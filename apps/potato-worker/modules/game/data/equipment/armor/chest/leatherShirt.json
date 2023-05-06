@@ -1,0 +1,8 @@
+{
+    "name": "Leather Shirt",
+    "implicits": {
+        "armor": 25
+    },
+    "weight": 3.4,
+    "slot": "CHEST"
+}

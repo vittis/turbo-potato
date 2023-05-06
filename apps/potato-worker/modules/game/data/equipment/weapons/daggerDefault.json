@@ -1,0 +1,15 @@
+{
+  "name": "Rusty Dagger",
+  "damage": 7,
+  "weight": 0.5,
+  "attackSpeed": 40,
+  "slot": [
+    "MAIN_HAND"
+  ],
+  "strScale": 0,
+  "dexScale": 2.5,
+  "intScale": 0,
+  "perks": {
+    "penetration": 10
+  }
+}

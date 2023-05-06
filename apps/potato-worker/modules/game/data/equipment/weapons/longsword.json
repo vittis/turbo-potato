@@ -1,0 +1,17 @@
+{
+    "name": "Longsword",
+    "damage": {
+        "min": 25,
+        "max": 35
+    },
+    "atkRange": 1,
+    "weight": 2,
+    "quickness": 0,
+    "slot": [
+        "MAIN_HAND"
+    ],
+    "penetration": 20,
+    "armorShred": 0,
+    "strScale": 1,
+    "dexScale": 1
+}

@@ -1,0 +1,26 @@
+{
+    "light": {
+        "min": 0,
+        "max": 5,
+        "bonuses": {
+            "attackSpeed": 20,
+            "skillRegen": 20
+        }
+    },
+    "medium": {
+        "min": 5,
+        "max": 12,
+        "bonuses": {
+            "attackSpeed": 0,
+            "skillRegen": 0
+        }
+    },
+    "heavy": {
+        "min": 12,
+        "max": 1000,
+        "bonuses": {
+            "attackSpeed": -20,
+            "skillRegen": -20
+        }
+    }
+}

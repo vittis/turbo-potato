@@ -1,0 +1,21 @@
+{
+    "name": "Dagger",
+    "damage": 12,
+    "weight": 0.5,
+    "attackSpeed": 45,
+    "slot": [
+        "MAIN_HAND"
+    ],
+    "strScale": 0,
+    "dexScale": 3,
+    "intScale": 0,
+    "perks": {
+        "penetration": 10
+    },
+    "possibleModifiers": [
+        "Penetration",
+        "AttackSpeed",
+        "Dex",
+        "Weight"
+    ]
+}

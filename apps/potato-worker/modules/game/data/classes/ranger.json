@@ -1,0 +1,9 @@
+{
+  "name": "Ranger",
+  "hp": 100,
+  "str": 2,
+  "dex": 9,
+  "int": 2,
+  "tier": 2,
+  "defaultWeapon": "Rusty Shortbow"
+}

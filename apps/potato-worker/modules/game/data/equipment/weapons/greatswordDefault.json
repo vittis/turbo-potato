@@ -1,0 +1,12 @@
+{
+  "name": "Rusty Greatsword",
+  "damage": 50,
+  "weight": 4,
+  "attackSpeed": 20,
+  "slot": [
+    "TWO_HANDED"
+  ],
+  "strScale": 2,
+  "dexScale": 0,
+  "intScale": 0
+}

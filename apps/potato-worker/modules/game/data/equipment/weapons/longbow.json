@@ -1,0 +1,16 @@
+{
+    "name": "Longbow",
+    "damage": {
+        "min": 20,
+        "max": 30
+    },
+    "weight": 2,
+    "quickness": 0,
+    "slot": [
+        "TWO_HANDED"
+    ],
+    "penetration": 15,
+    "armorShred": 0,
+    "strScale": 1,
+    "dexScale": 2
+}

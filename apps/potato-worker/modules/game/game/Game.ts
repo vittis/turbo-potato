@@ -21,12 +21,12 @@ export class Game {
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
-        POSITION.TOP_MID,
+        POSITION.TOP_FRONT,
         Races.Human,
         Classes.Ranger,
         {
           mainHandWeapon: Weapons.Dagger as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
+          chest: Chests.LeatherShirt as ArmorData,
           head: Heads.ClothHat as ArmorData,
         }
       )
@@ -35,7 +35,7 @@ export class Game {
       new Unit(
         this.boardManager,
         OWNER.TEAM_TWO,
-        POSITION.BOT_FRONT,
+        POSITION.TOP_FRONT,
         Races.Dwarf,
         Classes.Knight,
         {
@@ -46,13 +46,28 @@ export class Game {
       )
     );
 
+    /* this.boardManager.addToBoard(
+      new Unit(
+        this.boardManager,
+        OWNER.TEAM_ONE,
+        POSITION.BOT_MID,
+        Races.Dwarf,
+        Classes.Ranger,
+        {
+          mainHandWeapon: Weapons.Greatsword as WeaponData,
+          chest: Chests.PlateMail as ArmorData,
+          head: Heads.PlateHelment as ArmorData,
+        }
+      )
+    ); */
+
     // this.boardManager.printBoard();
   }
 
   async startGame() {
     console.log("start game");
 
-    /* const unit1 = this.boardManager.getUnit(OWNER.TEAM_ONE, POSITION.TOP_BACK);
+    /* const unit1 = this.boardManager.getUnit(OWNER.TEAM_ONE, POSITION.TOP_MID);
     const unit2 = this.boardManager.getUnit(OWNER.TEAM_TWO, POSITION.TOP_FRONT); */
 
     const serializedUnits = this.boardManager
@@ -76,7 +91,10 @@ export class Game {
             this.history.push({ units: serializedUnits }); */
     } while (!this.hasGameEnded());
 
-    /* console.table([
+    const unit1 = this.boardManager.getAllUnits()[0];
+    const unit2 = this.boardManager.getAllUnits()[1];
+
+    console.table([
       {
         name: unit1.getName(),
         hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
@@ -105,7 +123,7 @@ export class Game {
         dex: unit2.stats.dex,
         attacks: unit2.TEST_attacksCounter,
       },
-    ]); */
+    ]);
     // console.timeEnd("loop");
   }
 

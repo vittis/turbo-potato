@@ -1,8 +1,8 @@
 import { Game } from "./game/Game";
 
 const game = new Game();
+game.startGame();
 
 export function getGameHistory() {
-  game.startGame();
   return game.history;
 }

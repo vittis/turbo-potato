@@ -1,9 +1,9 @@
 {
   "name": "Knight",
   "hp": 200,
-  "str": 9,
-  "dex": 4,
-  "int": 4,
+  "str": 10,
+  "dex": 3,
+  "int": 3,
   "tier": 3,
   "statsBonus": {
     "armor": 100

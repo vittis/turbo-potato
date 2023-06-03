@@ -1,5 +1,16 @@
 import Phaser from "phaser";
 import { Unit } from "./Unit";
+import { queryClient } from "../../services/api/queryClient";
+import { useGameStore } from "../../services/state/game";
+
+export async function fetchUnits() {
+  console.log("fetching");
+  const response = await fetch("http://localhost:8787/game/karpov");
+  const data = await response.json();
+  return data;
+}
+
+export const GAME_LOOP_SPEED = 150;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -7,6 +18,7 @@ export class Battle extends Phaser.Scene {
   currentStep = 0;
   board!: Phaser.GameObjects.Container;
   units: Unit[] = [];
+  mainLoop!: Phaser.Time.TimerEvent;
 
   constructor() {
     super("GameScene");
@@ -128,26 +140,54 @@ export class Battle extends Phaser.Scene {
     this.tweens.add({
       targets: board,
       y: this.cameras.main.centerY,
-      duration: 1900,
+      duration: 1100,
       ease: Phaser.Math.Easing.Cubic.Out,
     });
 
-    /* this.text = this.add.text(0, 0, "Move the mouse", {
-      font: "16px Courier",
-      color: "black",
-    });
-    this.text.setOrigin(0.5);
-    board.add(this.text); */
-
-    fetch("http://localhost:8787/game/karpov")
-      .then((response) => response.json()) // Parse the response as JSON
+    queryClient
+      .fetchQuery({
+        queryKey: ["game/units"],
+        queryFn: fetchUnits,
+        staleTime: Infinity,
+      })
       .then((data) => {
-        this.initializeBattle(data);
+        this.history = data;
+        this.initializeBattle(this.history);
       });
+
+    useGameStore.subscribe(
+      (state) => state.selectedEntity,
+      (selectedEntity) => {
+        this.units.forEach((unit) => {
+          if (`${unit.owner}${unit.boardPosition}` === selectedEntity) {
+            unit.onSelected();
+          } else {
+            unit.onDeselected();
+          }
+        });
+      }
+    );
+
+    useGameStore.subscribe(
+      (state) => state.isGameRunning,
+      (isGameRunning) => {
+        if (isGameRunning) {
+          if (this.currentStep === this.history.length - 1) {
+            this.initializeBattle(this.history);
+            this.currentStep = 0;
+          }
+          this.startLoop();
+        } else {
+          this.stopLoop();
+        }
+      }
+    );
   }
 
   initializeBattle(data: any[]) {
-    this.history = data;
+    this.units.forEach((unit) => unit.destroy());
+    this.units = [];
+
     const unitOffset = {
       x: 82,
       y: 60,
@@ -187,12 +227,25 @@ export class Battle extends Phaser.Scene {
       this.board.add(unit);
     });
 
-    this.time.addEvent({
-      delay: 30,
+    console.log("end initialize");
+    // this.startLoop();
+  }
+
+  startLoop() {
+    console.log("start loop");
+
+    this.mainLoop = this.time.addEvent({
+      delay: GAME_LOOP_SPEED,
       callback: this.loopStep,
       callbackScope: this,
-      repeat: this.history.length - 1,
+      repeat: this.history.length - 1 - this.currentStep,
     });
+  }
+
+  stopLoop() {
+    if (this.mainLoop) {
+      this.mainLoop.remove();
+    }
   }
 
   loopStep() {
@@ -211,7 +264,11 @@ export class Battle extends Phaser.Scene {
         }
       }
     });
-    this.currentStep++;
+    if (this.currentStep === this.history.length - 1) {
+      useGameStore.getState().setIsGameRunning(false);
+    } else {
+      this.currentStep++;
+    }
   }
 
   update(time: number, delta: number): void {

@@ -1,4 +1,8 @@
 import Phaser from "phaser";
+import { useGameStore } from "../../services/state/game";
+import { GAME_LOOP_SPEED } from "./Battle";
+
+const BAR_WIDTH = 50;
 
 export class Unit extends Phaser.GameObjects.Container {
   public sprite: Phaser.GameObjects.Sprite;
@@ -6,10 +10,18 @@ export class Unit extends Phaser.GameObjects.Container {
   public armorBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
   public boardPosition: number;
-  public stats: any;
   public owner: number;
   public hpText: Phaser.GameObjects.Text;
   public armorText: Phaser.GameObjects.Text;
+
+  public stats: any;
+  public equipment: any;
+  public unitName: string;
+
+  public dataUnit: any;
+
+  public isSelected = false;
+  public apBarTween!: Phaser.Tweens.Tween;
 
   constructor(
     scene: Phaser.Scene,
@@ -20,13 +32,17 @@ export class Unit extends Phaser.GameObjects.Container {
   ) {
     super(scene, x, y);
     this.boardPosition = dataUnit.position;
+    this.dataUnit = dataUnit;
+
+    this.unitName = dataUnit.name;
     this.stats = dataUnit.stats;
+    this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
     this.sprite = scene.add.sprite(0, 0, texture);
     this.initializeAnimations();
 
-    const width = 65;
+    const width = BAR_WIDTH;
     const height = 7;
     const borderWidth = 3;
     const yOffset = 50;
@@ -103,8 +119,8 @@ export class Unit extends Phaser.GameObjects.Container {
     this.add(apRectBorder);
     this.add(apBar);
 
-    const hpText = this.scene.add.text(rect.x + 15, rect.y + 27, "0", {
-      fontSize: "20px",
+    const hpText = this.scene.add.text(rect.x + 12, rect.y + 27, "0", {
+      fontSize: "18px",
       color: "#ff121d",
       fontFamily: "IM Fell DW Pica",
       stroke: "#000000",
@@ -118,8 +134,8 @@ export class Unit extends Phaser.GameObjects.Container {
         stroke: true,
       },
     });
-    const armorText = this.scene.add.text(rect.x + 55, rect.y + 27, "0", {
-      fontSize: "20px",
+    const armorText = this.scene.add.text(rect.x + 42, rect.y + 27, "0", {
+      fontSize: "18px",
       color: "#a7a7a7",
       fontFamily: "IM Fell DW Pica",
       stroke: "#000000",
@@ -141,6 +157,16 @@ export class Unit extends Phaser.GameObjects.Container {
     this.add(hpText);
     this.add(armorText);
     scene.add.existing(this);
+  }
+
+  public onSelected() {
+    this.isSelected = true;
+    this.sprite.setTint(0xffff44);
+  }
+
+  public onDeselected() {
+    this.isSelected = false;
+    this.sprite.clearTint();
   }
 
   public initalizeUnit(dataUnit: any) {
@@ -199,11 +225,15 @@ export class Unit extends Phaser.GameObjects.Container {
             },
           });
 
-          this.sprite.setTint(0xde3c45);
+          if (!this.isSelected) {
+            this.sprite.setTint(0xde3c45);
+          }
           this.scene.time.addEvent({
             delay: 150,
             callback: () => {
-              this.sprite.clearTint();
+              if (!this.isSelected) {
+                this.sprite.clearTint();
+              }
             },
           });
 
@@ -243,7 +273,8 @@ export class Unit extends Phaser.GameObjects.Container {
 
           this.add(damageText);
 
-          const newHpBarValue = (dataUnit.stats.hp / dataUnit.stats.maxHp) * 65;
+          const newHpBarValue =
+            (dataUnit.stats.hp / dataUnit.stats.maxHp) * BAR_WIDTH;
           this.scene.tweens.add({
             targets: this.hpBar,
             width: newHpBarValue <= 0 ? 0 : newHpBarValue,
@@ -252,7 +283,7 @@ export class Unit extends Phaser.GameObjects.Container {
           });
 
           const newArmorHpValue =
-            (dataUnit.stats.armorHp / dataUnit.stats.maxArmorHp) * 65;
+            (dataUnit.stats.armorHp / dataUnit.stats.maxArmorHp) * BAR_WIDTH;
           this.scene.tweens.add({
             targets: this.armorBar,
             width: newArmorHpValue <= 0 ? 0 : newArmorHpValue,
@@ -262,22 +293,25 @@ export class Unit extends Phaser.GameObjects.Container {
         },
       });
     }
-    this.stats = dataUnit.stats;
 
-    const newApValue = (dataUnit.stats.ap / 1000) * 65;
-    if (newApValue < this.apBar.width) {
+    const newApBarWidth = (dataUnit.stats.ap / 1000) * BAR_WIDTH;
+    if (dataUnit.stats.ap < this.stats.ap) {
       // did action
-      this.sprite.play("attack", true).chain("idle");
+      if (this.apBarTween) {
+        this.apBarTween.stop();
+      }
       this.apBar.width = 0;
+      this.sprite.play("attack", true).chain("idle");
     } else {
-      this.scene.tweens.add({
+      this.apBarTween = this.scene.tweens.add({
         targets: this.apBar,
-        width: newApValue <= 0 ? 0 : newApValue,
-        duration: 150,
+        width: newApBarWidth <= 0 ? 0 : newApBarWidth,
+        duration: GAME_LOOP_SPEED, // has to be lower than game loop speed to be smooth (need confirmation)
         ease: "Linear",
       });
     }
 
+    this.stats = dataUnit.stats;
     if (this.stats.hp <= 0) {
       this.scene.tweens.add({
         targets: this,
@@ -303,17 +337,41 @@ export class Unit extends Phaser.GameObjects.Container {
     this.sprite.setInteractive();
 
     this.sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.sprite.setTint(0xde3c45);
-      this.sprite
+      if (!this.isSelected) {
+        useGameStore
+          .getState()
+          .setSelectedEntity(`${this.owner}${this.boardPosition}`);
+      } else {
+        useGameStore.getState().setSelectedEntity(null);
+      }
+      /* this.sprite
         .play("attack", true)
         .on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-          this.sprite.clearTint();
+          if (!this.isSelected) {
+            this.sprite.clearTint();
+          }
         })
-        .chain("idle");
+        .chain("idle"); */
     });
 
     this.sprite.on("pointerup", () => {
-      this.sprite.clearTint();
+      if (!this.isSelected) {
+        this.sprite.clearTint();
+      }
+    });
+
+    this.sprite.on("pointerover", () => {
+      this.sprite.setTint(0xdddd44);
+      this.scene.game.canvas.style.cursor = "pointer";
+    });
+
+    this.sprite.on("pointerout", () => {
+      if (!this.isSelected) {
+        this.sprite.clearTint();
+      } else {
+        this.sprite.setTint(0xffff44);
+      }
+      this.scene.game.canvas.style.cursor = "default";
     });
   }
 

@@ -1,10 +1,135 @@
-import { CSSProperties } from "react";
+import { CSSProperties, useMemo } from "react";
+import { useGameStore } from "./services/state/game";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUnits } from "./game/scenes/Battle";
 
 function App() {
+  const { selectedEntity, isGameRunning, setSelectedEntity, setIsGameRunning } =
+    useGameStore();
+
+  const { data } = useQuery({
+    queryKey: ["game/units"],
+    queryFn: fetchUnits,
+  });
+
+  const firstState = data?.[0];
+
+  const teamOneUnits = useMemo(() => {
+    if (!firstState) return [];
+    return firstState?.units.filter((unit) => unit.owner === 0);
+  }, [firstState]);
+
+  const teamTwoUnits = useMemo(() => {
+    if (!firstState) return [];
+    return firstState?.units.filter((unit) => unit.owner === 1);
+  }, [firstState]);
+
   return (
     <>
-      <main className="shadow-md relative max-w-screen-md mx-auto bg-base-100 border-base-content/5 border rounded-box m-4 flex flex-col items-center px-6">
-        {/* navbar */}
+      <div className="mt-10 flex justify-center">
+        <button
+          onClick={() => {
+            setIsGameRunning(!isGameRunning);
+          }}
+          className={`btn  btn-wide shadow-lg ${
+            isGameRunning ? "btn-neutral" : "btn-secondary"
+          }`}
+        >
+          {isGameRunning ? "Stop" : "Start"}
+        </button>
+      </div>
+
+      {firstState && (
+        <div className="w-fit flex justify-center inset-x-0 bg-stone-800 shadow-md p-4 fixed bottom-8 rounded-lg mx-auto">
+          <div className="overflow-x-auto">
+            <table className="table table-xs">
+              <thead>
+                <tr className="text-zinc-100 italic text-md">
+                  <th>Name</th>
+                  <th>Hp</th>
+                  <th>Armor</th>
+                  <th>Str</th>
+                  <th>Dex</th>
+                  <th>Int</th>
+                  <th>Def</th>
+                  <th>Weapon</th>
+                  <th>A. Speed</th>
+                  <th>A. Damage</th>
+                  <th>Chest</th>
+                  <th>Head</th>
+                </tr>
+              </thead>
+              <tbody className="text-zinc-100">
+                {teamOneUnits.map((unit: any) => (
+                  <tr
+                    // @todo add an ID
+                    onClick={() => {
+                      if (selectedEntity !== `${unit.owner}${unit.position}`) {
+                        setSelectedEntity(`${unit.owner}${unit.position}`);
+                      } else {
+                        setSelectedEntity(null);
+                      }
+                    }}
+                    tabIndex={0}
+                    className={`border-none hover:brightness-125 cursor-pointer transition-all ${
+                      selectedEntity === `${unit.owner}${unit.position}`
+                        ? "bg-amber-400 text-zinc-900"
+                        : "bg-amber-950"
+                    }`}
+                    key={`${unit.owner}${unit.position}`}
+                  >
+                    <td>{unit.name}</td>
+                    <td>{unit.stats.hp}</td>
+                    <td>{unit.stats.armorHp}</td>
+                    <td>{unit.stats.str}</td>
+                    <td>{unit.stats.dex}</td>
+                    <td>{unit.stats.int}</td>
+                    <td>{unit.stats.def}</td>
+                    <td>{unit.equipment.mainHandWeapon.name}</td>
+                    <td>{unit.stats.attackSpeed}</td>
+                    <td>{unit.stats.attackDamage}</td>
+                    <td>{unit.equipment.chest.name}</td>
+                    <td>{unit.equipment.head.name}</td>
+                  </tr>
+                ))}
+                {teamTwoUnits.map((unit: any) => (
+                  <tr
+                    onClick={() => {
+                      if (selectedEntity !== `${unit.owner}${unit.position}`) {
+                        setSelectedEntity(`${unit.owner}${unit.position}`);
+                      } else {
+                        setSelectedEntity(null);
+                      }
+                    }}
+                    tabIndex={0}
+                    className={`border-none hover:brightness-125 cursor-pointer transition-all ${
+                      selectedEntity === `${unit.owner}${unit.position}`
+                        ? "bg-amber-400 text-zinc-900"
+                        : "bg-slate-800"
+                    }`}
+                    key={`${unit.owner}${unit.position}`}
+                  >
+                    <td>{unit.name}</td>
+                    <td>{unit.stats.hp}</td>
+                    <td>{unit.stats.armorHp}</td>
+                    <td>{unit.stats.str}</td>
+                    <td>{unit.stats.dex}</td>
+                    <td>{unit.stats.int}</td>
+                    <td>{unit.stats.def}</td>
+                    <td>{unit.equipment.mainHandWeapon.name}</td>
+                    <td>{unit.stats.attackSpeed}</td>
+                    <td>{unit.stats.attackDamage}</td>
+                    <td>{unit.equipment.chest.name}</td>
+                    <td>{unit.equipment.head.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      {/* navbar */}
+      {/* <main className="shadow-md relative max-w-screen-md mx-auto bg-base-100 rounded-box mt-4 flex flex-col items-center px-6">
         <div className="navbar bg-base-100 p-0">
           <div className="navbar-start">
             <a href="/" className="text-3xl prose text-primary font-normal">
@@ -50,8 +175,8 @@ function App() {
             </button>
           </div>
         </div>
-      </main>
-
+      </main> */}
+      {/* <DemoUI /> */}
       {/* Online players count */}
       <div className="fixed bottom-5 right-5 stats shadow">
         <div className="stat py-2 px-5">
@@ -64,10 +189,9 @@ function App() {
               }
             ></span>
           </div>
-          <div className="stat-title">online</div>
+          <div className="stat-title text-slate-800 font-semibold">online</div>
         </div>
       </div>
-
       {/* Members */}
       <div className="fixed flex flex-col items-center top-5 right-5 px-5 py-2 bg-base-100 shadow rounded z-50">
         <h1 className="text-primary border-b-[3px] border-primary mb-2">

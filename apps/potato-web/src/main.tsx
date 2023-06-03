@@ -5,6 +5,8 @@ import Phaser from "phaser";
 import "./styles/main.css";
 import { PHASER_CONFIG } from "./game/config";
 import { Battle } from "./game/scenes/Battle";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./services/api/queryClient";
 
 const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
@@ -28,7 +30,7 @@ const game = new Phaser.Game(
 game.events.on("ready", onReady); */
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
+  <QueryClientProvider client={queryClient}>
     <App />
-  </React.StrictMode>
+  </QueryClientProvider>
 );

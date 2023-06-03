@@ -46,7 +46,7 @@ export class Game {
       )
     );
 
-    /* this.boardManager.addToBoard(
+    this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
@@ -59,7 +59,7 @@ export class Game {
           head: Heads.PlateHelment as ArmorData,
         }
       )
-    ); */
+    );
 
     // this.boardManager.printBoard();
   }
@@ -80,13 +80,12 @@ export class Game {
     do {
       this.boardManager.getAllUnits().forEach((unit) => {
         unit.step();
-
-        const serializedUnits = this.boardManager
-          .getAllUnits()
-          .map((unit) => unit.serialize());
-        this.history.push({ units: serializedUnits });
       });
 
+      const serializedUnits = this.boardManager
+        .getAllUnits()
+        .map((unit) => unit.serialize());
+      this.history.push({ units: serializedUnits });
       /* const serializedUnits = this.boardManager.getAllUnits().map((unit) => unit.serialize());
             this.history.push({ units: serializedUnits }); */
     } while (!this.hasGameEnded());
@@ -94,6 +93,7 @@ export class Game {
     const unit1 = this.boardManager.getAllUnits()[0];
     const unit2 = this.boardManager.getAllUnits()[1];
 
+    // @ts-ignore
     console.table([
       {
         name: unit1.getName(),

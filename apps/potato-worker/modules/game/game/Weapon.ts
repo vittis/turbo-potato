@@ -8,6 +8,7 @@ export interface WeaponStats {
     damage: number;
     weight: number;
     attackSpeed: number;
+    attackDelay: number;
     slot: WEAPON_SLOT_TYPE[];
     strScale: number;
     dexScale: number;

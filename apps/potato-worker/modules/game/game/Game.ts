@@ -40,7 +40,7 @@ export class Game {
         Classes.Knight,
         {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
+          chest: Chests.ClothRobe as ArmorData,
           head: Heads.PlateHelment as ArmorData,
         }
       )
@@ -60,6 +60,7 @@ export class Game {
         }
       )
     );
+    
 
     // this.boardManager.printBoard();
   }

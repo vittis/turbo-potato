@@ -3,6 +3,7 @@
     "damage": 12,
     "weight": 0.5,
     "attackSpeed": 45,
+    "attackDelay": 50,
     "slot": [
         "MAIN_HAND"
     ],

@@ -54,6 +54,7 @@ function App() {
                   <th>Def</th>
                   <th>Weapon</th>
                   <th>A. Speed</th>
+                  <th>A. Delay</th>
                   <th>A. Damage</th>
                   <th>Chest</th>
                   <th>Head</th>
@@ -87,6 +88,7 @@ function App() {
                     <td>{unit.stats.def}</td>
                     <td>{unit.equipment.mainHandWeapon.name}</td>
                     <td>{unit.stats.attackSpeed}</td>
+                    <td>{unit.stats.attackDelay}</td>
                     <td>{unit.stats.attackDamage}</td>
                     <td>{unit.equipment.chest.name}</td>
                     <td>{unit.equipment.head.name}</td>
@@ -118,6 +120,7 @@ function App() {
                     <td>{unit.stats.def}</td>
                     <td>{unit.equipment.mainHandWeapon.name}</td>
                     <td>{unit.stats.attackSpeed}</td>
+                    <td>{unit.stats.attackDelay}</td>
                     <td>{unit.stats.attackDamage}</td>
                     <td>{unit.equipment.chest.name}</td>
                     <td>{unit.equipment.head.name}</td>

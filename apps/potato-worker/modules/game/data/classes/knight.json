@@ -3,7 +3,7 @@
   "hp": 200,
   "str": 10,
   "dex": 3,
-  "int": 3,
+  "int": 2,
   "tier": 3,
   "statsBonus": {
     "armor": 100

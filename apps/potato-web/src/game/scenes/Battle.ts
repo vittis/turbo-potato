@@ -10,7 +10,7 @@ export async function fetchUnits() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 150;
+export const GAME_LOOP_SPEED = 80;
 
 export class Battle extends Phaser.Scene {
   text: any;

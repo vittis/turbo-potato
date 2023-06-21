@@ -3,6 +3,7 @@
     "damage": 50,
     "weight": 4,
     "attackSpeed": 15,
+    "attackDelay": 90,
     "slot": [
         "TWO_HANDED"
     ],

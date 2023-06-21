@@ -13,6 +13,7 @@ export interface UnitStats {
   maxArmorHp: number;
   def: number;
   attackSpeed: number;
+  attackDelay: number;
   ap: number;
   skillRegen: number;
   sp: number;
@@ -59,6 +60,9 @@ export class Unit {
   position: POSITION;
   bm: BoardManager;
 
+  isPreparingAttack = false;
+  attackDelayBuffer = 0;
+
   TEST_attacksCounter = 0;
 
   constructor(
@@ -93,6 +97,8 @@ export class Unit {
       this.equipment.mainHandWeapon.attackSpeed *
       (1 + (finalDex * Multipliers.asDexMult) / 100);
 
+    const finalAttackDelay = this.equipment.mainHandWeapon.attackDelay;
+
     const finalAttackDamage = Math.round(
       this.equipment.mainHandWeapon.damage *
         (1 +
@@ -112,6 +118,7 @@ export class Unit {
       maxArmorHp: finalArmor,
       def: finalDef,
       attackSpeed: finalAttackSpeed,
+      attackDelay: finalAttackDelay,
       ap: 0,
       skillRegen: 0,
       sp: 0,
@@ -140,17 +147,25 @@ export class Unit {
   }
 
   step() {
-    this.stats.ap += this.stats.attackSpeed;
-    if (this.canAttack()) {
-      this.stats.ap -= 1000;
-      this.TEST_attacksCounter++;
+    if (this.isPreparingAttack) {
+      this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
+      if (this.attackDelayBuffer >= this.stats.attackDelay) {
+        this.isPreparingAttack = false;
+        this.attackDelayBuffer = 0;
 
-      const attackTarget = this.bm.getAttackTargetFor(this);
-      if (!attackTarget) {
-        throw Error("Undefined attack target for " + this.toString());
+        this.TEST_attacksCounter++;
+        const attackTarget = this.bm.getAttackTargetFor(this);
+        if (!attackTarget) {
+          throw Error("Undefined attack target for " + this.toString());
+        }
+        this.attackWithMainHand(attackTarget);
       }
-
-      this.attackWithMainHand(attackTarget);
+    } else {
+      this.stats.ap += this.stats.attackSpeed;
+    }
+    if (this.canAttack()) {
+      this.isPreparingAttack = true;
+      this.stats.ap = 0;
     }
   }
 

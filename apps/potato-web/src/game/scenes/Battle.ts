@@ -10,7 +10,7 @@ export async function fetchUnits() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 80;
+export const GAME_LOOP_SPEED = 100;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -233,6 +233,7 @@ export class Battle extends Phaser.Scene {
 
   startLoop() {
     console.log("start loop");
+    this.units.forEach((unit) => unit.onStartBattle());
 
     this.mainLoop = this.time.addEvent({
       delay: GAME_LOOP_SPEED,

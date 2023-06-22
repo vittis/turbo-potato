@@ -157,6 +157,8 @@ export class Unit extends Phaser.GameObjects.Container {
     this.add(hpText);
     this.add(armorText);
     scene.add.existing(this);
+
+    // console.log(timeToAttack);
   }
 
   public onSelected() {
@@ -174,6 +176,45 @@ export class Unit extends Phaser.GameObjects.Container {
     const newArmorHp = Math.max(0, dataUnit.stats.armorHp);
     this.hpText.setText(`${newHp}`);
     this.armorText.setText(`${newArmorHp}`);
+  }
+
+  // todo: improve and use this
+  public onStartBattle() {
+    return;
+    const stepsToAttack = Math.ceil(1000 / this.stats.attackSpeed);
+    const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
+
+    const stepsInAttackAnimation = Math.ceil(
+      this.stats.attackDelay / (10 + this.stats.attackSpeed / 10)
+    );
+    const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
+    console.log(timeToAttack);
+
+    this.apBarTween = this.scene.tweens.add({
+      targets: this.apBar,
+      width: { from: 0, to: BAR_WIDTH },
+      duration: timeToAttack,
+      ease: "Linear",
+      loop: -1,
+      onStart: () => {
+        if (this.unitName === "Dwarf Knight") {
+          console.time("timer");
+        }
+      },
+      onLoop: () => {
+        if (this.unitName === "Dwarf Knight") {
+          console.timeEnd("timer");
+        }
+        this.apBarTween.pause();
+        this.scene.time.addEvent({
+          delay: timeInAttackAnimation,
+          callback: () => {
+            this.apBarTween.resume();
+          },
+          callbackScope: this,
+        });
+      },
+    });
   }
 
   public updateUnit(dataUnit: any) {
@@ -294,6 +335,12 @@ export class Unit extends Phaser.GameObjects.Container {
       });
     }
 
+    // temporary
+    if (dataUnit.stats.ap < this.stats.ap) {
+      this.sprite.play("attack", true).chain("idle");
+    }
+
+    /* AP BAR STUFF */
     const newApBarWidth = (dataUnit.stats.ap / 1000) * BAR_WIDTH;
     if (dataUnit.stats.ap < this.stats.ap) {
       // did action

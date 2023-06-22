@@ -1,7 +1,7 @@
 import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUnits } from "./game/scenes/Battle";
+import { GAME_LOOP_SPEED, fetchUnits } from "./game/scenes/Battle";
 
 function App() {
   const { selectedEntity, isGameRunning, setSelectedEntity, setIsGameRunning } =
@@ -14,15 +14,19 @@ function App() {
 
   const firstState = data?.[0];
 
-  const teamOneUnits = useMemo(() => {
+  const teamOneUnits = useMemo<any[]>(() => {
     if (!firstState) return [];
     return firstState?.units.filter((unit) => unit.owner === 0);
   }, [firstState]);
 
-  const teamTwoUnits = useMemo(() => {
+  const teamTwoUnits = useMemo<any[]>(() => {
     if (!firstState) return [];
     return firstState?.units.filter((unit) => unit.owner === 1);
   }, [firstState]);
+
+  const allUnits = useMemo<any[]>(() => {
+    return [...teamOneUnits, ...teamTwoUnits];
+  }, [teamOneUnits, teamTwoUnits]);
 
   return (
     <>
@@ -61,71 +65,63 @@ function App() {
                 </tr>
               </thead>
               <tbody className="text-zinc-100">
-                {teamOneUnits.map((unit: any) => (
-                  <tr
-                    // @todo add an ID
-                    onClick={() => {
-                      if (selectedEntity !== `${unit.owner}${unit.position}`) {
-                        setSelectedEntity(`${unit.owner}${unit.position}`);
-                      } else {
-                        setSelectedEntity(null);
-                      }
-                    }}
-                    tabIndex={0}
-                    className={`border-none hover:brightness-125 cursor-pointer transition-all ${
-                      selectedEntity === `${unit.owner}${unit.position}`
-                        ? "bg-amber-400 text-zinc-900"
-                        : "bg-amber-950"
-                    }`}
-                    key={`${unit.owner}${unit.position}`}
-                  >
-                    <td>{unit.name}</td>
-                    <td>{unit.stats.hp}</td>
-                    <td>{unit.stats.armorHp}</td>
-                    <td>{unit.stats.str}</td>
-                    <td>{unit.stats.dex}</td>
-                    <td>{unit.stats.int}</td>
-                    <td>{unit.stats.def}</td>
-                    <td>{unit.equipment.mainHandWeapon.name}</td>
-                    <td>{unit.stats.attackSpeed}</td>
-                    <td>{unit.stats.attackDelay}</td>
-                    <td>{unit.stats.attackDamage}</td>
-                    <td>{unit.equipment.chest.name}</td>
-                    <td>{unit.equipment.head.name}</td>
-                  </tr>
-                ))}
-                {teamTwoUnits.map((unit: any) => (
-                  <tr
-                    onClick={() => {
-                      if (selectedEntity !== `${unit.owner}${unit.position}`) {
-                        setSelectedEntity(`${unit.owner}${unit.position}`);
-                      } else {
-                        setSelectedEntity(null);
-                      }
-                    }}
-                    tabIndex={0}
-                    className={`border-none hover:brightness-125 cursor-pointer transition-all ${
-                      selectedEntity === `${unit.owner}${unit.position}`
-                        ? "bg-amber-400 text-zinc-900"
-                        : "bg-slate-800"
-                    }`}
-                    key={`${unit.owner}${unit.position}`}
-                  >
-                    <td>{unit.name}</td>
-                    <td>{unit.stats.hp}</td>
-                    <td>{unit.stats.armorHp}</td>
-                    <td>{unit.stats.str}</td>
-                    <td>{unit.stats.dex}</td>
-                    <td>{unit.stats.int}</td>
-                    <td>{unit.stats.def}</td>
-                    <td>{unit.equipment.mainHandWeapon.name}</td>
-                    <td>{unit.stats.attackSpeed}</td>
-                    <td>{unit.stats.attackDelay}</td>
-                    <td>{unit.stats.attackDamage}</td>
-                    <td>{unit.equipment.chest.name}</td>
-                    <td>{unit.equipment.head.name}</td>
-                  </tr>
-                ))}
+                {allUnits.map((unit: any) => {
+                  const stepsToAttack = Math.ceil(
+                    1000 / unit.stats.attackSpeed
+                  );
+                  const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
+
+                  const stepsInAttackAnimation = Math.ceil(
+                    unit.stats.attackDelay / (10 + unit.stats.attackSpeed / 10)
+                  );
+                  const timeInAttackAnimation =
+                    stepsInAttackAnimation * GAME_LOOP_SPEED;
+
+                  return (
+                    <tr
+                      // @todo add an ID
+                      onClick={() => {
+                        if (
+                          selectedEntity !== `${unit.owner}${unit.position}`
+                        ) {
+                          setSelectedEntity(`${unit.owner}${unit.position}`);
+                        } else {
+                          setSelectedEntity(null);
+                        }
+                      }}
+                      tabIndex={0}
+                      className={`border-none hover:brightness-125 cursor-pointer transition-all ${
+                        selectedEntity === `${unit.owner}${unit.position}`
+                          ? "bg-amber-400 text-zinc-900"
+                          : `${
+                              unit.owner === 0 ? "bg-amber-950" : "bg-slate-800"
+                            }`
+                      }`}
+                      key={`${unit.owner}${unit.position}`}
+                    >
+                      <td>{unit.name}</td>
+                      <td>{unit.stats.hp}</td>
+                      <td>{unit.stats.armorHp}</td>
+                      <td>{unit.stats.str}</td>
+                      <td>{unit.stats.dex}</td>
+                      <td>{unit.stats.int}</td>
+                      <td>{unit.stats.def}</td>
+                      <td>{unit.equipment.mainHandWeapon.name}</td>
+                      <td>
+                        {unit.stats.attackSpeed} ({stepsToAttack}) (
+                        {timeToAttack / 1000}s)
+                      </td>
+                      <td>
+                        {unit.stats.attackDelay} ({stepsInAttackAnimation}) (
+                        {timeInAttackAnimation / 1000}
+                        s)
+                      </td>
+                      <td>{unit.stats.attackDamage}</td>
+                      <td>{unit.equipment.chest.name}</td>
+                      <td>{unit.equipment.head.name}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

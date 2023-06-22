@@ -64,6 +64,7 @@ export class Unit {
   attackDelayBuffer = 0;
 
   TEST_attacksCounter = 0;
+  TEST_stepsCounter = 0;
 
   constructor(
     bm: BoardManager,
@@ -147,6 +148,7 @@ export class Unit {
   }
 
   step() {
+    this.TEST_stepsCounter++;
     if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
       if (this.attackDelayBuffer >= this.stats.attackDelay) {
@@ -164,6 +166,7 @@ export class Unit {
       this.stats.ap += this.stats.attackSpeed;
     }
     if (this.canAttack()) {
+      console.log(this.getName(), " Preparing attack ", this.TEST_stepsCounter);
       this.isPreparingAttack = true;
       this.stats.ap = 0;
     }

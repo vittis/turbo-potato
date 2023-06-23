@@ -16,6 +16,7 @@ export interface UnitStats {
   attackDelay: number;
   ap: number;
   skillRegen: number;
+  skillDelay: number;
   sp: number;
   attackDamage: number;
   weight: number;
@@ -63,7 +64,11 @@ export class Unit {
   isPreparingAttack = false;
   attackDelayBuffer = 0;
 
+  isPreparingSkill = false;
+  skillDelayBuffer = 0;
+
   TEST_attacksCounter = 0;
+  TEST_skillsCounter = 0;
   TEST_stepsCounter = 0;
 
   constructor(
@@ -109,6 +114,10 @@ export class Unit {
             100)
     );
 
+    const finalSkillRegen = 10 * (1 + (finalInt * Multipliers.srIntMult) / 100);
+
+    const finalSkillDelay = this.equipment.mainHandWeapon.attackDelay; // temporary since skill anim and attack anim is the same
+
     this.stats = {
       str: finalStr,
       dex: finalDex,
@@ -121,7 +130,8 @@ export class Unit {
       attackSpeed: finalAttackSpeed,
       attackDelay: finalAttackDelay,
       ap: 0,
-      skillRegen: 0,
+      skillRegen: finalSkillRegen,
+      skillDelay: finalSkillDelay,
       sp: 0,
       attackDamage: finalAttackDamage,
       weight: 10,
@@ -149,13 +159,37 @@ export class Unit {
 
   step() {
     this.TEST_stepsCounter++;
+
+    if (this.isPreparingSkill) {
+      this.skillDelayBuffer += 10 + this.stats.attackSpeed / 10; // temporary - change attackSpeed to skillRegen?
+
+      if (this.skillDelayBuffer >= this.stats.skillDelay) {
+        this.isPreparingSkill = false;
+        this.skillDelayBuffer = 0;
+
+        this.TEST_skillsCounter++;
+
+        this.castSkill();
+      }
+    }
+
+    if (this.canCastSkill() && !this.isPreparingAttack) {
+      console.log(this.getName(), " Preparing skill ", this.TEST_stepsCounter);
+      this.isPreparingSkill = true;
+      this.stats.sp = 0;
+    } else {
+      this.stats.sp += this.stats.skillRegen;
+    }
+
     if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
+
       if (this.attackDelayBuffer >= this.stats.attackDelay) {
         this.isPreparingAttack = false;
         this.attackDelayBuffer = 0;
 
         this.TEST_attacksCounter++;
+
         const attackTarget = this.bm.getAttackTargetFor(this);
         if (!attackTarget) {
           throw Error("Undefined attack target for " + this.toString());
@@ -163,9 +197,12 @@ export class Unit {
         this.attackWithMainHand(attackTarget);
       }
     } else {
-      this.stats.ap += this.stats.attackSpeed;
+      if (!this.isPreparingSkill) {
+        this.stats.ap += this.stats.attackSpeed;
+      }
     }
-    if (this.canAttack()) {
+
+    if (this.canAttack() && !this.isPreparingSkill) {
       console.log(this.getName(), " Preparing attack ", this.TEST_stepsCounter);
       this.isPreparingAttack = true;
       this.stats.ap = 0;
@@ -174,6 +211,10 @@ export class Unit {
 
   attackWithMainHand(target: Unit) {
     target.receiveDamage(this.stats.attackDamage);
+  }
+
+  castSkill() {
+    console.log(this.getName(), " Cast skill ", this.TEST_stepsCounter);
   }
 
   receiveDamage(damage: number) {
@@ -193,6 +234,10 @@ export class Unit {
 
   canAttack() {
     return this.stats.ap >= 1000;
+  }
+
+  canCastSkill() {
+    return this.stats.sp >= 1000;
   }
 
   getName() {

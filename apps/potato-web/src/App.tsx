@@ -60,6 +60,7 @@ function App() {
                   <th>A. Speed</th>
                   <th>A. Delay</th>
                   <th>A. Damage</th>
+                  <th>S. Regen</th>
                   <th>Chest</th>
                   <th>Head</th>
                 </tr>
@@ -117,6 +118,7 @@ function App() {
                         s)
                       </td>
                       <td>{unit.stats.attackDamage}</td>
+                      <td>{unit.stats.skillRegen}</td>
                       <td>{unit.equipment.chest.name}</td>
                       <td>{unit.equipment.head.name}</td>
                     </tr>

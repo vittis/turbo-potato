@@ -1,0 +1,7 @@
+{
+  "name": "Elf",
+  "hpMultiplier": 0.8,
+  "str": 3,
+  "dex": 5,
+  "int": 10
+}

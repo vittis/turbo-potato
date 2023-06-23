@@ -9,6 +9,7 @@ export class Unit extends Phaser.GameObjects.Container {
   public hpBar: Phaser.GameObjects.Rectangle;
   public armorBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
+  public spBar: Phaser.GameObjects.Rectangle;
   public boardPosition: number;
   public owner: number;
   public hpText: Phaser.GameObjects.Text;
@@ -22,6 +23,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
   public isSelected = false;
   public apBarTween!: Phaser.Tweens.Tween;
+  public spBarTween!: Phaser.Tweens.Tween;
 
   constructor(
     scene: Phaser.Scene,
@@ -46,10 +48,12 @@ export class Unit extends Phaser.GameObjects.Container {
     const height = 7;
     const borderWidth = 3;
     const yOffset = 50;
+    const spBarHeight = 5;
+    const spBarYOffset = 9;
     const apBarHeight = 5;
-    const apBarYOffset = 9;
+    const apBarYOffset = 18;
 
-    const rect = new Phaser.GameObjects.Rectangle(
+    const hpRect = new Phaser.GameObjects.Rectangle(
       scene,
       this.sprite.x + borderWidth / 2 - width / 2,
       this.sprite.y + yOffset + borderWidth / 2,
@@ -57,7 +61,7 @@ export class Unit extends Phaser.GameObjects.Container {
       height,
       0xde3c45
     );
-    this.hpBar = rect;
+    this.hpBar = hpRect;
 
     const armorRect = new Phaser.GameObjects.Rectangle(
       scene,
@@ -69,13 +73,45 @@ export class Unit extends Phaser.GameObjects.Container {
     );
     this.armorBar = armorRect;
 
+    const hpRectBorder = new Phaser.GameObjects.Rectangle(
+      scene,
+      this.sprite.x - width / 2,
+      this.sprite.y + yOffset,
+      width + borderWidth,
+      height + borderWidth,
+      0x232422,
+      0.75
+    );
+    hpRectBorder.setStrokeStyle(borderWidth, 0x390908, 1);
+
+    const spBar = new Phaser.GameObjects.Rectangle(
+      scene,
+      this.sprite.x + borderWidth / 2 - width / 2,
+      this.sprite.y + yOffset + borderWidth / 2 + spBarYOffset,
+      0,
+      spBarHeight,
+      0x3679d8
+    );
+    this.spBar = spBar;
+
+    const spRectBorder = new Phaser.GameObjects.Rectangle(
+      scene,
+      this.sprite.x - width / 2,
+      this.sprite.y + yOffset + spBarYOffset,
+      width + borderWidth,
+      spBarHeight + borderWidth,
+      0x232422,
+      0.75
+    );
+    spRectBorder.setStrokeStyle(borderWidth, 0x390908, 1);
+
     const apBar = new Phaser.GameObjects.Rectangle(
       scene,
       this.sprite.x + borderWidth / 2 - width / 2,
       this.sprite.y + yOffset + borderWidth / 2 + apBarYOffset,
       0,
       apBarHeight,
-      0x3679d8
+      0xd4b320
     );
     this.apBar = apBar;
 
@@ -90,36 +126,31 @@ export class Unit extends Phaser.GameObjects.Container {
     );
     apRectBorder.setStrokeStyle(borderWidth, 0x390908, 1);
 
-    const rectBorder = new Phaser.GameObjects.Rectangle(
-      scene,
-      this.sprite.x - width / 2,
-      this.sprite.y + yOffset,
-      width + borderWidth,
-      height + borderWidth,
-      0x232422,
-      0.75
-    );
-    rectBorder.setStrokeStyle(borderWidth, 0x390908, 1);
-
-    rect.setOrigin(0);
-    rect.setDepth(1);
-    rectBorder.setOrigin(0);
-    rectBorder.setDepth(1);
+    hpRect.setOrigin(0);
+    hpRect.setDepth(1);
     armorRect.setOrigin(0);
     armorRect.setDepth(1);
+    hpRectBorder.setOrigin(0);
+    hpRectBorder.setDepth(1);
+    spBar.setOrigin(0);
+    spBar.setDepth(1);
+    spRectBorder.setOrigin(0);
+    spRectBorder.setDepth(1);
     apBar.setOrigin(0);
     apBar.setDepth(1);
     apRectBorder.setOrigin(0);
     apRectBorder.setDepth(1);
-
+    
     this.add(this.sprite);
-    this.add(rectBorder);
-    this.add(rect);
+    this.add(hpRectBorder);
+    this.add(hpRect);
     this.add(armorRect);
+    this.add(spRectBorder);
+    this.add(spBar);
     this.add(apRectBorder);
     this.add(apBar);
 
-    const hpText = this.scene.add.text(rect.x + 12, rect.y + 27, "0", {
+    const hpText = this.scene.add.text(hpRect.x + 12, hpRect.y + 36, "0", {
       fontSize: "18px",
       color: "#ff121d",
       fontFamily: "IM Fell DW Pica",
@@ -134,7 +165,7 @@ export class Unit extends Phaser.GameObjects.Container {
         stroke: true,
       },
     });
-    const armorText = this.scene.add.text(rect.x + 42, rect.y + 27, "0", {
+    const armorText = this.scene.add.text(hpRect.x + 42, hpRect.y + 36, "0", {
       fontSize: "18px",
       color: "#a7a7a7",
       fontFamily: "IM Fell DW Pica",
@@ -243,8 +274,9 @@ export class Unit extends Phaser.GameObjects.Container {
           if (newHp === 0) {
             this.hpText.alpha = 0;
             this.hpBar.alpha = 0;
-            this.apBar.alpha = 0;
             this.armorBar.alpha = 0;
+            this.spBar.alpha = 0;
+            this.apBar.alpha = 0;
           }
 
           this.scene.tweens.add({
@@ -358,6 +390,33 @@ export class Unit extends Phaser.GameObjects.Container {
       });
     }
 
+    /* SP BAR STUFF */
+    const newSpBarWidth = (dataUnit.stats.sp / 1000) * BAR_WIDTH;
+    if (dataUnit.stats.sp < this.stats.sp) {
+      // did action
+      if (this.spBarTween) {
+        this.spBarTween.stop();
+      }
+      this.spBar.width = 0;
+      this.sprite.play("skill", true).chain("idle");
+      // temporary tween so skill animation is different from attack
+      this.scene.tweens.add({
+        targets: this,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 500,
+        yoyo: true,
+        ease: "Bounce.easeOut"
+      });
+    } else {
+      this.spBarTween = this.scene.tweens.add({
+        targets: this.spBar,
+        width: newSpBarWidth <= 0 ? 0 : newSpBarWidth,
+        duration: GAME_LOOP_SPEED, // has to be lower than game loop speed to be smooth (need confirmation)
+        ease: "Linear",
+      });
+    }
+
     this.stats = dataUnit.stats;
     if (this.stats.hp <= 0) {
       this.scene.tweens.add({
@@ -453,6 +512,17 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 8,
       repeat: -1,
+      // repeatDelay: 2000
+    });
+
+    scene.anims.create({
+      key: "skill",
+      frames: scene.anims.generateFrameNumbers("warrior", {
+        start: 12,
+        end: 17,
+      }),
+      frameRate: 9,
+      //repeat: 1,
       // repeatDelay: 2000
     });
   }

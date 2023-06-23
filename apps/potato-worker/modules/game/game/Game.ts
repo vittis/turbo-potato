@@ -54,13 +54,27 @@ export class Game {
         Races.Dwarf,
         Classes.Ranger,
         {
+          mainHandWeapon: Weapons.Dagger as WeaponData,
+          chest: Chests.PlateMail as ArmorData,
+          head: Heads.PlateHelment as ArmorData,
+        }
+      )
+    );
+
+    this.boardManager.addToBoard(
+      new Unit(
+        this.boardManager,
+        OWNER.TEAM_TWO,
+        POSITION.BOT_MID,
+        Races.Dwarf,
+        Classes.Ranger,
+        {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,
           head: Heads.PlateHelment as ArmorData,
         }
       )
     );
-    
 
     // this.boardManager.printBoard();
   }
@@ -80,24 +94,32 @@ export class Game {
 
     do {
       this.boardManager.getAllUnits().forEach((unit) => {
-        unit.step();
+        if (!unit.isDead) {
+          unit.step();
+        }
+      });
+
+      this.boardManager.getAllUnits().forEach((unit) => {
+        if (unit.hasDied()) {
+          unit.markAsDead();
+        }
       });
 
       const serializedUnits = this.boardManager
         .getAllUnits()
         .map((unit) => unit.serialize());
       this.history.push({ units: serializedUnits });
-      /* const serializedUnits = this.boardManager.getAllUnits().map((unit) => unit.serialize());
-            this.history.push({ units: serializedUnits }); */
+
+      /* this.boardManager.removeUnitsIfDead(); */
     } while (!this.hasGameEnded());
 
     const unit1 = this.boardManager.getAllUnits()[0];
     const unit2 = this.boardManager.getAllUnits()[1];
 
     // @ts-ignore
-    console.table([
+    /* console.table([
       {
-        name: unit1.getName(),
+        name: unit1?.getName(),
         hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
         armorHp: unit1.stats.armorHp + "/" + unit1.stats.maxArmorHp,
         def: unit1.stats.def,
@@ -111,7 +133,7 @@ export class Game {
         attacks: unit1.TEST_attacksCounter,
       },
       {
-        name: unit2.getName(),
+        name: unit2?.getName(),
         hp: unit2.stats.hp + "/" + unit2.stats.maxHp,
         armorHp: unit2.stats.armorHp + "/" + unit2.stats.maxArmorHp,
         def: unit2.stats.def,
@@ -124,7 +146,7 @@ export class Game {
         dex: unit2.stats.dex,
         attacks: unit2.TEST_attacksCounter,
       },
-    ]);
+    ]); */
     // console.timeEnd("loop");
   }
 
@@ -132,10 +154,10 @@ export class Game {
     return (
       this.boardManager
         .getAllUnitsOfOwner(OWNER.TEAM_ONE)
-        .every((unit) => unit.stats.hp <= 0) ||
+        .every((unit) => unit.isDead) ||
       this.boardManager
         .getAllUnitsOfOwner(OWNER.TEAM_TWO)
-        .every((unit) => unit.stats.hp <= 0)
+        .every((unit) => unit.isDead)
     );
   }
 }

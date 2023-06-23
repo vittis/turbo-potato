@@ -176,6 +176,21 @@ export class Unit extends Phaser.GameObjects.Container {
     const newArmorHp = Math.max(0, dataUnit.stats.armorHp);
     this.hpText.setText(`${newHp}`);
     this.armorText.setText(`${newArmorHp}`);
+
+    const stepsInAttackAnimation = Math.ceil(
+      dataUnit.stats.attackDelay / (10 + dataUnit.stats.attackSpeed / 10)
+    );
+    const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
+
+    // create local animation
+    this.sprite.anims.create({
+      key: "attack",
+      frames: this.scene.anims.generateFrameNumbers("warrior", {
+        start: 12,
+        end: 17,
+      }),
+      duration: timeInAttackAnimation,
+    });
   }
 
   // todo: improve and use this
@@ -229,8 +244,9 @@ export class Unit extends Phaser.GameObjects.Container {
     const hasTakenDamage = damageTaken > 0;
 
     if (hasTakenDamage) {
+      console.log("took dmg");
       this.scene.time.addEvent({
-        delay: 250,
+        delay: 0,
         callbackScope: this,
         callback: () => {
           const newHp = Math.max(0, dataUnit.stats.hp);
@@ -423,18 +439,7 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   public static setupAnimations(scene: Phaser.Scene) {
-    scene.anims.create({
-      key: "attack",
-      frames: scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 17,
-      }),
-      frameRate: 9,
-      //repeat: 1,
-      // repeatDelay: 2000
-    });
-
-    scene.anims.create({
+    /* scene.anims.create({
       key: "walk",
       frames: scene.anims.generateFrameNumbers("warrior", {
         start: 6,
@@ -442,8 +447,7 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 10,
       repeat: -1,
-      // repeatDelay: 2000
-    });
+    }); */
 
     scene.anims.create({
       key: "idle",
@@ -453,7 +457,6 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 8,
       repeat: -1,
-      // repeatDelay: 2000
     });
   }
 }

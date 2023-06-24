@@ -207,6 +207,21 @@ export class Unit extends Phaser.GameObjects.Container {
     const newArmorHp = Math.max(0, dataUnit.stats.armorHp);
     this.hpText.setText(`${newHp}`);
     this.armorText.setText(`${newArmorHp}`);
+
+    const stepsInAttackAnimation = Math.ceil(
+      dataUnit.stats.attackDelay / (10 + dataUnit.stats.attackSpeed / 10)
+    );
+    const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
+
+    // create local animation
+    this.sprite.anims.create({
+      key: "attack",
+      frames: this.scene.anims.generateFrameNumbers("warrior", {
+        start: 12,
+        end: 17,
+      }),
+      duration: timeInAttackAnimation,
+    });
   }
 
   // todo: improve and use this
@@ -260,8 +275,9 @@ export class Unit extends Phaser.GameObjects.Container {
     const hasTakenDamage = damageTaken > 0;
 
     if (hasTakenDamage) {
+      console.log("took dmg");
       this.scene.time.addEvent({
-        delay: 250,
+        delay: 0,
         callbackScope: this,
         callback: () => {
           const newHp = Math.max(0, dataUnit.stats.hp);
@@ -367,26 +383,28 @@ export class Unit extends Phaser.GameObjects.Container {
       });
     }
 
-    // temporary
-    if (dataUnit.stats.ap < this.stats.ap) {
-      this.sprite.play("attack", true).chain("idle");
-    }
-
     /* AP BAR STUFF */
     const newApBarWidth = (dataUnit.stats.ap / 1000) * BAR_WIDTH;
-    if (dataUnit.stats.ap < this.stats.ap) {
-      // did action
-      if (this.apBarTween) {
-        this.apBarTween.stop();
-      }
-      this.apBar.width = 0;
-      this.sprite.play("attack", true).chain("idle");
-    } else {
+
+    if (this.stats.ap < 1000) {
       this.apBarTween = this.scene.tweens.add({
         targets: this.apBar,
-        width: newApBarWidth <= 0 ? 0 : newApBarWidth,
-        duration: GAME_LOOP_SPEED, // has to be lower than game loop speed to be smooth (need confirmation)
+        width:
+          Math.min(newApBarWidth, BAR_WIDTH) <= 0
+            ? 0
+            : Math.min(newApBarWidth, BAR_WIDTH),
+        duration: GAME_LOOP_SPEED - 1, // has to be lower than game loop speed to be smooth (need confirmation)
         ease: "Linear",
+        onComplete: () => {
+          if (dataUnit.stats.ap >= 1000) {
+            // did action
+            if (this.apBarTween) {
+              this.apBarTween.stop();
+            }
+            this.apBar.width = 0;
+            this.sprite.play("attack", true).chain("idle");
+          }
+        },
       });
     }
 
@@ -482,18 +500,7 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   public static setupAnimations(scene: Phaser.Scene) {
-    scene.anims.create({
-      key: "attack",
-      frames: scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 17,
-      }),
-      frameRate: 9,
-      //repeat: 1,
-      // repeatDelay: 2000
-    });
-
-    scene.anims.create({
+    /* scene.anims.create({
       key: "walk",
       frames: scene.anims.generateFrameNumbers("warrior", {
         start: 6,
@@ -501,8 +508,7 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 10,
       repeat: -1,
-      // repeatDelay: 2000
-    });
+    }); */
 
     scene.anims.create({
       key: "idle",
@@ -512,7 +518,6 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 8,
       repeat: -1,
-      // repeatDelay: 2000
     });
 
     scene.anims.create({

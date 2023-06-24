@@ -4,7 +4,6 @@ import { queryClient } from "../../services/api/queryClient";
 import { useGameStore } from "../../services/state/game";
 
 export async function fetchUnits() {
-  console.log("fetching");
   const response = await fetch("http://localhost:8787/game/karpov");
   const data = await response.json();
   return data;
@@ -185,7 +184,9 @@ export class Battle extends Phaser.Scene {
   }
 
   initializeBattle(data: any[]) {
-    this.units.forEach((unit) => unit.destroy());
+    this.units.forEach((unit) => {
+      unit.destroy();
+    });
     this.units = [];
 
     const unitOffset = {
@@ -260,7 +261,9 @@ export class Battle extends Phaser.Scene {
         unit.updateUnit(dataUnit);
         if (unit.stats.hp <= 0) {
           this.units = this.units.filter(
-            (u) => u.owner !== unit.owner || u.position !== unit.position
+            (u) =>
+              `${unit.owner}${unit.boardPosition}` !==
+              `${u.owner}${u.boardPosition}`
           );
         }
       }

@@ -66,6 +66,7 @@ export class Unit {
 
   isPreparingSkill = false;
   skillDelayBuffer = 0;
+  isDead = false;
 
   TEST_attacksCounter = 0;
   TEST_skillsCounter = 0;
@@ -194,18 +195,18 @@ export class Unit {
         if (!attackTarget) {
           throw Error("Undefined attack target for " + this.toString());
         }
+
         this.attackWithMainHand(attackTarget);
+        this.stats.ap -= 1000;
       }
     } else {
       if (!this.isPreparingSkill) {
         this.stats.ap += this.stats.attackSpeed;
       }
     }
-
-    if (this.canAttack() && !this.isPreparingSkill) {
-      console.log(this.getName(), " Preparing attack ", this.TEST_stepsCounter);
+    if (!this.isPreparingAttack && this.canAttack() && !this.isPreparingSkill) {
+      this.TEST_stepsCounter = 0;
       this.isPreparingAttack = true;
-      this.stats.ap = 0;
     }
   }
 
@@ -230,6 +231,14 @@ export class Unit {
     } else {
       this.stats.hp -= Math.round(finalDamage);
     }
+  }
+
+  markAsDead() {
+    this.isDead = true;
+  }
+
+  hasDied() {
+    return this.stats.hp <= 0;
   }
 
   canAttack() {

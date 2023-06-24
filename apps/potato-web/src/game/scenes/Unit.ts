@@ -140,7 +140,7 @@ export class Unit extends Phaser.GameObjects.Container {
     apBar.setDepth(1);
     apRectBorder.setOrigin(0);
     apRectBorder.setDepth(1);
-    
+
     this.add(this.sprite);
     this.add(hpRectBorder);
     this.add(hpRect);
@@ -313,6 +313,13 @@ export class Unit extends Phaser.GameObjects.Container {
               });
             },
           });
+          this.scene.tweens.add({
+            targets: this,
+            x: this.owner === 0 ? this.x - 5 : this.x + 5,
+            duration: 150,
+            yoyo: true,
+            ease: "Bounce.easeOut",
+          });
 
           if (!this.isSelected) {
             this.sprite.setTint(0xde3c45);
@@ -408,8 +415,41 @@ export class Unit extends Phaser.GameObjects.Container {
       });
     }
 
-    /* SP BAR STUFF */
+    /* AP BAR STUFF */
     const newSpBarWidth = (dataUnit.stats.sp / 1000) * BAR_WIDTH;
+
+    if (this.stats.ap < 1000) {
+      this.spBarTween = this.scene.tweens.add({
+        targets: this.spBar,
+        width:
+          Math.min(newSpBarWidth, BAR_WIDTH) <= 0
+            ? 0
+            : Math.min(newSpBarWidth, BAR_WIDTH),
+        duration: GAME_LOOP_SPEED - 1, // has to be lower than game loop speed to be smooth (need confirmation)
+        ease: "Linear",
+        onComplete: () => {
+          if (dataUnit.stats.sp >= 1000) {
+            // did action
+            if (this.spBarTween) {
+              this.spBarTween.stop();
+            }
+            this.spBar.width = 0;
+            this.sprite.play("skill", true).chain("idle");
+            this.scene.tweens.add({
+              targets: this,
+              scaleX: 1.15,
+              scaleY: 1.15,
+              duration: 500,
+              yoyo: true,
+              ease: "Bounce.easeOut",
+            });
+          }
+        },
+      });
+    }
+
+    /* SP BAR STUFF */
+    /* const newSpBarWidth = (dataUnit.stats.sp / 1000) * BAR_WIDTH;
     if (dataUnit.stats.sp < this.stats.sp) {
       // did action
       if (this.spBarTween) {
@@ -433,7 +473,7 @@ export class Unit extends Phaser.GameObjects.Container {
         duration: GAME_LOOP_SPEED, // has to be lower than game loop speed to be smooth (need confirmation)
         ease: "Linear",
       });
-    }
+    } */
 
     this.stats = dataUnit.stats;
     if (this.stats.hp <= 0) {

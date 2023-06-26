@@ -3,6 +3,21 @@ import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Multipliers } from "./data/config";
 import { WeaponData } from "./Weapon";
 
+export enum EVENT_TYPE {
+  ATTACK = "ATTACK",
+  IS_PREPARING_ATTACK = "IS_PREPARING_ATTACK",
+  RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
+  HAS_DIED = "HAS_DIED",
+}
+
+// use for better perfomance
+/* export enum EVENT_TYPE {
+  ATTACK = 0,
+  IS_PREPARING_ATTACK = 1,
+  RECEIVED_DAMAGE = 2,
+  HAS_DIED = 3,
+} */
+
 export interface UnitStats {
   str: number;
   dex: number;
@@ -52,7 +67,15 @@ export interface Equipment {
   head: ArmorData;
 }
 
+interface StepEvent {
+  type: EVENT_TYPE;
+  id: string;
+  payload?: any;
+  step: number;
+}
+
 export class Unit {
+  id: string;
   stats: UnitStats;
   race: RaceData;
   class: ClassData;
@@ -72,6 +95,9 @@ export class Unit {
   TEST_skillsCounter = 0;
   TEST_stepsCounter = 0;
 
+  currentStep = 0;
+  stepEvents: StepEvent[] = [];
+
   constructor(
     bm: BoardManager,
     owner: OWNER,
@@ -80,6 +106,7 @@ export class Unit {
     uClass: ClassData,
     equipment: Equipment
   ) {
+    this.id = `${owner}${position}`;
     this.bm = bm;
     this.owner = owner;
     this.position = position;
@@ -142,6 +169,7 @@ export class Unit {
 
   serialize() {
     return {
+      id: this.id,
       owner: this.owner,
       name: this.getName(),
       equipment: {
@@ -158,11 +186,18 @@ export class Unit {
     };
   }
 
-  step() {
+  serializeEvents() {
+    const events = [...this.stepEvents];
+    this.stepEvents = [];
+    return events;
+  }
+
+  step(stepNumber: number) {
+    this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
-    if (this.isPreparingSkill) {
-      this.skillDelayBuffer += 10 + this.stats.attackSpeed / 10; // temporary - change attackSpeed to skillRegen?
+    /* if (this.isPreparingSkill) {
+      this.skillDelayBuffer += 10 + this.stats.skillRegen / 10; // temporary - change attackSpeed to skillRegen?
 
       if (this.skillDelayBuffer >= this.stats.skillDelay) {
         this.isPreparingSkill = false;
@@ -180,7 +215,7 @@ export class Unit {
       this.stats.sp = 0;
     } else {
       this.stats.sp += this.stats.skillRegen;
-    }
+    } */
 
     if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
@@ -196,8 +231,8 @@ export class Unit {
           throw Error("Undefined attack target for " + this.toString());
         }
 
-        this.attackWithMainHand(attackTarget);
         this.stats.ap -= 1000;
+        this.attackWithMainHand(attackTarget);
       }
     } else {
       if (!this.isPreparingSkill) {
@@ -207,18 +242,31 @@ export class Unit {
     if (!this.isPreparingAttack && this.canAttack() && !this.isPreparingSkill) {
       this.TEST_stepsCounter = 0;
       this.isPreparingAttack = true;
+      this.stepEvents.push({
+        id: this.id,
+        type: EVENT_TYPE.IS_PREPARING_ATTACK,
+        payload: { attackDelay: this.stats.attackDelay },
+        step: this.currentStep,
+      });
     }
   }
 
   attackWithMainHand(target: Unit) {
-    target.receiveDamage(this.stats.attackDamage);
+    this.stepEvents.push({
+      id: this.id,
+      type: EVENT_TYPE.ATTACK,
+      payload: { target: target.id, currentAp: this.stats.ap },
+      step: this.currentStep,
+    });
+    target.receiveDamage(this.stats.attackDamage, this.currentStep);
   }
 
   castSkill() {
     console.log(this.getName(), " Cast skill ", this.TEST_stepsCounter);
+    this.stats.hp = Math.min(this.stats.hp + 100, this.stats.maxHp);
   }
 
-  receiveDamage(damage: number) {
+  receiveDamage(damage: number, stepItWasAttacked: number) {
     const finalDamage = Math.round((damage * 100) / (this.stats.def + 100));
 
     if (this.stats.armorHp > 0) {
@@ -231,9 +279,23 @@ export class Unit {
     } else {
       this.stats.hp -= Math.round(finalDamage);
     }
+
+    this.stepEvents.push({
+      id: this.id,
+      type: EVENT_TYPE.RECEIVED_DAMAGE,
+      payload: {
+        hp: this.stats.hp,
+        armorHp: this.stats.armorHp,
+        damage: finalDamage,
+      },
+      step: stepItWasAttacked,
+    });
   }
 
   markAsDead() {
+    if (this.isDead) {
+      throw Error("Unit is already dead");
+    }
     this.isDead = true;
   }
 

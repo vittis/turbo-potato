@@ -5,6 +5,7 @@ import { GAME_LOOP_SPEED } from "./Battle";
 const BAR_WIDTH = 50;
 
 export class Unit extends Phaser.GameObjects.Container {
+  public id: string;
   public sprite: Phaser.GameObjects.Sprite;
   public hpBar: Phaser.GameObjects.Rectangle;
   public armorBar: Phaser.GameObjects.Rectangle;
@@ -33,6 +34,7 @@ export class Unit extends Phaser.GameObjects.Container {
     dataUnit: any
   ) {
     super(scene, x, y);
+    this.id = dataUnit.id;
     this.boardPosition = dataUnit.position;
     this.dataUnit = dataUnit;
 
@@ -224,259 +226,8 @@ export class Unit extends Phaser.GameObjects.Container {
     });
   }
 
-  // todo: improve and use this
-  public onStartBattle() {
-    return;
-    const stepsToAttack = Math.ceil(1000 / this.stats.attackSpeed);
-    const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
-
-    const stepsInAttackAnimation = Math.ceil(
-      this.stats.attackDelay / (10 + this.stats.attackSpeed / 10)
-    );
-    const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
-    console.log(timeToAttack);
-
-    this.apBarTween = this.scene.tweens.add({
-      targets: this.apBar,
-      width: { from: 0, to: BAR_WIDTH },
-      duration: timeToAttack,
-      ease: "Linear",
-      loop: -1,
-      onStart: () => {
-        if (this.unitName === "Dwarf Knight") {
-          console.time("timer");
-        }
-      },
-      onLoop: () => {
-        if (this.unitName === "Dwarf Knight") {
-          console.timeEnd("timer");
-        }
-        this.apBarTween.pause();
-        this.scene.time.addEvent({
-          delay: timeInAttackAnimation,
-          callback: () => {
-            this.apBarTween.resume();
-          },
-          callbackScope: this,
-        });
-      },
-    });
-  }
-
-  public updateUnit(dataUnit: any) {
-    const damageTaken =
-      this.stats.hp -
-      dataUnit.stats.hp +
-      this.stats.armorHp -
-      dataUnit.stats.armorHp;
-    const hasTakenHpDamage = this.stats.hp - dataUnit.stats.hp > 0;
-    const hasTakenArmorDamage = this.stats.armorHp - dataUnit.stats.armorHp > 0;
-
-    const hasTakenDamage = damageTaken > 0;
-
-    if (hasTakenDamage) {
-      console.log("took dmg");
-      this.scene.time.addEvent({
-        delay: 0,
-        callbackScope: this,
-        callback: () => {
-          const newHp = Math.max(0, dataUnit.stats.hp);
-          const newArmorHp = Math.max(0, dataUnit.stats.armorHp);
-          this.hpText.setText(`${newHp}`);
-          this.armorText.setText(`${newArmorHp}`);
-          if (newArmorHp === 0) {
-            this.armorText.alpha = 0;
-          }
-          if (newHp === 0) {
-            this.hpText.alpha = 0;
-            this.hpBar.alpha = 0;
-            this.armorBar.alpha = 0;
-            this.spBar.alpha = 0;
-            this.apBar.alpha = 0;
-          }
-
-          this.scene.tweens.add({
-            targets: hasTakenHpDamage ? this.hpText : this.armorText,
-            scaleX: 1.25,
-            scaleY: 1.25,
-            duration: 150,
-            ease: "Bounce.easeOut",
-            onComplete: () => {
-              this.hpText.setText(newHp.toString());
-              this.armorText.setText(newArmorHp.toString());
-              this.scene.tweens.add({
-                targets: hasTakenHpDamage ? this.hpText : this.armorText,
-                scaleX: 1,
-                scaleY: 1,
-                duration: 150,
-                ease: "Bounce.easeOut",
-              });
-            },
-          });
-          this.scene.tweens.add({
-            targets: this,
-            x: this.owner === 0 ? this.x - 5 : this.x + 5,
-            duration: 150,
-            yoyo: true,
-            ease: "Bounce.easeOut",
-          });
-
-          if (!this.isSelected) {
-            this.sprite.setTint(0xde3c45);
-          }
-          this.scene.time.addEvent({
-            delay: 150,
-            callback: () => {
-              if (!this.isSelected) {
-                this.sprite.clearTint();
-              }
-            },
-          });
-
-          const damageText = this.scene.add.text(
-            0,
-            30,
-            "-" + damageTaken.toString(),
-            {
-              fontSize: damageTaken > 50 ? "40px" : "30px",
-              color: "#ff121d",
-              fontFamily: "IM Fell DW Pica",
-              stroke: "#000000",
-              strokeThickness: 2,
-              fontStyle: "bold",
-              shadow: {
-                offsetX: 0,
-                offsetY: 3,
-                color: "#000",
-                blur: 0,
-                stroke: true,
-                fill: false,
-              },
-            }
-          );
-          damageText.setOrigin(0.5);
-
-          this.scene.tweens.add({
-            targets: damageText,
-            y: damageText.y - 40,
-            alpha: 0,
-            duration: damageTaken > 50 ? 1900 : 1200,
-            ease: "Linear",
-            onComplete: () => {
-              damageText.destroy();
-            },
-          });
-
-          this.add(damageText);
-
-          const newHpBarValue =
-            (dataUnit.stats.hp / dataUnit.stats.maxHp) * BAR_WIDTH;
-          this.scene.tweens.add({
-            targets: this.hpBar,
-            width: newHpBarValue <= 0 ? 0 : newHpBarValue,
-            duration: 80,
-            ease: "Linear",
-          });
-
-          const newArmorHpValue =
-            (dataUnit.stats.armorHp / dataUnit.stats.maxArmorHp) * BAR_WIDTH;
-          this.scene.tweens.add({
-            targets: this.armorBar,
-            width: newArmorHpValue <= 0 ? 0 : newArmorHpValue,
-            duration: 80,
-            ease: "Linear",
-          });
-        },
-      });
-    }
-
-    /* AP BAR STUFF */
-    const newApBarWidth = (dataUnit.stats.ap / 1000) * BAR_WIDTH;
-
-    if (this.stats.ap < 1000) {
-      this.apBarTween = this.scene.tweens.add({
-        targets: this.apBar,
-        width:
-          Math.min(newApBarWidth, BAR_WIDTH) <= 0
-            ? 0
-            : Math.min(newApBarWidth, BAR_WIDTH),
-        duration: GAME_LOOP_SPEED - 1, // has to be lower than game loop speed to be smooth (need confirmation)
-        ease: "Linear",
-        onComplete: () => {
-          if (dataUnit.stats.ap >= 1000) {
-            // did action
-            if (this.apBarTween) {
-              this.apBarTween.stop();
-            }
-            this.apBar.width = 0;
-            this.sprite.play("attack", true).chain("idle");
-          }
-        },
-      });
-    }
-
-    /* AP BAR STUFF */
-    const newSpBarWidth = (dataUnit.stats.sp / 1000) * BAR_WIDTH;
-
-    if (this.stats.ap < 1000) {
-      this.spBarTween = this.scene.tweens.add({
-        targets: this.spBar,
-        width:
-          Math.min(newSpBarWidth, BAR_WIDTH) <= 0
-            ? 0
-            : Math.min(newSpBarWidth, BAR_WIDTH),
-        duration: GAME_LOOP_SPEED - 1, // has to be lower than game loop speed to be smooth (need confirmation)
-        ease: "Linear",
-        onComplete: () => {
-          if (dataUnit.stats.sp >= 1000) {
-            // did action
-            if (this.spBarTween) {
-              this.spBarTween.stop();
-            }
-            this.spBar.width = 0;
-            this.sprite.play("skill", true).chain("idle");
-            this.scene.tweens.add({
-              targets: this,
-              scaleX: 1.15,
-              scaleY: 1.15,
-              duration: 500,
-              yoyo: true,
-              ease: "Bounce.easeOut",
-            });
-          }
-        },
-      });
-    }
-
-    /* SP BAR STUFF */
-    /* const newSpBarWidth = (dataUnit.stats.sp / 1000) * BAR_WIDTH;
-    if (dataUnit.stats.sp < this.stats.sp) {
-      // did action
-      if (this.spBarTween) {
-        this.spBarTween.stop();
-      }
-      this.spBar.width = 0;
-      this.sprite.play("skill", true).chain("idle");
-      // temporary tween so skill animation is different from attack
-      this.scene.tweens.add({
-        targets: this,
-        scaleX: 1.2,
-        scaleY: 1.2,
-        duration: 500,
-        yoyo: true,
-        ease: "Bounce.easeOut"
-      });
-    } else {
-      this.spBarTween = this.scene.tweens.add({
-        targets: this.spBar,
-        width: newSpBarWidth <= 0 ? 0 : newSpBarWidth,
-        duration: GAME_LOOP_SPEED, // has to be lower than game loop speed to be smooth (need confirmation)
-        ease: "Linear",
-      });
-    } */
-
-    this.stats = dataUnit.stats;
-    if (this.stats.hp <= 0) {
+  public playEvent(event: any) {
+    if (event.type === "HAS_DIED") {
       this.scene.tweens.add({
         targets: this,
         alpha: 0,
@@ -484,15 +235,159 @@ export class Unit extends Phaser.GameObjects.Container {
         scaleY: 0,
         angle: 180,
         duration: 1400,
-        delay: 250,
+        delay: Math.min(250, GAME_LOOP_SPEED * 1.5),
         ease: "Sine.easeInOut",
         onComplete: () => {
           this.sprite.setTint(0xde3c45);
-          // Destroy the unit after the death animation is complete
           this.destroy();
         },
       });
     }
+    if (event.type === "IS_PREPARING_ATTACK") {
+      this.sprite.play("attack", true).chain("idle");
+    }
+
+    if (event.type === "ATTACK") {
+      const currentAp = event.payload.currentAp;
+      this.fillApBar(currentAp);
+    }
+
+    if (event.type === "RECEIVED_DAMAGE") {
+      const newHp = Math.max(0, event.payload.hp);
+      const newArmorHp = Math.max(0, event.payload.armorHp);
+
+      const hasTakenHpDamage = newHp < this.stats.hp;
+      const hasTakenArmorDamage = newArmorHp < this.stats.armorHp;
+
+      const textTargets = [] as any[];
+      if (hasTakenArmorDamage) textTargets.push(this.armorText);
+      if (hasTakenHpDamage) textTargets.push(this.hpText);
+
+      this.hpText.setText(`${newHp}`);
+      this.armorText.setText(`${newArmorHp}`);
+
+      if (newArmorHp === 0) {
+        this.armorText.alpha = 0;
+      }
+      if (newHp === 0) {
+        this.hpText.alpha = 0;
+        this.hpBar.alpha = 0;
+        this.armorBar.alpha = 0;
+        this.spBar.alpha = 0;
+        this.apBar.alpha = 0;
+      }
+
+      this.scene.tweens.add({
+        targets: textTargets,
+        scaleX: 1.25,
+        scaleY: 1.25,
+        duration: 150,
+        ease: "Bounce.easeOut",
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: textTargets,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 150,
+            ease: "Bounce.easeOut",
+          });
+        },
+      });
+
+      this.scene.tweens.add({
+        targets: this,
+        x: this.owner === 0 ? this.x - 5 : this.x + 5,
+        duration: 150,
+        yoyo: true,
+        ease: "Bounce.easeOut",
+      });
+
+      if (!this.isSelected) {
+        this.sprite.setTint(0xde3c45);
+      }
+
+      this.scene.time.addEvent({
+        delay: 150,
+        callback: () => {
+          if (!this.isSelected) {
+            this.sprite.clearTint();
+          }
+        },
+      });
+
+      const damageText = this.scene.add.text(
+        0,
+        30,
+        "-" + event.payload.damage.toString(),
+        {
+          fontSize: event.payload.damage > 50 ? "40px" : "30px",
+          color: "#ff121d",
+          fontFamily: "IM Fell DW Pica",
+          stroke: "#000000",
+          strokeThickness: 2,
+          fontStyle: "bold",
+          shadow: {
+            offsetX: 0,
+            offsetY: 3,
+            color: "#000",
+            blur: 0,
+            stroke: true,
+            fill: false,
+          },
+        }
+      );
+      damageText.setOrigin(0.5);
+
+      this.scene.tweens.add({
+        targets: damageText,
+        y: damageText.y - 40,
+        alpha: 0,
+        duration: event.payload.damage > 50 ? 1900 : 1200,
+        ease: "Linear",
+        onComplete: () => {
+          damageText.destroy();
+        },
+      });
+
+      this.add(damageText);
+
+      const newHpBarValue = (newHp / this.stats.maxHp) * BAR_WIDTH;
+      this.scene.tweens.add({
+        targets: this.hpBar,
+        width: newHpBarValue <= 0 ? 0 : newHpBarValue,
+        duration: 80,
+        ease: "Linear",
+      });
+
+      const newArmorHpValue = (newArmorHp / this.stats.maxArmorHp) * BAR_WIDTH;
+      this.scene.tweens.add({
+        targets: this.armorBar,
+        width: newArmorHpValue <= 0 ? 0 : newArmorHpValue,
+        duration: 80,
+        ease: "Linear",
+      });
+    }
+  }
+
+  private fillApBar(currentAp: number) {
+    const stepsToAttack = Math.ceil(1000 / this.stats.attackSpeed);
+
+    const timeToAttack =
+      stepsToAttack * GAME_LOOP_SPEED * (1 - currentAp / 1000);
+
+    this.apBarTween = this.scene.tweens.add({
+      targets: this.apBar,
+      width: { from: 0, to: BAR_WIDTH },
+      duration: timeToAttack,
+      ease: "Linear",
+      onComplete: () => {
+        this.apBarTween = null as any;
+      },
+    });
+  }
+
+  public onStartBattle() {
+    this.fillApBar(0);
   }
 
   public initializeAnimations() {
@@ -540,15 +435,14 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   public static setupAnimations(scene: Phaser.Scene) {
-    /* scene.anims.create({
+    scene.anims.create({
       key: "walk",
       frames: scene.anims.generateFrameNumbers("warrior", {
         start: 6,
         end: 11,
       }),
       frameRate: 10,
-      repeat: -1,
-    }); */
+    });
 
     scene.anims.create({
       key: "idle",
@@ -564,9 +458,9 @@ export class Unit extends Phaser.GameObjects.Container {
       key: "skill",
       frames: scene.anims.generateFrameNumbers("warrior", {
         start: 12,
-        end: 17,
+        end: 13,
       }),
-      frameRate: 9,
+      duration: 1000,
       //repeat: 1,
       // repeatDelay: 2000
     });

@@ -3,8 +3,8 @@ import { Unit } from "./Unit";
 import { queryClient } from "../../services/api/queryClient";
 import { useGameStore } from "../../services/state/game";
 
-export async function fetchUnits() {
-  const response = await fetch("http://localhost:8787/game/karpov");
+export async function fetchBattleSetup() {
+  const response = await fetch("http://localhost:8787/game/battle/setup");
   const data = await response.json();
   return data;
 }
@@ -13,11 +13,14 @@ export const GAME_LOOP_SPEED = 100;
 
 export class Battle extends Phaser.Scene {
   text: any;
-  history: any[] = [];
+  firstStep: any;
+  totalSteps = -1;
   currentStep = 0;
   board!: Phaser.GameObjects.Container;
   units: Unit[] = [];
   mainLoop!: Phaser.Time.TimerEvent;
+  eventHistory: any[] = [];
+  timeEventsHistory: Phaser.Time.TimerEvent[] = [];
 
   constructor() {
     super("GameScene");
@@ -66,60 +69,6 @@ export class Battle extends Phaser.Scene {
     return [tree, tree2, tree3, tree4];
   }
 
-  /* addWarriorRunner() {
-      const warrior = this.add.sprite(-300, -100, "warrior");
-      warrior.play("idle");
-
-      const goTweenConfig = {
-         targets: warrior,
-         x: 310,
-         duration: 3400,
-         ease: Phaser.Math.Easing.Linear,
-         delay: 5000,
-         onStart: () => {
-            warrior.play("walk");
-            warrior.setFlipX(false);
-         },
-         onComplete: () => {
-            warrior.play("attack");
-            this.time.addEvent({
-               callback: () => {
-                  warrior.play("idle");
-                  this.add.tween(backTweenConfig);
-               },
-               delay: 2000,
-            });
-         },
-      } as Phaser.Types.Tweens.TweenBuilderConfig;
-
-      const backTweenConfig = {
-         targets: warrior,
-         x: -300,
-         duration: 3500,
-         ease: Phaser.Math.Easing.Linear,
-         delay: 5000,
-         onStart: () => {
-            warrior.play("walk");
-            warrior.setFlipX(true);
-         },
-         onComplete: () => {
-            warrior.play("attack");
-            this.time.addEvent({
-               callback: () => {
-                  warrior.play("idle");
-                  this.add.tween(goTweenConfig);
-               },
-               delay: 2000,
-            });
-         },
-      } as Phaser.Types.Tweens.TweenBuilderConfig;
-
-      warrior.play("idle");
-      this.tweens.add(goTweenConfig);
-
-      return [warrior];
-   } */
-
   create() {
     Unit.setupAnimations(this);
     const boardImage = this.add.image(0, 0, "board");
@@ -145,20 +94,22 @@ export class Battle extends Phaser.Scene {
 
     queryClient
       .fetchQuery({
-        queryKey: ["game/units"],
-        queryFn: fetchUnits,
+        queryKey: ["game/battle/setup"],
+        queryFn: fetchBattleSetup,
         staleTime: Infinity,
       })
       .then((data) => {
-        this.history = data;
-        this.initializeBattle(this.history);
+        this.firstStep = data.firstStep;
+        this.totalSteps = data.totalSteps;
+        this.eventHistory = data.eventHistory;
+        this.initializeBattle(this.firstStep);
       });
 
     useGameStore.subscribe(
       (state) => state.selectedEntity,
       (selectedEntity) => {
         this.units.forEach((unit) => {
-          if (`${unit.owner}${unit.boardPosition}` === selectedEntity) {
+          if (unit.id === selectedEntity) {
             unit.onSelected();
           } else {
             unit.onDeselected();
@@ -171,10 +122,7 @@ export class Battle extends Phaser.Scene {
       (state) => state.isGameRunning,
       (isGameRunning) => {
         if (isGameRunning) {
-          if (this.currentStep === this.history.length - 1) {
-            this.initializeBattle(this.history);
-            this.currentStep = 0;
-          }
+          this.initializeBattle(this.firstStep);
           this.startLoop();
         } else {
           this.stopLoop();
@@ -183,7 +131,7 @@ export class Battle extends Phaser.Scene {
     );
   }
 
-  initializeBattle(data: any[]) {
+  initializeBattle(firstFrame: any) {
     this.units.forEach((unit) => {
       unit.destroy();
     });
@@ -211,7 +159,7 @@ export class Battle extends Phaser.Scene {
       return unitOffset.y * (isTop ? -1 : 1) - 10;
     };
 
-    data[0].units.forEach((dataUnit: any) => {
+    firstFrame.units.forEach((dataUnit: any) => {
       const unit = new Unit(
         this,
         getUnitPosX(dataUnit.position, dataUnit.owner),
@@ -227,62 +175,53 @@ export class Battle extends Phaser.Scene {
       unit.initalizeUnit(dataUnit);
       this.board.add(unit);
     });
-
-    console.log("end initialize");
-    // this.startLoop();
   }
 
   startLoop() {
-    console.log("start loop");
     this.units.forEach((unit) => unit.onStartBattle());
 
-    this.mainLoop = this.time.addEvent({
-      delay: GAME_LOOP_SPEED,
-      callback: this.loopStep,
-      callbackScope: this,
-      repeat: this.history.length - 1 - this.currentStep,
+    this.eventHistory.forEach((event: any) => {
+      const timeEvent = this.time.addEvent({
+        delay: (event.step + 1) * GAME_LOOP_SPEED,
+        callback: () => {
+          this.playEvent(event);
+        },
+        callbackScope: this,
+      });
+
+      this.timeEventsHistory.push(timeEvent);
     });
+  }
+
+  playEvent(event) {
+    const unit = this.units.find((unit) => unit.id === event.id);
+    if (!unit) {
+      throw Error("couldnt find unit id: ", event.id);
+    }
+    console.log(unit?.unitName, event.type);
+
+    unit.playEvent(event);
+
+    if (event.step === this.totalSteps - 1) {
+      this.time.addEvent({
+        delay: GAME_LOOP_SPEED,
+        callback: () => {
+          useGameStore.getState().setIsGameRunning(false);
+        },
+      });
+    }
   }
 
   stopLoop() {
-    if (this.mainLoop) {
-      this.mainLoop.remove();
-    }
-  }
-
-  loopStep() {
-    this.history[this.currentStep].units.forEach((dataUnit: any) => {
-      const unit = this.units.find(
-        (unit) =>
-          unit.boardPosition === dataUnit.position &&
-          unit.owner === dataUnit.owner
-      );
-      if (unit) {
-        unit.updateUnit(dataUnit);
-        if (unit.stats.hp <= 0) {
-          this.units = this.units.filter(
-            (u) =>
-              `${unit.owner}${unit.boardPosition}` !==
-              `${u.owner}${u.boardPosition}`
-          );
-        }
+    this.timeEventsHistory.forEach((event) => {
+      event.remove();
+    });
+    this.units.forEach((unit) => {
+      if (unit.apBarTween) {
+        unit.apBarTween.pause();
       }
     });
-    if (this.currentStep === this.history.length - 1) {
-      useGameStore.getState().setIsGameRunning(false);
-    } else {
-      this.currentStep++;
-    }
   }
 
-  update(time: number, delta: number): void {
-    /* const pointer = this.input.activePointer;
-       this.text.setText([
-         "mouse: " + Math.ceil(pointer.x) + "," + Math.ceil(pointer.y),
-         "warrior: " +
-            Math.ceil(this.warrior.parentContainer.x + this.warrior.x) +
-            "," +
-            Math.ceil(this.warrior.parentContainer.y + this.warrior.y),
-      ]); */
-  }
+  // update(time: number, delta: number): void {}
 }

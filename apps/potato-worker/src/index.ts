@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { getGameHistory } from "../modules/game";
+import { getGameEventHistory, getGameHistory } from "../modules/game";
 import { cors } from "hono/cors";
 
 /* durable objects exports */
@@ -57,6 +57,16 @@ app.get("/chat/global", async (c) => {
 app.get("/game/karpov", async (c) => {
   const history = getGameHistory();
   return c.json(history);
+});
+
+app.get("/game/battle/setup", async (c) => {
+  const history = getGameHistory();
+  const eventHistory = getGameEventHistory();
+  return c.json({
+    firstStep: history[0],
+    totalSteps: history.length - 1,
+    eventHistory,
+  });
 });
 
 export default app;

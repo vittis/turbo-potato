@@ -1,18 +1,18 @@
 import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
-import { GAME_LOOP_SPEED, fetchUnits } from "./game/scenes/Battle";
+import { GAME_LOOP_SPEED, fetchBattleSetup } from "./game/scenes/Battle";
 
 function App() {
   const { selectedEntity, isGameRunning, setSelectedEntity, setIsGameRunning } =
     useGameStore();
 
   const { data } = useQuery({
-    queryKey: ["game/units"],
-    queryFn: fetchUnits,
+    queryKey: ["game/battle/setup"],
+    queryFn: fetchBattleSetup,
   });
 
-  const firstState = data?.[0];
+  const firstState = data?.firstStep;
 
   const teamOneUnits = useMemo<any[]>(() => {
     if (!firstState) return [];

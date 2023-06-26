@@ -1,6 +1,6 @@
 {
     "name": "Dagger",
-    "damage": 12,
+    "damage": 15,
     "weight": 0.5,
     "attackSpeed": 45,
     "attackDelay": 50,

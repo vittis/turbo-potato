@@ -1,5 +1,5 @@
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
-import { Unit } from "./Unit";
+import { EVENT_TYPE, Unit } from "./Unit";
 
 import Races from "./data/races";
 import Classes from "./data/classes";
@@ -13,6 +13,7 @@ import { ArmorData } from "./Armor";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
+  eventHistory: any[] = [];
 
   constructor() {
     this.boardManager = new BoardManager();
@@ -54,7 +55,7 @@ export class Game {
         Races.Elf,
         Classes.Ranger,
         {
-          mainHandWeapon: Weapons.Dagger as WeaponData,
+          mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,
           head: Heads.PlateHelment as ArmorData,
         }
@@ -80,44 +81,51 @@ export class Game {
   }
 
   async startGame() {
-    console.log("start game");
-
-    /* const unit1 = this.boardManager.getUnit(OWNER.TEAM_ONE, POSITION.TOP_MID);
-    const unit2 = this.boardManager.getUnit(OWNER.TEAM_TWO, POSITION.TOP_FRONT); */
-
     const serializedUnits = this.boardManager
       .getAllUnits()
       .map((unit) => unit.serialize());
     this.history.push({ units: serializedUnits });
 
-    // console.time("loop");
-
+    let currentStep = 0;
     do {
       this.boardManager.getAllUnits().forEach((unit) => {
         if (!unit.isDead) {
-          unit.step();
+          unit.step(currentStep);
         }
       });
 
       this.boardManager.getAllUnits().forEach((unit) => {
-        if (unit.hasDied()) {
-          unit.markAsDead();
+        if (!unit.isDead) {
+          this.eventHistory.push(...unit.serializeEvents());
+
+          if (!unit.isDead && unit.hasDied()) {
+            unit.markAsDead();
+            this.eventHistory.push({
+              id: unit.id,
+              type: EVENT_TYPE.HAS_DIED,
+              step: currentStep,
+            });
+          }
         }
       });
 
       const serializedUnits = this.boardManager
         .getAllUnits()
         .map((unit) => unit.serialize());
-      this.history.push({ units: serializedUnits });
 
-      /* this.boardManager.removeUnitsIfDead(); */
+      this.history.push({ units: serializedUnits });
+      currentStep++;
     } while (!this.hasGameEnded());
 
     const unit1 = this.boardManager.getAllUnits()[0];
     const unit2 = this.boardManager.getAllUnits()[1];
 
+    this.boardManager.getAllUnits().forEach((unit) => {
+      console.log(unit.getName(), unit.TEST_attacksCounter);
+    });
+
     // @ts-ignore
-    /* console.table([
+    console.table([
       {
         name: unit1?.getName(),
         hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
@@ -152,8 +160,7 @@ export class Game {
         int: unit2.stats.int,
         attacks: unit2.TEST_attacksCounter,
       },
-    ]); */
-    // console.timeEnd("loop");
+    ]);
   }
 
   hasGameEnded() {

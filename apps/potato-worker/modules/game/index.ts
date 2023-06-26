@@ -6,3 +6,7 @@ game.startGame();
 export function getGameHistory() {
   return game.history;
 }
+
+export function getGameEventHistory() {
+  return game.eventHistory;
+}

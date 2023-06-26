@@ -370,10 +370,16 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   private fillApBar(currentAp: number) {
-    const stepsToAttack = Math.ceil(1000 / this.stats.attackSpeed);
+    const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
 
-    const timeToAttack =
-      stepsToAttack * GAME_LOOP_SPEED * (1 - currentAp / 1000);
+    const willNeedOneLessStep =
+      (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >=
+      1000;
+
+    const stepsToAttack =
+      stepsToAttackFromZeroAP - (willNeedOneLessStep ? 1 : 0);
+
+    const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
     this.apBarTween = this.scene.tweens.add({
       targets: this.apBar,

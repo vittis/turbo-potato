@@ -88,7 +88,7 @@ export class Battle extends Phaser.Scene {
     this.tweens.add({
       targets: board,
       y: this.cameras.main.centerY,
-      duration: 1100,
+      duration: 800,
       ease: Phaser.Math.Easing.Cubic.Out,
     });
 
@@ -198,7 +198,6 @@ export class Battle extends Phaser.Scene {
     if (!unit) {
       throw Error("couldnt find unit id: ", event.id);
     }
-    console.log(unit?.unitName, event.type);
 
     unit.playEvent(event);
 

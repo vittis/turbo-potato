@@ -26,6 +26,8 @@ export class Unit extends Phaser.GameObjects.Container {
   public apBarTween!: Phaser.Tweens.Tween;
   public spBarTween!: Phaser.Tweens.Tween;
 
+  isDead = false;
+
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -190,8 +192,6 @@ export class Unit extends Phaser.GameObjects.Container {
     this.add(hpText);
     this.add(armorText);
     scene.add.existing(this);
-
-    // console.log(timeToAttack);
   }
 
   public onSelected() {
@@ -238,8 +238,8 @@ export class Unit extends Phaser.GameObjects.Container {
         delay: Math.min(250, GAME_LOOP_SPEED * 1.5),
         ease: "Sine.easeInOut",
         onComplete: () => {
-          this.sprite.setTint(0xde3c45);
-          this.destroy();
+          this.setVisible(false);
+          this.isDead = true;
         },
       });
     }
@@ -369,7 +369,7 @@ export class Unit extends Phaser.GameObjects.Container {
     }
   }
 
-  private fillApBar(currentAp: number) {
+  private fillApBar(currentAp: number, fromResume?: boolean) {
     const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
 
     const willNeedOneLessStep =
@@ -381,10 +381,19 @@ export class Unit extends Phaser.GameObjects.Container {
 
     const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
+    let duration = 0;
+    if (fromResume) {
+      if (this.apBarTween) {
+        duration = this.apBarTween.duration - this.apBarTween.elapsed;
+      }
+    } else {
+      duration = timeToAttack;
+    }
+
     this.apBarTween = this.scene.tweens.add({
       targets: this.apBar,
-      width: { from: 0, to: BAR_WIDTH },
-      duration: timeToAttack,
+      width: { from: fromResume ? this.apBar.width : 0, to: BAR_WIDTH },
+      duration: duration,
       ease: "Linear",
       onComplete: () => {
         this.apBarTween = null as any;
@@ -392,8 +401,9 @@ export class Unit extends Phaser.GameObjects.Container {
     });
   }
 
-  public onStartBattle() {
-    this.fillApBar(0);
+  public onStartBattle({ fromResume = false }) {
+    this.fillApBar(0, fromResume);
+    this.sprite.anims.resume();
   }
 
   public initializeAnimations() {

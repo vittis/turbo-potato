@@ -15,12 +15,14 @@ export class Battle extends Phaser.Scene {
   text: any;
   firstStep: any;
   totalSteps = -1;
-  currentStep = 0;
   board!: Phaser.GameObjects.Container;
   units: Unit[] = [];
-  mainLoop!: Phaser.Time.TimerEvent;
   eventHistory: any[] = [];
   timeEventsHistory: Phaser.Time.TimerEvent[] = [];
+
+  totalBattleDuration = 0;
+  timeLoopStarted = 0;
+  timeInBattle = 0;
 
   constructor() {
     super("GameScene");
@@ -102,6 +104,11 @@ export class Battle extends Phaser.Scene {
         this.firstStep = data.firstStep;
         this.totalSteps = data.totalSteps;
         this.eventHistory = data.eventHistory;
+        this.totalBattleDuration =
+          this.eventHistory[this.eventHistory.length - 1].step *
+            GAME_LOOP_SPEED +
+          Math.min(GAME_LOOP_SPEED, 100);
+
         this.initializeBattle(this.firstStep);
       });
 
@@ -122,7 +129,13 @@ export class Battle extends Phaser.Scene {
       (state) => state.isGameRunning,
       (isGameRunning) => {
         if (isGameRunning) {
-          this.initializeBattle(this.firstStep);
+          if (
+            this.timeInBattle > this.totalBattleDuration ||
+            this.timeLoopStarted === 0
+          ) {
+            this.initializeBattle(this.firstStep);
+          }
+
           this.startLoop();
         } else {
           this.stopLoop();
@@ -132,6 +145,8 @@ export class Battle extends Phaser.Scene {
   }
 
   initializeBattle(firstFrame: any) {
+    this.timeLoopStarted = 0;
+    this.timeInBattle = 0;
     this.units.forEach((unit) => {
       unit.destroy();
     });
@@ -178,19 +193,54 @@ export class Battle extends Phaser.Scene {
   }
 
   startLoop() {
-    this.units.forEach((unit) => unit.onStartBattle());
-
-    this.eventHistory.forEach((event: any) => {
-      const timeEvent = this.time.addEvent({
-        delay: (event.step + 1) * GAME_LOOP_SPEED,
-        callback: () => {
-          this.playEvent(event);
-        },
-        callbackScope: this,
-      });
-
-      this.timeEventsHistory.push(timeEvent);
+    const fromResume = this.timeLoopStarted !== 0;
+    this.units.forEach((unit) => {
+      if (unit.isDead) return;
+      unit.onStartBattle({ fromResume });
     });
+
+    if (fromResume) {
+      const stepsPassed = Math.floor(this.timeInBattle / GAME_LOOP_SPEED);
+
+      const timeRemainingToNextStep =
+        (stepsPassed + 1) * GAME_LOOP_SPEED - this.timeInBattle;
+
+      this.eventHistory.forEach((event: any) => {
+        // event already happened
+        if (event.step <= stepsPassed) {
+          return;
+        }
+        const delay =
+          timeRemainingToNextStep +
+          (event.step - (stepsPassed + 1)) * GAME_LOOP_SPEED;
+
+        const timeEvent = this.time.addEvent({
+          delay: delay,
+          callback: () => {
+            this.playEvent(event);
+          },
+          callbackScope: this,
+        });
+
+        this.timeEventsHistory.push(timeEvent);
+      });
+    } else {
+      this.eventHistory.forEach((event: any) => {
+        const delay = event.step * GAME_LOOP_SPEED;
+
+        const timeEvent = this.time.addEvent({
+          delay: delay,
+          callback: () => {
+            this.playEvent(event);
+          },
+          callbackScope: this,
+        });
+
+        this.timeEventsHistory.push(timeEvent);
+      });
+    }
+
+    this.timeLoopStarted = this.time.now;
   }
 
   playEvent(event) {
@@ -199,11 +249,13 @@ export class Battle extends Phaser.Scene {
       throw Error("couldnt find unit id: ", event.id);
     }
 
+    const isLastStep = event.step === this.totalSteps;
+
     unit.playEvent(event);
 
-    if (event.step === this.totalSteps - 1) {
+    if (isLastStep) {
       this.time.addEvent({
-        delay: GAME_LOOP_SPEED,
+        delay: Math.min(GAME_LOOP_SPEED, 100),
         callback: () => {
           useGameStore.getState().setIsGameRunning(false);
         },
@@ -212,13 +264,20 @@ export class Battle extends Phaser.Scene {
   }
 
   stopLoop() {
+    this.timeInBattle += this.time.now - this.timeLoopStarted;
+
     this.timeEventsHistory.forEach((event) => {
       event.remove();
     });
     this.units.forEach((unit) => {
+      if (unit.isDead) return;
       if (unit.apBarTween) {
         unit.apBarTween.pause();
       }
+
+      // if (unit.sprite.anims.getName() !== "idle") {
+      unit.sprite.anims.pause();
+      // }
     });
   }
 

@@ -32,7 +32,7 @@ export class Game {
         }
       )
     );
-    this.boardManager.addToBoard(
+    /* this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_TWO,
@@ -45,9 +45,9 @@ export class Game {
           head: Heads.PlateHelment as ArmorData,
         }
       )
-    );
+    ); */
 
-    this.boardManager.addToBoard(
+    /* this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
@@ -60,7 +60,7 @@ export class Game {
           head: Heads.PlateHelment as ArmorData,
         }
       )
-    );
+    ); */
 
     this.boardManager.addToBoard(
       new Unit(
@@ -86,7 +86,7 @@ export class Game {
       .map((unit) => unit.serialize());
     this.history.push({ units: serializedUnits });
 
-    let currentStep = 0;
+    let currentStep = 1;
     do {
       this.boardManager.getAllUnits().forEach((unit) => {
         if (!unit.isDead) {

@@ -224,6 +224,20 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       duration: timeInAttackAnimation,
     });
+
+    const stepsInSkillAnimation = Math.ceil(
+      dataUnit.stats.skillDelay / (10 + dataUnit.stats.skillRegen / 10)
+    );
+    const timeInSkillAnimation = stepsInSkillAnimation * GAME_LOOP_SPEED;
+
+    this.sprite.anims.create({
+      key: "skill",
+      frames: this.scene.anims.generateFrameNumbers("warrior", {
+        start: 12,
+        end: 13,
+      }),
+      duration: timeInSkillAnimation,
+    });
   }
 
   public playEvent(event: any) {
@@ -247,12 +261,102 @@ export class Unit extends Phaser.GameObjects.Container {
       this.sprite.play("attack", true).chain("idle");
     }
 
+    if (event.type === "IS_PREPARING_SKILL") {
+      this.sprite.play("skill", true).chain("idle");
+    }
+
     if (event.type === "ATTACK") {
-      const currentAp = event.payload.currentAp;
-      this.fillApBar(currentAp);
+      this.fillApBar(event.payload.currentAp);
+      this.fillSpBar(event.payload.sp);
+    }
+
+    if (event.type === "CAST_SKILL") {
+      this.fillSpBar(event.payload.sp);
+    }
+
+    if (event.type === "RECEIVED_HEAL") {
+      const newHp = event.payload.hp;
+      const hpHealed = event.payload.hpHealed;
+      this.hpText.setText(`${hpHealed}`);
+
+      this.scene.tweens.add({
+        targets: this.hpText,
+        scaleX: 1.25,
+        scaleY: 1.25,
+        duration: 150,
+        ease: "Bounce.easeOut",
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: this.hpText,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 150,
+            ease: "Bounce.easeOut",
+          });
+        },
+      });
+
+      if (!this.isSelected) {
+        this.sprite.setTint(0x1dad2e);
+      }
+
+      this.scene.time.addEvent({
+        delay: 150,
+        callback: () => {
+          if (!this.isSelected) {
+            this.sprite.clearTint();
+          }
+        },
+      });
+
+      const healText = this.scene.add.text(
+        0,
+        30,
+        "+" + hpHealed.toString(),
+        {
+          fontSize: hpHealed > 50 ? "40px" : "30px",
+          color: "#1dad2e",
+          fontFamily: "IM Fell DW Pica",
+          stroke: "#000000",
+          strokeThickness: 2,
+          fontStyle: "bold",
+          shadow: {
+            offsetX: 0,
+            offsetY: 3,
+            color: "#000",
+            blur: 0,
+            stroke: true,
+            fill: false,
+          },
+        }
+      );
+      healText.setOrigin(0.5);
+
+      this.scene.tweens.add({
+        targets: healText,
+        y: healText.y - 40,
+        alpha: 0,
+        duration: hpHealed > 50 ? 1900 : 1200,
+        ease: "Linear",
+        onComplete: () => {
+          healText.destroy();
+        },
+      });
+
+      this.add(healText);
+
+      const newHpBarValue = (newHp / this.stats.maxHp) * BAR_WIDTH;
+      this.scene.tweens.add({
+        targets: this.hpBar,
+        width: newHpBarValue <= 0 ? 0 : newHpBarValue,
+        duration: 80,
+        ease: "Linear",
+      });
     }
 
     if (event.type === "RECEIVED_DAMAGE") {
+      this.fillSpBar(event.payload.sp);
+
       const newHp = Math.max(0, event.payload.hp);
       const newArmorHp = Math.max(0, event.payload.armorHp);
 
@@ -392,6 +496,20 @@ export class Unit extends Phaser.GameObjects.Container {
     });
   }
 
+  private fillSpBar(currentSp: number) {
+    const newSpBarWidth = Math.min(currentSp * BAR_WIDTH / 1000, BAR_WIDTH);
+
+    this.spBarTween = this.scene.tweens.add({
+      targets: this.spBar,
+      width: newSpBarWidth,
+      duration: 200,
+      ease: "Linear",
+      onComplete: () => {
+        this.spBarTween = null as any;
+      },
+    });
+  }
+
   public onStartBattle() {
     this.fillApBar(0);
   }
@@ -458,17 +576,6 @@ export class Unit extends Phaser.GameObjects.Container {
       }),
       frameRate: 8,
       repeat: -1,
-    });
-
-    scene.anims.create({
-      key: "skill",
-      frames: scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 13,
-      }),
-      duration: 1000,
-      //repeat: 1,
-      // repeatDelay: 2000
     });
   }
 }

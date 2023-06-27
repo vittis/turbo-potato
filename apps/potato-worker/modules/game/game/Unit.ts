@@ -8,6 +8,9 @@ export enum EVENT_TYPE {
   IS_PREPARING_ATTACK = "IS_PREPARING_ATTACK",
   RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
   HAS_DIED = "HAS_DIED",
+  CAST_SKILL = "CAST_SKILL",
+  IS_PREPARING_SKILL = "IS_PREPARING_SKILL",
+  RECEIVED_HEAL = "RECEIVED_HEAL",
 }
 
 // use for better perfomance
@@ -144,7 +147,7 @@ export class Unit {
 
     const finalSkillRegen = 10 * (1 + (finalInt * Multipliers.srIntMult) / 100);
 
-    const finalSkillDelay = this.equipment.mainHandWeapon.attackDelay; // temporary since skill anim and attack anim is the same
+    const finalSkillDelay = 10 * finalSkillRegen; // temporary
 
     this.stats = {
       str: finalStr,
@@ -196,8 +199,8 @@ export class Unit {
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
-    /* if (this.isPreparingSkill) {
-      this.skillDelayBuffer += 10 + this.stats.skillRegen / 10; // temporary - change attackSpeed to skillRegen?
+    if (this.isPreparingSkill) {
+      this.skillDelayBuffer += 10 + this.stats.skillRegen / 10;
 
       if (this.skillDelayBuffer >= this.stats.skillDelay) {
         this.isPreparingSkill = false;
@@ -205,17 +208,20 @@ export class Unit {
 
         this.TEST_skillsCounter++;
 
+        this.stats.sp -= 1000;
         this.castSkill();
       }
     }
 
-    if (this.canCastSkill() && !this.isPreparingAttack) {
-      console.log(this.getName(), " Preparing skill ", this.TEST_stepsCounter);
+    if (!this.isPreparingSkill && this.canCastSkill() && !this.isPreparingAttack) {
       this.isPreparingSkill = true;
-      this.stats.sp = 0;
-    } else {
-      this.stats.sp += this.stats.skillRegen;
-    } */
+      this.stepEvents.push({
+        id: this.id,
+        type: EVENT_TYPE.IS_PREPARING_SKILL,
+        payload: { skillDelay: this.stats.skillDelay },
+        step: this.currentStep,
+      });
+    }
 
     if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
@@ -252,18 +258,37 @@ export class Unit {
   }
 
   attackWithMainHand(target: Unit) {
+    const spGained = this.stats.skillRegen * Multipliers.srAtkBase + this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
+    this.stats.sp += spGained;
+
     this.stepEvents.push({
       id: this.id,
       type: EVENT_TYPE.ATTACK,
-      payload: { target: target.id, currentAp: this.stats.ap },
+      payload: { target: target.id, currentAp: this.stats.ap, sp: this.stats.sp, spGained },
       step: this.currentStep,
     });
+
     target.receiveDamage(this.stats.attackDamage, this.currentStep);
   }
 
   castSkill() {
-    console.log(this.getName(), " Cast skill ", this.TEST_stepsCounter);
-    this.stats.hp = Math.min(this.stats.hp + 100, this.stats.maxHp);
+    this.stepEvents.push({
+      id: this.id,
+      type: EVENT_TYPE.CAST_SKILL,
+      payload: { sp: this.stats.sp },
+      step: this.currentStep,
+    });
+
+    const newHp = Math.min(this.stats.hp + 100, this.stats.maxHp);
+    const hpHealed = newHp - this.stats.hp;
+    this.stats.hp = newHp;
+
+    this.stepEvents.push({
+      id: this.id,
+      type: EVENT_TYPE.RECEIVED_HEAL,
+      payload: { hp: this.stats.hp, hpHealed },
+      step: this.currentStep,
+    });
   }
 
   receiveDamage(damage: number, stepItWasAttacked: number) {
@@ -280,6 +305,9 @@ export class Unit {
       this.stats.hp -= Math.round(finalDamage);
     }
 
+    const spGained = this.stats.skillRegen * Multipliers.srReceiveDamageBase + this.stats.skillRegen * damage * Multipliers.srReceiveDamageMult;
+    this.stats.sp += spGained
+
     this.stepEvents.push({
       id: this.id,
       type: EVENT_TYPE.RECEIVED_DAMAGE,
@@ -287,6 +315,8 @@ export class Unit {
         hp: this.stats.hp,
         armorHp: this.stats.armorHp,
         damage: finalDamage,
+        sp: this.stats.sp,
+        spGained
       },
       step: stepItWasAttacked,
     });

@@ -4,7 +4,7 @@ import App from "./App";
 import Phaser from "phaser";
 import "./styles/main.css";
 import { PHASER_CONFIG } from "./game/config";
-import { Battle } from "./game/scenes/Battle";
+import { Battle } from "./game/scenes/battle/BattleScene";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./services/api/queryClient";
 

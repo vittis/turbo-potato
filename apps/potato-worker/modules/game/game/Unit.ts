@@ -211,7 +211,7 @@ export class Unit {
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
-    if (this.isPreparingSkill) {
+    /* if (this.isPreparingSkill) {
       this.skillDelayBuffer += 10 + this.stats.skillRegen / 10;
 
       if (this.skillDelayBuffer >= this.stats.skillDelay) {
@@ -237,9 +237,9 @@ export class Unit {
         payload: { skillDelay: this.stats.skillDelay },
         step: this.currentStep,
       });
-    }
+    } */
 
-    if (this.isPreparingAttack) {
+    /* if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
 
       if (this.attackDelayBuffer >= this.stats.attackDelay) {
@@ -270,6 +270,23 @@ export class Unit {
         payload: { attackDelay: this.stats.attackDelay },
         step: this.currentStep,
       });
+    } */
+
+    this.stats.ap += this.stats.attackSpeed;
+    this.stats.sp += this.stats.skillRegen;
+
+    console.log("rs", this.stats.ap, this.stats.sp);
+
+    if (this.canCastSkill()) {
+      this.stats.sp -= 1000;
+      this.castSkill();
+    } else if (this.canAttack()) {
+      const attackTarget = this.bm.getAttackTargetFor(this);
+      if (!attackTarget) {
+        throw Error("Undefined attack target for " + this.toString());
+      }
+      this.stats.ap -= 1000;
+      this.attackWithMainHand(attackTarget);
     }
   }
 

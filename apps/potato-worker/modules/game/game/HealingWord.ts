@@ -11,8 +11,8 @@ export class HealingWord extends Skill {
   name = "Healing Word";
 
   // Temporary - check where should we set these values
-  baseHeal = 60;
-  intMultiplier = 4;
+  baseHeal = 10;
+  intMultiplier = 1;
 
   constructor(bm: BoardManager) {
     super(bm);

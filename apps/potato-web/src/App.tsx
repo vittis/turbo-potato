@@ -1,7 +1,10 @@
 import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
-import { GAME_LOOP_SPEED, fetchBattleSetup } from "./game/scenes/Battle";
+import {
+  GAME_LOOP_SPEED,
+  fetchBattleSetup,
+} from "./game/scenes/battle/BattleScene";
 
 function App() {
   const { selectedEntity, isGameRunning, setSelectedEntity, setIsGameRunning } =

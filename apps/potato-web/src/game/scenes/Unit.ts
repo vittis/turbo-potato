@@ -263,6 +263,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
     if (event.type === "IS_PREPARING_SKILL") {
       this.sprite.play("skill", true).chain("idle");
+      if (this.apBarTween) this.apBarTween.stop();
     }
 
     if (event.type === "ATTACK") {
@@ -271,13 +272,14 @@ export class Unit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "CAST_SKILL") {
+      this.fillApBar(event.payload.currentAp);
       this.fillSpBar(event.payload.sp);
     }
 
     if (event.type === "RECEIVED_HEAL") {
       const newHp = event.payload.hp;
       const hpHealed = event.payload.hpHealed;
-      this.hpText.setText(`${hpHealed}`);
+      this.hpText.setText(`${newHp}`);
 
       this.scene.tweens.add({
         targets: this.hpText,

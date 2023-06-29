@@ -1,0 +1,13 @@
+{
+    "name": "Wand",
+    "damage": 20,
+    "weight": 0.5,
+    "attackSpeed": 25,
+    "attackDelay": 70,
+    "slot": [
+        "MAIN_HAND"
+    ],
+    "strScale": 0,
+    "dexScale": 0,
+    "intScale": 2
+}

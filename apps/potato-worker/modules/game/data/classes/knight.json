@@ -8,5 +8,6 @@
   "statsBonus": {
     "armor": 100
   },
-  "defaultWeapon": "Rusty Greatsword"
+  "defaultWeapon": "Rusty Greatsword",
+  "defaultSkill": "HEAD_CRUSH"
 }

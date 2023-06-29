@@ -1,6 +1,8 @@
 import { ArmorData } from "./Armor";
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Multipliers } from "./data/config";
+import { HealingWord } from "./HealingWord";
+//import { Skill } from "./Skill";
 import { WeaponData } from "./Weapon";
 
 export enum EVENT_TYPE {
@@ -101,6 +103,10 @@ export class Unit {
   currentStep = 0;
   stepEvents: StepEvent[] = [];
 
+  // Fix - use type Skill ?
+  // RSRS
+  skill: HealingWord;
+
   constructor(
     bm: BoardManager,
     owner: OWNER,
@@ -168,6 +174,9 @@ export class Unit {
       weight: 10,
       level: 1,
     };
+
+    // RSRS
+    this.skill = new HealingWord(bm);
   }
 
   serialize() {
@@ -186,6 +195,8 @@ export class Unit {
         ...this.stats,
       },
       position: this.position,
+      // RSRS
+      //skill: { ...this.skill },
     };
   }
 
@@ -196,6 +207,7 @@ export class Unit {
   }
 
   step(stepNumber: number) {
+    if (stepNumber === 0) console.log(this);
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
@@ -213,7 +225,11 @@ export class Unit {
       }
     }
 
-    if (!this.isPreparingSkill && this.canCastSkill() && !this.isPreparingAttack) {
+    if (
+      !this.isPreparingSkill &&
+      this.canCastSkill() &&
+      !this.isPreparingAttack
+    ) {
       this.isPreparingSkill = true;
       this.stepEvents.push({
         id: this.id,
@@ -258,13 +274,20 @@ export class Unit {
   }
 
   attackWithMainHand(target: Unit) {
-    const spGained = this.stats.skillRegen * Multipliers.srAtkBase + this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
+    const spGained =
+      this.stats.skillRegen * Multipliers.srAtkBase +
+      this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
     this.stats.sp += spGained;
 
     this.stepEvents.push({
       id: this.id,
       type: EVENT_TYPE.ATTACK,
-      payload: { target: target.id, currentAp: this.stats.ap, sp: this.stats.sp, spGained },
+      payload: {
+        target: target.id,
+        currentAp: this.stats.ap,
+        sp: this.stats.sp,
+        spGained,
+      },
       step: this.currentStep,
     });
 
@@ -272,10 +295,13 @@ export class Unit {
   }
 
   castSkill() {
-    this.stepEvents.push({
+    // RSRS
+    this.skill.cast(this);
+
+    /* this.stepEvents.push({
       id: this.id,
       type: EVENT_TYPE.CAST_SKILL,
-      payload: { sp: this.stats.sp },
+      payload: { name: "", sp: this.stats.sp, currentAp: this.stats.ap },
       step: this.currentStep,
     });
 
@@ -288,7 +314,7 @@ export class Unit {
       type: EVENT_TYPE.RECEIVED_HEAL,
       payload: { hp: this.stats.hp, hpHealed },
       step: this.currentStep,
-    });
+    }); */
   }
 
   receiveDamage(damage: number, stepItWasAttacked: number) {
@@ -305,8 +331,10 @@ export class Unit {
       this.stats.hp -= Math.round(finalDamage);
     }
 
-    const spGained = this.stats.skillRegen * Multipliers.srReceiveDamageBase + this.stats.skillRegen * damage * Multipliers.srReceiveDamageMult;
-    this.stats.sp += spGained
+    const spGained =
+      this.stats.skillRegen * Multipliers.srReceiveDamageBase +
+      this.stats.skillRegen * damage * Multipliers.srReceiveDamageMult;
+    this.stats.sp += spGained;
 
     this.stepEvents.push({
       id: this.id,
@@ -316,7 +344,7 @@ export class Unit {
         armorHp: this.stats.armorHp,
         damage: finalDamage,
         sp: this.stats.sp,
-        spGained
+        spGained,
       },
       step: stepItWasAttacked,
     });

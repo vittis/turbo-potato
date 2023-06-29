@@ -1,0 +1,9 @@
+{
+    "name": "Healing Word",
+    "target": "SINGLE_ALLY",
+    "effect": "HEAL",
+    "value": 60,
+    "valueMult": {
+        "int": 4
+    }
+}

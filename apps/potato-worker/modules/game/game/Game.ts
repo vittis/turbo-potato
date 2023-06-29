@@ -67,12 +67,12 @@ export class Game {
         this.boardManager,
         OWNER.TEAM_TWO,
         POSITION.BOT_MID,
-        Races.Dwarf,
-        Classes.Ranger,
+        Races.Elf,
+        Classes.Cleric,
         {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
-          head: Heads.PlateHelment as ArmorData,
+          mainHandWeapon: Weapons.Wand as WeaponData,
+          chest: Chests.ClothRobe as ArmorData,
+          head: Heads.ClothHat as ArmorData,
         }
       )
     );

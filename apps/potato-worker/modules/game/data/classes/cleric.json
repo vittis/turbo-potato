@@ -1,0 +1,10 @@
+{
+  "name": "Cleric",
+  "hp": 120,
+  "str": 2,
+  "dex": 2,
+  "int": 9,
+  "tier": 2,
+  "defaultWeapon": "Rusty Wand",
+  "defaultSkill": "HEALING_WORD"
+}

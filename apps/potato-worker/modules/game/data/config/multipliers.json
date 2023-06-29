@@ -1,9 +1,9 @@
 {
   "defStrBonus": 1.5,
   "asDexMult": 7,
-  "srIntMult": 10,
+  "srIntMult": 5,
   "srAtkMult": 0.1,
-  "srAtkBase": 5,
-  "srReceiveDamageMult": 0.2,
-  "srReceiveDamageBase": 10
+  "srAtkBase": 1,
+  "srReceiveDamageMult": 0.5,
+  "srReceiveDamageBase": 2
 }

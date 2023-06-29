@@ -188,7 +188,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     if (event.type === "CAST_SKILL") {
       this.sprite.play("skill", true).chain("idle");
 
-      this.fillApBar(event.payload.currentAp);
       this.fillSpBar(event.payload.sp);
     }
 
@@ -303,7 +302,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.spBarTween = this.scene.tweens.add({
       targets: this.spBar,
       width: newSpBarWidth,
-      duration: 200,
+      duration: 50,
       ease: "Linear",
       onComplete: () => {
         this.spBarTween = null as any;

@@ -275,10 +275,8 @@ export class Unit {
     this.stats.ap += this.stats.attackSpeed;
     this.stats.sp += this.stats.skillRegen;
 
-    console.log("rs", this.stats.ap, this.stats.sp);
-
     if (this.canCastSkill()) {
-      this.stats.sp -= 1000;
+      this.stats.sp = 0;
       this.castSkill();
     } else if (this.canAttack()) {
       const attackTarget = this.bm.getAttackTargetFor(this);

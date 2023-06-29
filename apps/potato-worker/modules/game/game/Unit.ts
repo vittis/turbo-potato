@@ -217,7 +217,7 @@ export class Unit {
       this.stats.sp += this.stats.skillRegen;
     } */
 
-    if (this.isPreparingAttack) {
+    /* if (this.isPreparingAttack) {
       this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
 
       if (this.attackDelayBuffer >= this.stats.attackDelay) {
@@ -248,6 +248,16 @@ export class Unit {
         payload: { attackDelay: this.stats.attackDelay },
         step: this.currentStep,
       });
+    } */
+
+    this.stats.ap += this.stats.attackSpeed;
+    if (this.canAttack()) {
+      const attackTarget = this.bm.getAttackTargetFor(this);
+      if (!attackTarget) {
+        throw Error("Undefined attack target for " + this.toString());
+      }
+      this.stats.ap -= 1000;
+      this.attackWithMainHand(attackTarget);
     }
   }
 

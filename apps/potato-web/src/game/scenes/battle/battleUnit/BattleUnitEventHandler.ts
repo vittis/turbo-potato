@@ -40,9 +40,10 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     yoyo: true,
   });
 
+  // pushback
   unit.scene.tweens.add({
     targets: unit,
-    x: unit.owner === 0 ? unit.x - 5 : unit.x + 5,
+    x: unit.owner === 0 ? unit.x - 10 : unit.x + 10,
     duration: 150,
     yoyo: true,
     ease: "Bounce.easeOut",
@@ -53,7 +54,7 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
   }
 
   unit.scene.time.addEvent({
-    delay: 150,
+    delay: 250,
     callback: () => {
       if (!unit.isSelected) {
         unit.sprite.clearTint();

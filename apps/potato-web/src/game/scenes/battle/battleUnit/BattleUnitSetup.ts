@@ -155,6 +155,7 @@ export function setupUnitAnimations(scene: Phaser.Scene) {
       end: 11,
     }),
     frameRate: 10,
+    repeat: -1,
   });
 
   scene.anims.create({

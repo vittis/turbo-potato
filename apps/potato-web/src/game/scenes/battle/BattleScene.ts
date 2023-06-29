@@ -5,6 +5,20 @@ import { useGameStore } from "../../../services/state/game";
 import { preloadBattle, setupBattle } from "./BattleSetup";
 import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
 
+// todo: reuse from server
+enum EVENT_TYPE {
+  ATTACK = "ATTACK",
+  IS_PREPARING_ATTACK = "IS_PREPARING_ATTACK",
+  RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
+  HAS_DIED = "HAS_DIED",
+}
+export interface StepEvent {
+  type: EVENT_TYPE;
+  id: string;
+  payload?: any;
+  step: number;
+}
+
 export async function fetchBattleSetup() {
   const response = await fetch("http://localhost:8787/game/battle/setup");
   const data = await response.json();
@@ -19,7 +33,7 @@ export class Battle extends Phaser.Scene {
   totalSteps = -1;
   board!: Phaser.GameObjects.Container;
   units: BattleUnit[] = [];
-  eventHistory: any[] = [];
+  eventHistory: StepEvent[] = [];
   timeEventsHistory: Phaser.Time.TimerEvent[] = [];
 
   totalBattleDuration = 0;
@@ -110,16 +124,44 @@ export class Battle extends Phaser.Scene {
     });
   }
 
-  playEvent(event) {
-    const unit = this.units.find((unit) => unit.id === event.id);
-    if (!unit) {
-      throw Error("couldnt find unit id: ", event.id);
-    }
+  playEvents(step: number) {
+    const eventsOnThisStep = this.eventHistory.filter((e) => e.step === step);
 
-    const isLastStep = event.step === this.totalSteps;
+    eventsOnThisStep.forEach((event) => {
+      const unit = this.units.find((unit) => unit.id === event.id);
+      if (!unit) {
+        throw Error(`couldnt find unit id: ${event.id}`);
+      }
 
-    unit.playEvent(event);
+      const targetUnit = this.units.find(
+        (unit) => unit.id === event.payload?.target
+      );
+      let onEnd: Function | undefined = undefined;
+      let onAttack: Function | undefined = undefined;
+      if (event.type === "ATTACK") {
+        this.board.bringToTop(unit);
+        this.stopLoop();
+        onAttack = () => {
+          const attackTargetId = event.payload.target;
+          const receiveDamageEvent = eventsOnThisStep.find((e) => {
+            return (
+              e.type === EVENT_TYPE.RECEIVED_DAMAGE && e.id === attackTargetId
+            );
+          });
+          if (receiveDamageEvent) {
+            targetUnit?.playEvent({ event: receiveDamageEvent });
+          }
+        };
+        onEnd = () => {
+          this.startLoop();
+        };
+      }
+      if (event.type !== EVENT_TYPE.RECEIVED_DAMAGE) {
+        unit.playEvent({ event, target: targetUnit, onEnd, onAttack });
+      }
+    });
 
+    const isLastStep = step === this.totalSteps;
     if (isLastStep) {
       this.time.addEvent({
         delay: Math.min(GAME_LOOP_SPEED, 100),
@@ -147,21 +189,26 @@ export class Battle extends Phaser.Scene {
   }
 
   resumeFromPause() {
+    const stepsThatHaveEvents = [
+      ...new Set(this.eventHistory.map((event) => event.step)),
+    ];
+
     const stepsPassed = Math.floor(this.timeInBattle / GAME_LOOP_SPEED);
     const timeRemainingToNextStep =
       (stepsPassed + 1) * GAME_LOOP_SPEED - this.timeInBattle;
 
-    this.eventHistory.forEach((event: any) => {
+    stepsThatHaveEvents.forEach((step) => {
       // event already happened
-      if (event.step <= stepsPassed) {
+      if (step <= stepsPassed) {
         return;
       }
+
       const timeEvent = this.time.addEvent({
         delay:
           timeRemainingToNextStep +
-          (event.step - (stepsPassed + 1)) * GAME_LOOP_SPEED,
+          (step - (stepsPassed + 1)) * GAME_LOOP_SPEED,
         callback: () => {
-          this.playEvent(event);
+          this.playEvents(step);
         },
         callbackScope: this,
       });
@@ -170,13 +217,17 @@ export class Battle extends Phaser.Scene {
   }
 
   startFromBeggining() {
-    this.eventHistory.forEach((event: any) => {
-      const delay = event.step * GAME_LOOP_SPEED;
+    const stepsThatHaveEvents = [
+      ...new Set(this.eventHistory.map((event) => event.step)),
+    ];
+
+    stepsThatHaveEvents.forEach((step) => {
+      const delay = step * GAME_LOOP_SPEED;
 
       const timeEvent = this.time.addEvent({
         delay: delay,
         callback: () => {
-          this.playEvent(event);
+          this.playEvents(step);
         },
         callbackScope: this,
       });
@@ -194,12 +245,13 @@ export class Battle extends Phaser.Scene {
 
     this.units.forEach((unit) => {
       if (unit.isDead) return;
-      if (unit.apBarTween) {
+      if (unit.apBarTween.isActive()) {
         unit.apBarTween.pause();
       }
 
-      // if (unit.sprite.anims.getName() !== "idle")
-      unit.sprite.anims.pause();
+      if (unit.sprite.anims.getName() !== "idle") {
+        unit.sprite.anims.pause();
+      }
     });
   }
 }

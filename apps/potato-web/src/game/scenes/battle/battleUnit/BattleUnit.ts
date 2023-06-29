@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { GAME_LOOP_SPEED } from "../BattleScene";
+import { GAME_LOOP_SPEED, StepEvent } from "../BattleScene";
 import {
   BAR_WIDTH,
   createBars,
@@ -80,7 +80,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.hpText.setText(`${hp}`);
     this.armorText.setText(`${armor}`);
 
-    const stepsInAttackAnimation = Math.ceil(
+    // testing no attack delay
+    /* const stepsInAttackAnimation = Math.ceil(
       dataUnit.stats.attackDelay / (10 + dataUnit.stats.attackSpeed / 10)
     );
     const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
@@ -93,19 +94,80 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         end: 17,
       }),
       duration: timeInAttackAnimation,
+    }); */
+
+    this.sprite.anims.create({
+      key: "attack",
+      frames: this.scene.anims.generateFrameNumbers("warrior", {
+        start: 12,
+        end: 17,
+      }),
+      duration: 650,
     });
   }
 
-  public playEvent(event: any) {
+  public playEvent({
+    event,
+    target,
+    onEnd,
+    onAttack,
+  }: {
+    event: StepEvent;
+    target?: BattleUnit;
+    onEnd?: Function;
+    onAttack?: Function;
+  }) {
     if (event.type === "HAS_DIED") {
       this.onDeath();
     }
-    if (event.type === "IS_PREPARING_ATTACK") {
+    /* if (event.type === "IS_PREPARING_ATTACK") {
       this.sprite.play("attack", true).chain("idle");
-    }
+    } */
 
     if (event.type === "ATTACK") {
-      this.fillApBar(event.payload.currentAp);
+      if (!target) {
+        throw new Error("Attack target is undefined");
+      }
+
+      this.sprite.play("walk", true);
+      // tween to target unit position
+      const walkTween = this.scene.tweens.add({
+        targets: this,
+        x: target.x - (this.owner === 0 ? 90 : -90),
+        y: target.y,
+        duration: 800,
+        ease: "Linear",
+        yoyo: true,
+        onYoyo: () => {
+          walkTween.pause();
+          if (this.sprite.anims.getName() !== "attack") {
+            this.sprite
+              .play("attack", true)
+              .once("animationcomplete", () => {
+                walkTween.resume();
+                this.sprite.setFlipX(!this.sprite.flipX);
+              })
+              .chain("walk");
+
+            this.scene.time.delayedCall(
+              // sync with impact point
+              this.sprite.anims.get("attack").duration / 1.5,
+              () => {
+                if (onAttack) onAttack();
+              }
+            );
+          }
+        },
+        onComplete: () => {
+          this.sprite.setFlipX(!this.sprite.flipX);
+          this.sprite.play("idle");
+          if (onEnd) {
+            onEnd();
+          }
+
+          this.fillApBar(event.payload.currentAp);
+        },
+      });
     }
 
     if (event.type === "RECEIVED_DAMAGE") {
@@ -125,28 +187,29 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
-    let duration = 0;
-    if (fromResume) {
+    const duration = timeToAttack;
+    /* if (fromResume) {
       if (this.apBarTween) {
         duration = this.apBarTween.duration - this.apBarTween.elapsed;
       }
     } else {
       duration = timeToAttack;
-    }
+    } */
 
     this.apBarTween = this.scene.tweens.add({
       targets: this.apBar,
-      width: { from: fromResume ? this.apBar.width : 0, to: BAR_WIDTH },
+      width: { from: 0, to: BAR_WIDTH },
       duration: duration,
       ease: "Linear",
-      onComplete: () => {
-        this.apBarTween = null as any;
-      },
     });
   }
 
   public onStartBattle({ fromResume = false }) {
-    this.fillApBar(0, fromResume);
+    if (this.apBarTween && this.apBarTween.isPaused() && fromResume) {
+      this.apBarTween.resume();
+    } else {
+      this.fillApBar(0, fromResume);
+    }
     this.sprite.anims.resume();
   }
 

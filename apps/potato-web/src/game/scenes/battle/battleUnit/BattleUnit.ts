@@ -36,10 +36,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
     super(scene, x, y);
+    this.setDepth(1);
     this.id = dataUnit.id;
     this.boardPosition = dataUnit.position;
     this.dataUnit = dataUnit;
-
     this.unitName = dataUnit.name;
     this.stats = dataUnit.stats;
     this.equipment = dataUnit.equipment;
@@ -47,6 +47,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     this.sprite = scene.add.sprite(0, 0, texture);
     this.sprite.play("idle");
+    if (dataUnit.owner === 1) {
+      this.sprite.setFlipX(true);
+    }
     this.add(this.sprite);
 
     setupUnitPointerEvents(this);
@@ -60,41 +63,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     const { hpText, armorText } = createTexts(this, hpBar.x, hpBar.y);
     this.hpText = hpText;
     this.armorText = armorText;
+    this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
+    this.armorText.setText(`${Math.max(0, dataUnit.stats.armorHp)}`);
 
     scene.add.existing(this);
-  }
-
-  public onSelected() {
-    this.isSelected = true;
-    this.sprite.setTint(0xffff44);
-  }
-
-  public onDeselected() {
-    this.isSelected = false;
-    this.sprite.clearTint();
-  }
-
-  public initalize(dataUnit: any) {
-    const hp = Math.max(0, dataUnit.stats.hp);
-    const armor = Math.max(0, dataUnit.stats.armorHp);
-    this.hpText.setText(`${hp}`);
-    this.armorText.setText(`${armor}`);
-
-    // testing no attack delay
-    /* const stepsInAttackAnimation = Math.ceil(
-      dataUnit.stats.attackDelay / (10 + dataUnit.stats.attackSpeed / 10)
-    );
-    const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
-
-    // create local animation
-    this.sprite.anims.create({
-      key: "attack",
-      frames: this.scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 17,
-      }),
-      duration: timeInAttackAnimation,
-    }); */
 
     this.sprite.anims.create({
       key: "attack",
@@ -113,6 +85,16 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }),
       duration: 350,
     });
+  }
+
+  public onSelected() {
+    this.isSelected = true;
+    this.sprite.setTint(0xffff44);
+  }
+
+  public onDeselected() {
+    this.isSelected = false;
+    this.sprite.clearTint();
   }
 
   public playEvent({
@@ -144,7 +126,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         targets: this,
         x: target.x - (this.owner === 0 ? 90 : -90),
         y: target.y,
-        duration: 800,
+        duration: 300,
         ease: "Linear",
         yoyo: true,
         onYoyo: () => {
@@ -182,13 +164,16 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     if (event.type === "RECEIVED_DAMAGE") {
       onReceiveDamage(this, event);
-      this.fillSpBar(event.payload.sp);
+      // temporary
+      if (event.payload.sp < 1000) {
+        this.fillSpBar(event.payload.sp);
+      }
     }
 
     if (event.type === "CAST_SKILL") {
       this.sprite.play("skill", true).chain("idle");
 
-      this.fillSpBar(event.payload.sp);
+      this.fillSpBar(0);
     }
 
     if (event.type === "RECEIVED_HEAL") {

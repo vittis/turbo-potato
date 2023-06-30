@@ -27,7 +27,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 100;
+export const GAME_LOOP_SPEED = 50;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -117,19 +117,26 @@ export class Battle extends Phaser.Scene {
     firstFrame.units.forEach((dataUnit: any) => {
       const unit = new BattleUnit(this, "warrior", dataUnit);
       this.units.push(unit);
-      unit.setDepth(1);
-      if (dataUnit.owner === 1) {
-        unit.sprite.setFlipX(true);
-      }
-      unit.initalize(dataUnit);
       this.board.add(unit);
     });
   }
 
+  // todo: better events sync logic
   playEvents(step: number) {
     const eventsOnThisStep = this.eventHistory.filter((e) => e.step === step);
 
-    eventsOnThisStep.forEach((event) => {
+    // RECEIVED_DAMAGE first then ATTACK then CAST_SKILL
+    const orderedEvents = eventsOnThisStep.sort((a, b) => {
+      const typeOrder = {
+        RECEIVED_DAMAGE: 0,
+        ATTACK: 1,
+        CAST_SKILL: 2,
+      };
+
+      return typeOrder[a.type] - typeOrder[b.type];
+    });
+
+    orderedEvents.forEach((event) => {
       const unit = this.units.find((unit) => unit.id === event.id);
       if (!unit) {
         throw Error(`couldnt find unit id: ${event.id}`);

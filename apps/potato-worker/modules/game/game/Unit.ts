@@ -273,18 +273,17 @@ export class Unit {
     } */
 
     this.stats.ap += this.stats.attackSpeed;
-    this.stats.sp += this.stats.skillRegen;
+    // this.stats.sp += this.stats.skillRegen;
 
-    if (this.canCastSkill()) {
-      this.stats.sp = 0;
-      this.castSkill();
-    } else if (this.canAttack()) {
+    if (this.canAttack()) {
       const attackTarget = this.bm.getAttackTargetFor(this);
       if (!attackTarget) {
         throw Error("Undefined attack target for " + this.toString());
       }
       this.stats.ap -= 1000;
       this.attackWithMainHand(attackTarget);
+    } else if (this.canCastSkill()) {
+      this.castSkill();
     }
   }
 
@@ -312,6 +311,7 @@ export class Unit {
   castSkill() {
     // RSRS
     this.skill.cast(this);
+    this.stats.sp = 0;
 
     /* this.stepEvents.push({
       id: this.id,

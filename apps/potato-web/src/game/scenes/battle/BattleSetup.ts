@@ -7,6 +7,16 @@ export function preloadBattle(scene: Phaser.Scene) {
     frameHeight: 192,
   });
 
+  scene.load.spritesheet("rogue", "assets/rogue_90x90.png", {
+    frameWidth: 90,
+    frameHeight: 90,
+  });
+
+  scene.load.spritesheet("knight", "assets/knight_90x90.png", {
+    frameWidth: 180,
+    frameHeight: 180,
+  });
+
   scene.load.spritesheet("tree", "assets/tree.png", {
     frameWidth: 192,
     frameHeight: 192,

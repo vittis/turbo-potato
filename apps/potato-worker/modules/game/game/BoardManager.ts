@@ -1,5 +1,10 @@
 import { Unit } from "./Unit";
 
+export enum OWNER {
+  TEAM_ONE = 0,
+  TEAM_TWO = 1,
+}
+
 export enum POSITION {
   TOP_FRONT = 0,
   TOP_MID = 1,
@@ -9,9 +14,15 @@ export enum POSITION {
   BOT_BACK = 5,
 }
 
-export enum OWNER {
-  TEAM_ONE = 0,
-  TEAM_TWO = 1,
+export enum ROW {
+  TOP = 0,
+  BOT = 1,
+}
+
+export enum COLUMN {
+  FRONT = 0,
+  MID = 1,
+  BACK = 2,
 }
 
 type Board = [
@@ -76,11 +87,44 @@ export class BoardManager {
     return this.board[owner].filter((tile) => !!tile) as Unit[];
   }
 
+  getEnemyOwner(owner: OWNER): OWNER {
+    if (owner === OWNER.TEAM_ONE) return OWNER.TEAM_TWO;
+    else return OWNER.TEAM_ONE;
+  }
+
+  getUnitRow(unit: Unit): number {
+    const isTop =
+      unit.position === 0 || unit.position === 1 || unit.position === 2;
+
+    return isTop ? ROW.TOP : ROW.BOT;
+  }
+
+  getUnitColumn(unit: Unit): number {
+    const isFront = unit.position === 0 || unit.position === 3;
+    const isMid = unit.position === 1 || unit.position === 4;
+    return isFront ? COLUMN.FRONT : isMid ? COLUMN.MID : COLUMN.BACK;
+  }
+
+  getAllUnitsInRow(owner: OWNER, row: number): Unit[] {
+    const unitsInRow = this.getAllUnitsOfOwner(owner).filter(
+      (unit) => this.getUnitRow(unit) === row
+    );
+
+    return unitsInRow;
+  }
+
+  getAllUnitsInColumn(owner: OWNER, column: number): Unit[] {
+    const unitsInColumn = this.getAllUnitsOfOwner(owner).filter(
+      (unit) => this.getUnitColumn(unit) === column
+    );
+
+    return unitsInColumn;
+  }
+
   getAttackTargetFor(unit: Unit): Unit {
     const otherBoard = this.board[unit.owner === 1 ? 0 : 1];
 
-    const isTop =
-      unit.position === 0 || unit.position === 1 || unit.position === 2;
+    const isTop = this.getUnitRow(unit) === ROW.TOP;
     let target;
     if (isTop) {
       target =

@@ -9,46 +9,40 @@ import { EVENT_TYPE, Unit } from "./Unit";
 
 export class HealingWord extends Skill {
   name = "Healing Word";
+  description = "Heals single lowest % health ally or self";
 
   // Temporary - check where should we set these values
   baseHeal = 10;
   intMultiplier = 1;
 
-  constructor(bm: BoardManager) {
-    super(bm);
+  // Check if there is at least one ally who lost HP, if not skill shouldn't be cast
+  shouldCast(unit: Unit, bm: BoardManager): boolean {
+    const allyUnits = bm.getAllUnitsOfOwner(unit.owner);
+
+    const hasUnitToHeal = allyUnits.some((ally) => ally.getPercentageHp() < 1);
+
+    return hasUnitToHeal;
   }
 
-  /*
-    Future - implement check function to see if skill should be cast
-    Example - if all allies are full health, should the unit even cast the skill?
-  */
-
-  getTarget(unit: Unit) {
-    const allyUnits = this.bm.getAllUnitsOfOwner(unit.owner);
+  getTarget(unit: Unit, bm: BoardManager): Unit {
+    const allyUnits = bm.getAllUnitsOfOwner(unit.owner);
 
     const lowestHealthAlly = allyUnits.reduce(
       (target, ally) =>
-        ally.stats.hp / ally.stats.maxHp < target.stats.hp / target.stats.maxHp
-          ? ally
-          : target,
+        ally.getPercentageHp() < target.getPercentageHp() ? ally : target,
       allyUnits[0]
     );
 
     return lowestHealthAlly;
   }
 
-  getHealValue(unit: Unit) {
+  getHealValue(unit: Unit): number {
     return this.baseHeal + this.intMultiplier * unit.stats.int;
   }
 
-  cast(unit: Unit) {
-    const target = this.getTarget(unit);
+  cast(unit: Unit, bm: BoardManager) {
+    const target = this.getTarget(unit, bm);
     const healValue = this.getHealValue(unit);
-
-    const newHp = Math.min(target.stats.hp + healValue, target.stats.maxHp);
-    const hpHealed = newHp - target.stats.hp;
-
-    target.stats.hp = newHp;
 
     unit.stepEvents.push({
       id: unit.id,
@@ -56,17 +50,11 @@ export class HealingWord extends Skill {
       payload: {
         skillName: this.name,
         sp: unit.stats.sp,
-        currentAp: unit.stats.ap,
         skillTarget: target.id,
       },
       step: unit.currentStep,
     });
 
-    target.stepEvents.push({
-      id: target.id,
-      type: EVENT_TYPE.RECEIVED_HEAL,
-      payload: { hp: target.stats.hp, hpHealed },
-      step: target.currentStep,
-    });
+    unit.receiveHeal(healValue, unit.currentStep);
   }
 }

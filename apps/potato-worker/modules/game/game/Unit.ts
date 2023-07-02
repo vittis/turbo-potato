@@ -2,6 +2,7 @@ import { ArmorData } from "./Armor";
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Multipliers } from "./data/config";
 import { HealingWord } from "./HealingWord";
+import { Powershot } from "./Powershot";
 //import { Skill } from "./Skill";
 import { WeaponData } from "./Weapon";
 
@@ -104,8 +105,7 @@ export class Unit {
   stepEvents: StepEvent[] = [];
 
   // Fix - use type Skill ?
-  // RSRS
-  skill: HealingWord;
+  skill: HealingWord | Powershot;
 
   constructor(
     bm: BoardManager,
@@ -175,8 +175,9 @@ export class Unit {
       level: 1,
     };
 
-    // RSRS
-    this.skill = new HealingWord(bm);
+    //Temporary skill picker
+    if (this.class.name === "Ranger") this.skill = new Powershot();
+    else this.skill = new HealingWord();
   }
 
   serialize() {
@@ -195,8 +196,10 @@ export class Unit {
         ...this.stats,
       },
       position: this.position,
-      // RSRS
-      //skill: { ...this.skill },
+      skill: {
+        name: this.skill.name,
+        description: this.skill.description,
+      },
     };
   }
 
@@ -211,79 +214,17 @@ export class Unit {
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
-    /* if (this.isPreparingSkill) {
-      this.skillDelayBuffer += 10 + this.stats.skillRegen / 10;
-
-      if (this.skillDelayBuffer >= this.stats.skillDelay) {
-        this.isPreparingSkill = false;
-        this.skillDelayBuffer = 0;
-
-        this.TEST_skillsCounter++;
-
-        this.stats.sp -= 1000;
-        this.castSkill();
-      }
-    }
-
-    if (
-      !this.isPreparingSkill &&
-      this.canCastSkill() &&
-      !this.isPreparingAttack
-    ) {
-      this.isPreparingSkill = true;
-      this.stepEvents.push({
-        id: this.id,
-        type: EVENT_TYPE.IS_PREPARING_SKILL,
-        payload: { skillDelay: this.stats.skillDelay },
-        step: this.currentStep,
-      });
-    } */
-
-    /* if (this.isPreparingAttack) {
-      this.attackDelayBuffer += 10 + this.stats.attackSpeed / 10;
-
-      if (this.attackDelayBuffer >= this.stats.attackDelay) {
-        this.isPreparingAttack = false;
-        this.attackDelayBuffer = 0;
-
-        this.TEST_attacksCounter++;
-
-        const attackTarget = this.bm.getAttackTargetFor(this);
-        if (!attackTarget) {
-          throw Error("Undefined attack target for " + this.toString());
-        }
-
-        this.stats.ap -= 1000;
-        this.attackWithMainHand(attackTarget);
-      }
-    } else {
-      if (!this.isPreparingSkill) {
-        this.stats.ap += this.stats.attackSpeed;
-      }
-    }
-    if (!this.isPreparingAttack && this.canAttack() && !this.isPreparingSkill) {
-      this.TEST_stepsCounter = 0;
-      this.isPreparingAttack = true;
-      this.stepEvents.push({
-        id: this.id,
-        type: EVENT_TYPE.IS_PREPARING_ATTACK,
-        payload: { attackDelay: this.stats.attackDelay },
-        step: this.currentStep,
-      });
-    } */
-
     this.stats.ap += this.stats.attackSpeed;
-    // this.stats.sp += this.stats.skillRegen;
 
-    if (this.canAttack()) {
+    if (this.canCastSkill()) {
+      this.castSkill();
+    } else if (this.canAttack()) {
       const attackTarget = this.bm.getAttackTargetFor(this);
       if (!attackTarget) {
         throw Error("Undefined attack target for " + this.toString());
       }
       this.stats.ap -= 1000;
       this.attackWithMainHand(attackTarget);
-    } else if (this.canCastSkill()) {
-      this.castSkill();
     }
   }
 
@@ -309,27 +250,8 @@ export class Unit {
   }
 
   castSkill() {
-    // RSRS
-    this.skill.cast(this);
-    this.stats.sp = 0;
-
-    /* this.stepEvents.push({
-      id: this.id,
-      type: EVENT_TYPE.CAST_SKILL,
-      payload: { name: "", sp: this.stats.sp, currentAp: this.stats.ap },
-      step: this.currentStep,
-    });
-
-    const newHp = Math.min(this.stats.hp + 100, this.stats.maxHp);
-    const hpHealed = newHp - this.stats.hp;
-    this.stats.hp = newHp;
-
-    this.stepEvents.push({
-      id: this.id,
-      type: EVENT_TYPE.RECEIVED_HEAL,
-      payload: { hp: this.stats.hp, hpHealed },
-      step: this.currentStep,
-    }); */
+    this.skill.cast(this, this.bm);
+    this.skill.afterExecute(this);
   }
 
   receiveDamage(damage: number, stepItWasAttacked: number) {
@@ -365,6 +287,20 @@ export class Unit {
     });
   }
 
+  receiveHeal(healValue: number, stepItWasHealed: number) {
+    const newHp = Math.min(this.stats.hp + healValue, this.stats.maxHp);
+    const hpHealed = newHp - this.stats.hp;
+
+    this.stats.hp = newHp;
+
+    this.stepEvents.push({
+      id: this.id,
+      type: EVENT_TYPE.RECEIVED_HEAL,
+      payload: { hp: this.stats.hp, hpHealed },
+      step: stepItWasHealed,
+    });
+  }
+
   markAsDead() {
     if (this.isDead) {
       throw Error("Unit is already dead");
@@ -382,6 +318,10 @@ export class Unit {
 
   canCastSkill() {
     return this.stats.sp >= 1000;
+  }
+
+  getPercentageHp() {
+    return this.stats.hp / this.stats.maxHp;
   }
 
   getName() {

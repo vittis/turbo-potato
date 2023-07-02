@@ -18,15 +18,9 @@ export enum SKILL_TARGET {
 } */
 
 export class Skill {
-  bm: BoardManager;
-
   skillCost = 1000;
 
-  constructor(bm: BoardManager) {
-    this.bm = bm;
-  }
-
   afterExecute(unit: Unit) {
-    unit.stats.sp -= this.skillCost;
+    unit.stats.sp = 0;
   }
 }

@@ -71,7 +71,7 @@ export class Game {
         Classes.Cleric,
         {
           mainHandWeapon: Weapons.Wand as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
+          chest: Chests.PlateMail as ArmorData,
           head: Heads.ClothHat as ArmorData,
         }
       )

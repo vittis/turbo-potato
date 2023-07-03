@@ -8,6 +8,7 @@ import {
   setupUnitPointerEvents,
 } from "./BattleUnitSetup";
 import { onReceiveDamage } from "./BattleUnitEventHandler";
+import { createAttackAnimation } from "./BattleUnitAnimations";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
@@ -32,10 +33,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public spBarTween!: Phaser.Tweens.Tween;
 
   public isDead = false;
+  public startingX;
+  public startingY: number;
 
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
     super(scene, x, y);
+    this.startingX = x;
+    this.startingY = y;
     this.setDepth(1);
     this.id = dataUnit.id;
     this.boardPosition = dataUnit.position;
@@ -46,11 +51,34 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.owner = dataUnit.owner;
 
     this.sprite = scene.add.sprite(0, 0, texture);
-    this.sprite.play("idle");
-    if (dataUnit.owner === 1) {
+    this.sprite.setScale(0.5, 0.5);
+    if (dataUnit.owner === 0) {
       this.sprite.setFlipX(true);
     }
+
+    const shadowContainer = scene.add.container();
+    const shadowColor = 0x000000;
+    const shadowAlpha = 0.4;
+    const shadowWidth = 65;
+    const shadowHeight = 25;
+    const shadowCircle = scene.add.graphics();
+    shadowCircle.fillStyle(shadowColor, shadowAlpha);
+    shadowCircle.fillEllipse(0, 0, shadowWidth, shadowHeight);
+    shadowContainer.add(shadowCircle);
+    shadowContainer.setPosition(this.sprite.x, this.sprite.y + 50);
+    this.add(shadowContainer);
     this.add(this.sprite);
+
+    // idle animation, tween scale
+    scene.tweens.add({
+      targets: this.sprite,
+      scaleY: this.sprite.scaleY * 0.995,
+      scaleX: this.sprite.scaleX * 0.97,
+      ease: Phaser.Math.Easing.Sine.InOut,
+      duration: 1000,
+      yoyo: true,
+      repeat: -1,
+    });
 
     setupUnitPointerEvents(this);
 
@@ -109,57 +137,22 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     onAttack?: Function;
   }) {
     if (event.type === "HAS_DIED") {
+      console.log("has died event");
       this.onDeath();
     }
-    /* if (event.type === "IS_PREPARING_ATTACK") {
-      this.sprite.play("attack", true).chain("idle");
-    } */
 
     if (event.type === "ATTACK") {
       if (!target) {
         throw new Error("Attack target is undefined");
       }
 
-      this.sprite.play("walk", true);
-      // tween to target unit position
-      const walkTween = this.scene.tweens.add({
-        targets: this,
-        x: target.x - (this.owner === 0 ? 90 : -90),
-        y: target.y,
-        duration: 300,
-        ease: "Linear",
-        yoyo: true,
-        onYoyo: () => {
-          walkTween.pause();
-          if (this.sprite.anims.getName() !== "attack") {
-            this.sprite
-              .play("attack", true)
-              .once("animationcomplete", () => {
-                walkTween.resume();
-                this.sprite.setFlipX(!this.sprite.flipX);
-              })
-              .chain("walk");
+      const onFinishAnimation = () => {
+        if (onEnd) onEnd();
+        this.fillApBar(event.payload.currentAp);
+        this.fillSpBar(event.payload.sp);
+      };
 
-            this.scene.time.delayedCall(
-              // sync with impact point
-              this.sprite.anims.get("attack").duration / 1.5,
-              () => {
-                if (onAttack) onAttack();
-                this.fillSpBar(event.payload.sp);
-              }
-            );
-          }
-        },
-        onComplete: () => {
-          this.sprite.setFlipX(!this.sprite.flipX);
-          this.sprite.play("idle");
-          if (onEnd) {
-            onEnd();
-          }
-
-          this.fillApBar(event.payload.currentAp);
-        },
-      });
+      createAttackAnimation({ unit: this, target, onFinishAnimation });
     }
 
     if (event.type === "RECEIVED_DAMAGE") {
@@ -171,8 +164,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "CAST_SKILL") {
-      this.sprite.play("skill", true).chain("idle");
-
       this.fillSpBar(0);
     }
 
@@ -252,7 +243,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
   }
 
-  private fillApBar(currentAp: number, fromResume?: boolean) {
+  public fillApBar(currentAp: number, fromResume?: boolean) {
     const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
 
     const willNeedOneLessStep =
@@ -281,10 +272,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     });
   }
 
-  private fillSpBar(currentSp: number) {
+  public fillSpBar(currentSp: number) {
     const newSpBarWidth = Math.min((currentSp * BAR_WIDTH) / 1000, BAR_WIDTH);
 
-    this.spBarTween = this.scene.tweens.add({
+    this.spBar.width = newSpBarWidth;
+
+    /* this.spBarTween = this.scene.tweens.add({
       targets: this.spBar,
       width: newSpBarWidth,
       duration: 50,
@@ -292,7 +285,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       onComplete: () => {
         this.spBarTween = null as any;
       },
-    });
+    }); */
   }
 
   public onStartBattle({ fromResume = false }) {
@@ -305,6 +298,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   }
 
   private onDeath() {
+    console.log("onDeath");
+
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
@@ -315,6 +310,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       delay: Math.min(250, GAME_LOOP_SPEED * 1.5),
       ease: "Sine.easeInOut",
       onComplete: () => {
+        console.log("onComplete");
         this.setVisible(false);
         this.isDead = true;
       },

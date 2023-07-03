@@ -1,6 +1,6 @@
 {
     "name": "Greatsword",
-    "damage": 50,
+    "damage": 10,
     "weight": 4,
     "attackSpeed": 15,
     "attackDelay": 90,

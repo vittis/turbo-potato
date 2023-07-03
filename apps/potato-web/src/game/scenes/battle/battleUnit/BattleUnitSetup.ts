@@ -1,13 +1,13 @@
 import { useGameStore } from "../../../../services/state/game";
 import { BattleUnit } from "./BattleUnit";
 
-export const BAR_WIDTH = 50;
+export const BAR_WIDTH = 45;
 
 export function createBars(unit: BattleUnit) {
   const width = BAR_WIDTH;
   const height = 7;
   const borderWidth = 3;
-  const yOffset = 50;
+  const yOffset = 50 + 10;
   const spBarHeight = 5;
   const spBarYOffset = 9;
   const apBarHeight = 5;
@@ -148,6 +148,7 @@ export function createTexts(unit: BattleUnit, x: number, y: number) {
 }
 
 export function setupUnitAnimations(scene: Phaser.Scene) {
+  return;
   scene.anims.create({
     key: "walk",
     frames: scene.anims.generateFrameNumbers("warrior", {
@@ -230,7 +231,7 @@ export function getUnitPos(position, owner) {
   const getUnitPosY = () => {
     const isTop =
       position === 0 || position === 1 || position === 2 ? true : false;
-    return UNIT_OFFSET.y * (isTop ? -1 : 1) - 10;
+    return UNIT_OFFSET.y * (isTop ? -1 : 1) - 20;
   };
   return { x: getUnitPosX(), y: getUnitPosY() };
 }

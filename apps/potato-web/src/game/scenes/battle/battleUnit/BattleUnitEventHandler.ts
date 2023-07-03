@@ -43,10 +43,10 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
   // pushback
   unit.scene.tweens.add({
     targets: unit,
-    x: unit.owner === 0 ? unit.x - 10 : unit.x + 10,
+    x: unit.owner === 0 ? unit.x - 15 : unit.x + 15,
     duration: 150,
     yoyo: true,
-    ease: "Bounce.easeOut",
+    ease: Phaser.Math.Easing.Bounce.InOut,
   });
 
   if (!unit.isSelected) {

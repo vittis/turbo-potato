@@ -200,6 +200,12 @@ export class Unit {
         name: this.skill.name,
         description: this.skill.description,
       },
+      class: {
+        name: this.class.name,
+      },
+      race: {
+        name: this.race.name,
+      },
     };
   }
 

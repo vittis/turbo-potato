@@ -115,13 +115,16 @@ export class Battle extends Phaser.Scene {
     this.units = [];
 
     firstFrame.units.forEach((dataUnit: any) => {
-      const unit = new BattleUnit(this, "warrior", dataUnit);
+      const unit = new BattleUnit(
+        this,
+        dataUnit.class.name.toLowerCase(),
+        dataUnit
+      );
       this.units.push(unit);
       this.board.add(unit);
     });
   }
 
-  // todo: better events sync logic
   playEvents(step: number) {
     const eventsOnThisStep = this.eventHistory.filter((e) => e.step === step);
 
@@ -131,6 +134,7 @@ export class Battle extends Phaser.Scene {
         RECEIVED_DAMAGE: 0,
         ATTACK: 1,
         CAST_SKILL: 2,
+        HAS_DIED: 3,
       };
 
       return typeOrder[a.type] - typeOrder[b.type];
@@ -142,32 +146,20 @@ export class Battle extends Phaser.Scene {
         throw Error(`couldnt find unit id: ${event.id}`);
       }
 
-      const targetUnit = this.units.find(
+      const target = this.units.find(
         (unit) => unit.id === event.payload?.target
       );
-      let onEnd: Function | undefined = undefined;
-      let onAttack: Function | undefined = undefined;
+
+      let onEnd;
       if (event.type === "ATTACK") {
         this.board.bringToTop(unit);
         this.stopLoop();
-        onAttack = () => {
-          const attackTargetId = event.payload.target;
-          const receiveDamageEvent = eventsOnThisStep.find((e) => {
-            return (
-              e.type === EVENT_TYPE.RECEIVED_DAMAGE && e.id === attackTargetId
-            );
-          });
-          if (receiveDamageEvent) {
-            targetUnit?.playEvent({ event: receiveDamageEvent });
-          }
-        };
         onEnd = () => {
           this.startLoop();
         };
       }
-      if (event.type !== EVENT_TYPE.RECEIVED_DAMAGE) {
-        unit.playEvent({ event, target: targetUnit, onEnd, onAttack });
-      }
+
+      unit.playEvent({ event, target, onEnd });
     });
 
     const isLastStep = step === this.totalSteps;

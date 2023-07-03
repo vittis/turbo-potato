@@ -32,22 +32,8 @@ export class Game {
         }
       )
     );
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.TOP_FRONT,
-        Races.Dwarf,
-        Classes.Knight,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
-          head: Heads.PlateHelment as ArmorData,
-        }
-      )
-    ); */
 
-    /* this.boardManager.addToBoard(
+    this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
@@ -56,11 +42,41 @@ export class Game {
         Classes.Ranger,
         {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
-          head: Heads.PlateHelment as ArmorData,
+          chest: Chests.LeatherShirt as ArmorData,
+          head: Heads.PlateHelmet as ArmorData,
         }
       )
-    ); */
+    );
+
+    this.boardManager.addToBoard(
+      new Unit(
+        this.boardManager,
+        OWNER.TEAM_TWO,
+        POSITION.BOT_FRONT,
+        Races.Dwarf,
+        Classes.Knight,
+        {
+          mainHandWeapon: Weapons.Greatsword as WeaponData,
+          chest: Chests.ClothRobe as ArmorData,
+          head: Heads.PlateHelmet as ArmorData,
+        }
+      )
+    );
+
+    this.boardManager.addToBoard(
+      new Unit(
+        this.boardManager,
+        OWNER.TEAM_TWO,
+        POSITION.BOT_BACK,
+        Races.Elf,
+        Classes.Ranger,
+        {
+          mainHandWeapon: Weapons.Greatsword as WeaponData,
+          chest: Chests.PlateMail as ArmorData,
+          head: Heads.PlateHelmet as ArmorData,
+        }
+      )
+    );
 
     this.boardManager.addToBoard(
       new Unit(

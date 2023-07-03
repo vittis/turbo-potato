@@ -40,19 +40,18 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     yoyo: true,
   });
 
+  // todo: revisit this later: pushback is now on Attack animation instead of onReceiveDamage
   // pushback
-  unit.scene.tweens.add({
+  /* unit.scene.tweens.add({
     targets: unit,
     x: unit.owner === 0 ? unit.x - 15 : unit.x + 15,
     duration: 150,
     yoyo: true,
     ease: Phaser.Math.Easing.Bounce.InOut,
-  });
-
-  if (!unit.isSelected) {
+  }); */
+  /* if (!unit.isSelected) {
     unit.sprite.setTint(0xde3c45);
   }
-
   unit.scene.time.addEvent({
     delay: 250,
     callback: () => {
@@ -60,7 +59,7 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
         unit.sprite.clearTint();
       }
     },
-  });
+  }); */
 
   const damageText = unit.scene.add.text(
     0,

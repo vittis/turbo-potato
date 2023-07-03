@@ -33,7 +33,7 @@ export class Game {
       )
     );
 
-    this.boardManager.addToBoard(
+    /* this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
@@ -76,7 +76,7 @@ export class Game {
           head: Heads.PlateHelmet as ArmorData,
         }
       )
-    );
+    ); */
 
     this.boardManager.addToBoard(
       new Unit(

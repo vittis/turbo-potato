@@ -27,7 +27,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 50;
+export const GAME_LOOP_SPEED = 100;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -41,6 +41,9 @@ export class Battle extends Phaser.Scene {
   totalBattleDuration = 0;
   timeLoopStarted = 0;
   timeInBattle = 0;
+
+  externalPaused = true;
+  inGamePaused = false;
 
   constructor() {
     super("GameScene");
@@ -163,10 +166,11 @@ export class Battle extends Phaser.Scene {
 
       let onEnd;
       if (event.type === "ATTACK") {
+        console.log("PLAY ATTACK STEP: ", event.step);
         this.board.bringToTop(unit);
-        this.stopLoop();
+        this.stopLoop({ fromInGame: true });
         onEnd = () => {
-          this.startLoop();
+          this.startLoop({ fromInGame: true });
         };
       }
 
@@ -184,47 +188,10 @@ export class Battle extends Phaser.Scene {
     }
   }
 
-  startLoop() {
-    const fromResume = this.timeLoopStarted !== 0;
-    this.units.forEach((unit) => {
-      if (unit.isDead) return;
-      unit.onStartBattle({ fromResume });
-    });
-
-    if (fromResume) {
-      this.resumeFromPause();
-    } else {
-      this.startFromBeggining();
-    }
-
-    this.timeLoopStarted = this.time.now;
-  }
-
   resumeFromPause() {
-    const stepsThatHaveEvents = [
-      ...new Set(this.eventHistory.map((event) => event.step)),
-    ];
-
-    const stepsPassed = Math.floor(this.timeInBattle / GAME_LOOP_SPEED);
-    const timeRemainingToNextStep =
-      (stepsPassed + 1) * GAME_LOOP_SPEED - this.timeInBattle;
-
-    stepsThatHaveEvents.forEach((step) => {
-      // event already happened
-      if (step <= stepsPassed) {
-        return;
-      }
-
-      const timeEvent = this.time.addEvent({
-        delay:
-          timeRemainingToNextStep +
-          (step - (stepsPassed + 1)) * GAME_LOOP_SPEED,
-        callback: () => {
-          this.playEvents(step);
-        },
-        callbackScope: this,
-      });
-      this.timeEventsHistory.push(timeEvent);
+    if (this.inGamePaused) return;
+    this.timeEventsHistory.forEach((event) => {
+      event.paused = false;
     });
   }
 
@@ -248,11 +215,31 @@ export class Battle extends Phaser.Scene {
     });
   }
 
-  stopLoop() {
-    this.timeInBattle += this.time.now - this.timeLoopStarted;
+  startLoop({ fromInGame = false }: { fromInGame?: boolean } = {}) {
+    this.externalPaused = false;
+    this.inGamePaused = fromInGame ? false : this.inGamePaused;
+
+    const fromResume = this.timeLoopStarted !== 0;
+    this.units.forEach((unit) => {
+      if (unit.isDead) return;
+      unit.onStartBattle({ fromResume, inGamePaused: this.inGamePaused });
+    });
+
+    if (fromResume) {
+      this.resumeFromPause();
+    } else {
+      this.startFromBeggining();
+    }
+
+    this.timeLoopStarted = this.time.now;
+  }
+
+  stopLoop({ fromInGame = false }: { fromInGame?: boolean } = {}) {
+    this.externalPaused = !fromInGame;
+    this.inGamePaused = fromInGame ? fromInGame : this.inGamePaused;
 
     this.timeEventsHistory.forEach((event) => {
-      event.remove();
+      event.paused = true;
     });
 
     this.units.forEach((unit) => {
@@ -261,9 +248,20 @@ export class Battle extends Phaser.Scene {
         unit.apBarTween.pause();
       }
 
+      if (unit?.attackTweenChain?.isPlaying()) {
+        unit.attackTweenChain.pause();
+      }
+
       if (unit.sprite.anims.getName() !== "idle") {
         unit.sprite.anims.pause();
       }
     });
+  }
+
+  update(time: number, delta: number): void {
+    // .log(stepsPassed);
+    if (this.externalPaused) return;
+    if (this.inGamePaused) return;
+    this.timeInBattle += delta;
   }
 }

@@ -13,7 +13,7 @@ export function createAttackAnimation({
   const DISTANCE_TO_ENEMY = unit.owner === 0 ? 70 : -70;
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 40 : -40;
 
-  unit.scene.tweens.chain({
+  const attackTweenChain = unit.scene.tweens.chain({
     delay: 150,
     targets: unit,
     onComplete: () => {
@@ -88,4 +88,6 @@ export function createAttackAnimation({
       },
     ],
   });
+
+  return { attackTweenChain };
 }

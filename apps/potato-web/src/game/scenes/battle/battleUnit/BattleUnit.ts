@@ -35,6 +35,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public isDead = false;
   public startingX;
   public startingY: number;
+  public attackTweenChain!: Phaser.Tweens.TweenChain;
 
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
@@ -152,7 +153,13 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         this.fillSpBar(event.payload.sp);
       };
 
-      createAttackAnimation({ unit: this, target, onFinishAnimation });
+      const { attackTweenChain } = createAttackAnimation({
+        unit: this,
+        target,
+        onFinishAnimation,
+      });
+
+      this.attackTweenChain = attackTweenChain;
     }
 
     if (event.type === "RECEIVED_DAMAGE") {
@@ -290,12 +297,19 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }); */
   }
 
-  public onStartBattle({ fromResume = false }) {
-    if (this.apBarTween && this.apBarTween.isPaused() && fromResume) {
-      this.apBarTween.resume();
-    } else {
+  public onStartBattle({ fromResume = false, inGamePaused = false }) {
+    if (!fromResume) {
       this.fillApBar(0, fromResume);
     }
+
+    if (this.apBarTween && this.apBarTween.isPaused() && !inGamePaused) {
+      this.apBarTween.resume();
+    }
+
+    if (fromResume && this.attackTweenChain?.isPaused()) {
+      this.attackTweenChain.resume();
+    }
+
     this.sprite.anims.resume();
   }
 

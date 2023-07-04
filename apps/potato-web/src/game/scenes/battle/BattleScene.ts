@@ -51,6 +51,18 @@ export class Battle extends Phaser.Scene {
   }
 
   create() {
+    // zuera de particula
+    /* const graphics = this.add.graphics();
+    graphics.fillStyle(0x888888);
+    graphics.fillRect(0, 0, 10, 10);
+    graphics.generateTexture("gray-square", 10, 10);
+    graphics.destroy();
+
+    const emitter = this.add.particles(100, 300, "gray-square", {
+      angle: { min: 0, max: 360 },
+      speed: 150,
+    });
+    return; */
     setupUnitAnimations(this);
 
     const { board } = setupBattle(this);
@@ -128,13 +140,12 @@ export class Battle extends Phaser.Scene {
   playEvents(step: number) {
     const eventsOnThisStep = this.eventHistory.filter((e) => e.step === step);
 
-    // RECEIVED_DAMAGE first then ATTACK then CAST_SKILL
     const orderedEvents = eventsOnThisStep.sort((a, b) => {
       const typeOrder = {
         RECEIVED_DAMAGE: 0,
-        ATTACK: 1,
-        CAST_SKILL: 2,
-        HAS_DIED: 3,
+        CAST_SKILL: 1,
+        HAS_DIED: 2,
+        ATTACK: 3,
       };
 
       return typeOrder[a.type] - typeOrder[b.type];

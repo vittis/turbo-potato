@@ -61,12 +61,28 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     },
   }); */
 
+  const minDamage = 0;
+  const maxDamage = 75;
+  const minFontSize = 25;
+  const maxFontSize = 70;
+
+  const damage = event.payload.damage;
+  const fontSize =
+    ((damage - minDamage) / (maxDamage - minDamage)) *
+      (maxFontSize - minFontSize) +
+    minFontSize;
+  const fontSizePx = `${fontSize.toFixed(0)}px`;
+
   const damageText = unit.scene.add.text(
     0,
     30,
     "-" + event.payload.damage.toString(),
     {
-      fontSize: event.payload.damage > 50 ? "40px" : "30px",
+      /* fontSize:
+        event.payload.damage > 50
+          ? `${40 + Phaser.Math.Between(0, 15)}px`
+          : `${25 + Phaser.Math.Between(3, 12)}px`, */
+      fontSize: fontSizePx,
       color: "#ff121d",
       fontFamily: "IM Fell DW Pica",
       stroke: "#000000",
@@ -84,9 +100,11 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
   );
   damageText.setOrigin(0.5);
 
+  // damage text going up
   unit.scene.tweens.add({
     targets: damageText,
-    y: damageText.y - 40,
+    x: Phaser.Math.Between(-15, 15),
+    y: damageText.y - 38 - Phaser.Math.Between(0, 10),
     alpha: 0,
     duration: event.payload.damage > 50 ? 1900 : 1200,
     ease: "Linear",

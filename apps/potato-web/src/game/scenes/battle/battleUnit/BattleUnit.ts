@@ -167,6 +167,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.fillSpBar(0);
     }
 
+    // todo: combine logic of receive damage and heal
     if (event.type === "RECEIVED_HEAL") {
       const newHp = event.payload.hp;
       const hpHealed = event.payload.hpHealed;
@@ -222,6 +223,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
       this.scene.tweens.add({
         targets: healText,
+        x: Phaser.Math.Between(-15, 15),
         y: healText.y - 40,
         alpha: 0,
         duration: hpHealed > 50 ? 1900 : 1200,

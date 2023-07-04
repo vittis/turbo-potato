@@ -2,7 +2,7 @@
     "name": "Wand",
     "damage": 20,
     "weight": 0.5,
-    "attackSpeed": 25,
+    "attackSpeed": 13,
     "attackDelay": 70,
     "slot": [
         "MAIN_HAND"

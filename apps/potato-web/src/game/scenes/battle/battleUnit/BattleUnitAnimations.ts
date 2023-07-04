@@ -14,13 +14,23 @@ export function createAttackAnimation({
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 40 : -40;
 
   unit.scene.tweens.chain({
+    delay: 150,
     targets: unit,
     onComplete: () => {
-      onFinishAnimation();
+      unit.scene.time.delayedCall(150, onFinishAnimation);
     },
     tweens: [
+      // pulinho
+      {
+        targets: unit.sprite,
+        y: unit.sprite.y - 40,
+        duration: 150,
+        yoyo: true,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+      },
       // corridinha indo
       {
+        delay: 50,
         alpha: 0,
         x: unit.x + RUN_DISTANCE,
         duration: 150,
@@ -48,7 +58,7 @@ export function createAttackAnimation({
           target.sprite.setTint(0xde3c45);
           target.scene.tweens.add({
             targets: target,
-            x: target.owner === 0 ? target.x - 15 : target.x + 15,
+            x: target.owner === 0 ? target.x - 4 : target.x + 4,
             duration: 150,
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,

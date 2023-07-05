@@ -9,7 +9,7 @@ export function createAttackAnimation({
   target: BattleUnit;
   onFinishAnimation: Function;
 }) {
-  const RUN_DISTANCE = unit.owner === 0 ? 50 : -50;
+  const RUN_DISTANCE = unit.owner === 0 ? 70 : -70;
   const DISTANCE_TO_ENEMY = unit.owner === 0 ? 70 : -70;
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 40 : -40;
 
@@ -23,8 +23,8 @@ export function createAttackAnimation({
       // pulinho
       {
         targets: unit.sprite,
-        y: unit.sprite.y - 40,
-        duration: 150,
+        y: unit.sprite.y - 38,
+        duration: 125,
         yoyo: true,
         ease: Phaser.Math.Easing.Bounce.InOut,
       },
@@ -33,7 +33,18 @@ export function createAttackAnimation({
         delay: 50,
         alpha: 0,
         x: unit.x + RUN_DISTANCE,
-        duration: 150,
+        duration: 200,
+        onStart: () => {
+          // start bouncing
+          unit.scene.tweens.add({
+            targets: unit.sprite,
+            y: unit.sprite.y - 3,
+            duration: 100 / 2,
+            yoyo: true,
+            repeat: 1,
+            ease: Phaser.Math.Easing.Bounce.InOut,
+          });
+        },
       },
       // corridinha chegando
       {
@@ -44,16 +55,48 @@ export function createAttackAnimation({
           to: target.startingX - DISTANCE_TO_ENEMY,
         },
         y: { from: target.startingY, to: target.startingY },
-        duration: 150,
+        duration: 200,
+        onStart: () => {
+          // start bouncing
+          unit.scene.tweens.add({
+            targets: unit.sprite,
+            y: unit.sprite.y - 2,
+            duration: 100 / 2,
+            yoyo: true,
+            repeat: 1,
+            ease: Phaser.Math.Easing.Bounce.InOut,
+          });
+        },
       },
       // attack (pushback)
       {
         delay: 200,
         x: target.startingX - PUSHBACK_DISTANCE,
-        duration: 150,
+        duration: 125,
         yoyo: true,
         ease: Phaser.Math.Easing.Bounce.InOut,
         onYoyo: () => {
+          // particle burst
+          const angle =
+            target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
+          const xOffset = target.owner === 0 ? -12 : 12;
+          const rect = new Phaser.Geom.Line(xOffset, -20, xOffset, 40);
+          const emitter = unit.scene.add.particles(xOffset, 15, "square", {
+            angle: angle,
+            speed: { min: 200, max: 200 },
+            frequency: 40,
+            color: [0xde3c45],
+            emitZone: { type: "random", source: rect, quantity: 10 },
+            duration: 100,
+            quantity: 7,
+            lifespan: 400,
+            alpha: { start: 1, end: 0 },
+            scale: 0.7,
+          });
+          // todo: better way to positionate emitter without using .add
+          target.add(emitter);
+          // target.bringToTop(target.sprite);
+
           // receive damage pushback
           target.sprite.setTint(0xde3c45);
           target.scene.tweens.add({
@@ -64,6 +107,7 @@ export function createAttackAnimation({
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
               target.sprite.clearTint();
+              unit.sprite.setFlipX(unit.owner === 0 ? false : true);
             },
           });
         },
@@ -77,14 +121,39 @@ export function createAttackAnimation({
           to: target.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
         },
         y: { from: target.startingY, to: target.startingY },
-        duration: 150,
+        duration: 200,
+        onStart: () => {
+          // start bouncing
+          unit.scene.tweens.add({
+            targets: unit.sprite,
+            y: unit.sprite.y - 2,
+            duration: 100 / 2,
+            yoyo: true,
+            repeat: 1,
+            ease: Phaser.Math.Easing.Bounce.InOut,
+          });
+        },
       },
       // corridinha chegando
       {
         alpha: 1,
         x: { from: unit.startingX + RUN_DISTANCE, to: unit.startingX },
         y: { from: unit.startingY, to: unit.startingY },
-        duration: 150,
+        duration: 200,
+        onComplete: () => {
+          unit.sprite.setFlipX(unit.owner === 1 ? false : true);
+        },
+        onStart: () => {
+          // start bouncing
+          unit.scene.tweens.add({
+            targets: unit.sprite,
+            y: unit.sprite.y - 3,
+            duration: 100 / 2,
+            yoyo: true,
+            repeat: 1,
+            ease: Phaser.Math.Easing.Bounce.InOut,
+          });
+        },
       },
     ],
   });

@@ -1,9 +1,10 @@
 import { ArmorData } from "./Armor";
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Multipliers } from "./data/config";
+import { HeadCrush } from "./HeadCrush";
 import { HealingWord } from "./HealingWord";
 import { Powershot } from "./Powershot";
-//import { Skill } from "./Skill";
+import { SKILL, STATUS_EFFECT_TYPE, StatusEffect } from "./Skill";
 import { WeaponData } from "./Weapon";
 
 export enum EVENT_TYPE {
@@ -60,6 +61,7 @@ export interface ClassData {
   int: number;
   tier: number;
   statsBonus?: { armor?: number };
+  defaultSkill: SKILL | string;
 }
 
 interface UnitData {
@@ -105,7 +107,9 @@ export class Unit {
   stepEvents: StepEvent[] = [];
 
   // Fix - use type Skill ?
-  skill: HealingWord | Powershot;
+  skill: HealingWord | Powershot | HeadCrush;
+
+  statusEffects: StatusEffect[] = [];
 
   constructor(
     bm: BoardManager,
@@ -123,6 +127,8 @@ export class Unit {
     this.race = race;
     this.class = uClass;
     this.equipment = equipment;
+
+    this.skill = this.getSkillByName(uClass.defaultSkill);
 
     const finalStr = race.str + uClass.str;
     const finalDex = race.dex + uClass.dex;
@@ -174,10 +180,6 @@ export class Unit {
       weight: 10,
       level: 1,
     };
-
-    //Temporary skill picker
-    if (this.class.name === "Ranger") this.skill = new Powershot();
-    else this.skill = new HealingWord();
   }
 
   serialize() {
@@ -220,12 +222,16 @@ export class Unit {
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
+    this.checkStatusEffects();
+
+    if (this.hasStatusEffect(STATUS_EFFECT_TYPE.STUN)) return;
+
     this.stats.ap += this.stats.attackSpeed;
 
     if (this.canCastSkill()) {
       this.castSkill();
     } else if (this.canAttack()) {
-      const attackTarget = this.bm.getAttackTargetFor(this);
+      const attackTarget = this.bm.getClosestAttackTarget(this);
       if (!attackTarget) {
         throw Error("Undefined attack target for " + this.toString());
       }
@@ -334,6 +340,56 @@ export class Unit {
     return `${this.race.name} ${this.class.name}`;
   }
 
+  applyStatusEffect(
+    type: STATUS_EFFECT_TYPE,
+    durationInSteps: number,
+    value?: number
+  ) {
+    const sameTypeAlreadyApplied = this.statusEffects.find(
+      (statusEffect) => statusEffect.type === type
+    );
+
+    if (
+      (sameTypeAlreadyApplied &&
+        durationInSteps > sameTypeAlreadyApplied.durationInSteps) ||
+      !sameTypeAlreadyApplied
+    ) {
+      let newArrStatusEffects = this.statusEffects;
+
+      if (sameTypeAlreadyApplied) {
+        newArrStatusEffects = this.statusEffects.filter(
+          (statusEffect) => statusEffect.type !== type
+        );
+      }
+
+      const newStatusEffect = {
+        type,
+        durationInSteps,
+        ...(value && { value }),
+      };
+
+      newArrStatusEffects.push(newStatusEffect);
+
+      this.statusEffects = newArrStatusEffects;
+    }
+  }
+
+  checkStatusEffects() {
+    this.statusEffects.forEach((statusEffect) => {
+      statusEffect.durationInSteps -= 1;
+    });
+
+    this.statusEffects = this.statusEffects.filter(
+      (statusEffect) => statusEffect.durationInSteps > 0
+    );
+  }
+
+  hasStatusEffect(type: STATUS_EFFECT_TYPE) {
+    return !!this.statusEffects.find(
+      (statusEffect) => statusEffect.type === type
+    );
+  }
+
   public toString = (): string => {
     return `${this.race.name.substring(0, 1)}${this.class.name.substring(
       0,
@@ -350,5 +406,19 @@ export class Unit {
     }
     bar += "|";
     console.log(bar);
+  }
+
+  //Temporary - move function elsewhere
+  getSkillByName(name: string) {
+    switch (name) {
+      case SKILL.HEALING_WORD:
+        return new HealingWord();
+      case SKILL.POWERSHOT:
+        return new Powershot();
+      case SKILL.HEAD_CRUSH:
+        return new HeadCrush();
+      default:
+        return new HealingWord();
+    }
   }
 }

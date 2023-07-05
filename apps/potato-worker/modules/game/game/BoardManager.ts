@@ -78,8 +78,8 @@ export class BoardManager {
   }
 
   getAllUnits(): Unit[] {
-    return this.board[0]
-      .concat(this.board[1])
+    return this.board[OWNER.TEAM_ONE]
+      .concat(this.board[OWNER.TEAM_TWO])
       .filter((tile) => !!tile) as Unit[];
   }
 
@@ -94,7 +94,9 @@ export class BoardManager {
 
   getUnitRow(unit: Unit): number {
     const isTop =
-      unit.position === 0 || unit.position === 1 || unit.position === 2;
+      unit.position === POSITION.TOP_FRONT ||
+      unit.position === POSITION.TOP_MID ||
+      unit.position === POSITION.TOP_BACK;
 
     return isTop ? ROW.TOP : ROW.BOT;
   }
@@ -121,28 +123,28 @@ export class BoardManager {
     return unitsInColumn;
   }
 
-  getAttackTargetFor(unit: Unit): Unit {
-    const otherBoard = this.board[unit.owner === 1 ? 0 : 1];
+  getClosestAttackTarget(unit: Unit): Unit {
+    const otherBoard = this.board[this.getEnemyOwner(unit.owner)];
 
     const isTop = this.getUnitRow(unit) === ROW.TOP;
     let target;
     if (isTop) {
       target =
-        checkForDead(otherBoard[0]) ||
-        checkForDead(otherBoard[3]) ||
-        checkForDead(otherBoard[1]) ||
-        checkForDead(otherBoard[4]) ||
-        checkForDead(otherBoard[2]) ||
-        checkForDead(otherBoard[5]);
+        checkForDead(otherBoard[POSITION.TOP_FRONT]) ||
+        checkForDead(otherBoard[POSITION.BOT_FRONT]) ||
+        checkForDead(otherBoard[POSITION.TOP_MID]) ||
+        checkForDead(otherBoard[POSITION.BOT_MID]) ||
+        checkForDead(otherBoard[POSITION.TOP_BACK]) ||
+        checkForDead(otherBoard[POSITION.BOT_BACK]);
       return target as Unit;
     } else {
       target =
-        checkForDead(otherBoard[3]) ||
-        checkForDead(otherBoard[0]) ||
-        checkForDead(otherBoard[4]) ||
-        checkForDead(otherBoard[1]) ||
-        checkForDead(otherBoard[5]) ||
-        checkForDead(otherBoard[2]);
+        checkForDead(otherBoard[POSITION.BOT_FRONT]) ||
+        checkForDead(otherBoard[POSITION.TOP_FRONT]) ||
+        checkForDead(otherBoard[POSITION.BOT_MID]) ||
+        checkForDead(otherBoard[POSITION.TOP_MID]) ||
+        checkForDead(otherBoard[POSITION.BOT_BACK]) ||
+        checkForDead(otherBoard[POSITION.TOP_BACK]);
     }
 
     return target as Unit;

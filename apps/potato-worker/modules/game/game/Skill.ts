@@ -1,4 +1,3 @@
-import { BoardManager } from "./BoardManager";
 import { Unit } from "./Unit";
 
 /* export enum SKILL_EFFECT {
@@ -16,6 +15,24 @@ export enum SKILL_TARGET {
   ALL_ALLIES = "ALL_ALLIES",
   ALL_ENEMIES = "ALL_ENEMIES",
 } */
+
+export enum STATUS_EFFECT_TYPE {
+  STUN = "STUN",
+  SILENCE = "SILENCE",
+  DISARM = "DISARM",
+}
+
+export interface StatusEffect {
+  type: STATUS_EFFECT_TYPE;
+  durationInSteps: number;
+  value?: number;
+}
+
+export enum SKILL {
+  HEALING_WORD = "Healing Word",
+  POWERSHOT = "Powershot",
+  HEAD_CRUSH = "Head Crush",
+}
 
 export class Skill {
   skillCost = 1000;

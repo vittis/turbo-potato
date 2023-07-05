@@ -84,7 +84,7 @@ export class Game {
         OWNER.TEAM_TWO,
         POSITION.BOT_MID,
         Races.Elf,
-        Classes.Cleric,
+        Classes.Knight,
         {
           mainHandWeapon: Weapons.Wand as WeaponData,
           chest: Chests.PlateMail as ArmorData,

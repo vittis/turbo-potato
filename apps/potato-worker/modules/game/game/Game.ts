@@ -24,7 +24,7 @@ export class Game {
         OWNER.TEAM_ONE,
         POSITION.TOP_FRONT,
         Races.Human,
-        Classes.Ranger,
+        Classes.Cleric,
         {
           mainHandWeapon: Weapons.Dagger as WeaponData,
           chest: Chests.LeatherShirt as ArmorData,
@@ -269,4 +269,174 @@ DANO TOTAL:
 
     Batalha baseada em buffs/debuffs tipo super auto battlemon
 
-*/
+
+___________________________________________________________________________________________________
+
+
+{
+    "actorId": "14",
+    "type": "ATTACK",
+    "payload": {
+      "targetsId": ["00"],
+      "stats": {
+        "ap": 7.719999999997981,
+        "sp": 712
+      },
+      "modifiers": {
+        "sp": 56
+      }
+    },
+    "step": 99,
+    "subEvents": [{
+      "actorId": "00",
+      "type": "RECEIVED_DAMAGE",
+      "payload": {
+        "stats": {
+          "hp": 84,
+          "armorHp": 0,
+          "sp": 517.05
+        },
+        "modifiers": {
+          "hp": -23,
+          "sp": 195.75
+        }
+      }
+   }]
+},
+
+{
+  "actorId": "00",
+  "type": "CAST_SKILL",
+  "payload": {
+    "targetsId": ["00"],
+    "skillName": "Healing Word"
+  },
+  "step": 188,
+  "subEvents": [{
+    "actorId": "00",
+    "type": "RECEIVED_HEAL",
+    "payload": {
+      "stats": {
+        "hp": 71,
+      },
+      "modifiers": {
+        "hp": 24,
+      }
+    }
+  }]
+}
+
+{
+  "actorId": "14",
+  "type": "CAST_SKILL",
+  "payload": {
+    "targetsId": ["00"],
+    "skillName": "Head Crush"
+  },
+  "step": 188,
+  "subEvents": [{
+    "actorId": "00",
+    "type": "RECEIVED_DAMAGE",
+    "payload": {
+      "stats": {
+        "hp": 84,
+        "armorHp": 0,
+        "sp": 517.05
+      },
+      "modifiers": {
+        "hp": -23,
+        "sp": 195.75
+      }
+    }
+ },
+ {
+  "actorId": "00",
+  "type": "RECEIVED_DISABLE",
+  "payload": {
+    "disableName": "Stun",
+    "duration": 20,
+  }
+}]
+}
+
+
+/* 
+
+STATUS EFFECTS
+
+REGEN = heal 1 hp per stack per 5 steps and remove 1 stack
+BUFF ATTACK SPEED = increase 1 attack speed per stack and remove 1 per attack
+BUFF ATTACK DAMAGE = increase 1 attack damage per stack and remove 1 per attack
+BUFF SKILL REGEN = increase 1 skill regen per stack and remove 1 per ult cast
+POISON = deal 1 dmg per stack per 5 steps and remove 1 stack
+BLEED = deal 1 dmg per stack per 5 steps and remove 1 stack
+SLOW = reduce 1 attack speed per stack per 5 steps and remove 1 stack per attack
+VULNERABLE = increase 1% damage taken per stack, remove all on hit
+STURDY = reduce 1% damage taken per stack, remove 1 stack on hit
+THORN = deal 1 dmg per stack on hit and remove 1 stack
+TAUNT = force enemy units to attack this unit, remove 1 stack on hit
+
+
+DISABLE
+
+STUN = barrinha (duração em step) e icone
+
+
+INSTANT EFFECTS
+
+DAMAGE = deal X dmg
+HEAL = heal X hp
+APPLY SHIELD = gain X armor
+
+
+
+XP
+
+cada round player tem um número específico de xp disponivel
+por ex. round 1 = 1, round 5 = 10 etc
+xp pode ser utilizado pra ganhar uma perk de uma unidade, como uma skill tree
+é possivel colocar e tirar pontos de qualquer unidade livremente entre os rounds
+
+
+SKILLS
+
+ULT = skill da barra
+
+EX:
+- PASSIVA APLICA POISON ON HIT
+- COMEÇA COM 20 THORN STACKS
+- TRIGGER (30%- HP) CASTA SKILL DOIDA
+
+
+CLASS
+
+PERKS ROGUE
+- PASSIVA APLICA POISON ON HIT
+- SE TIVER NA BACKLINE, GANHA 20% DAMAGE
+
+
+RACE
+
+PERKS ANÃO
+- +10 DEF
+- COMEÇA COM 20 THORN STACKS
+
+
+PERKS CATEGORIES
+
+- PASSIVA
+EX: APLICA POISON ON HIT
+
+- STATS BUFF
+EX: +20 BUFF ATTACK SPEED
+
+- INSTANT EFFECT
+EX: HEAL X HP ON TRIGGER
+
+
+PERKS
+
+PARKS HAVE TIERS (1, 2, 3, 4, 5) THAT CAN BE STACKED THROUGH DIFERRENT SOURCES
+EX: GAIN AGILE PERK LVL 1 FROM CLASS, AND LVL 2 FROM DAGGER, THEN UNIT HAS AGILE PERK LVL 3
+
+ */

@@ -38,12 +38,8 @@ export class Battle extends Phaser.Scene {
   eventHistory: StepEvent[] = [];
   timeEventsHistory: Phaser.Time.TimerEvent[] = [];
 
-  totalBattleDuration = 0;
-  timeLoopStarted = 0;
-  timeInBattle = 0;
-
-  externalPaused = true;
-  inGamePaused = false;
+  isGamePaused = true;
+  isPlayingEventAnimation = false;
 
   constructor() {
     super("GameScene");
@@ -76,12 +72,7 @@ export class Battle extends Phaser.Scene {
         this.firstStep = data.firstStep;
         this.totalSteps = data.totalSteps;
         this.eventHistory = data.eventHistory;
-        this.totalBattleDuration =
-          this.eventHistory[this.eventHistory.length - 1].step *
-            GAME_LOOP_SPEED +
-          Math.min(GAME_LOOP_SPEED, 100);
-
-        this.initializeBattle(this.firstStep);
+        this.initializeUnits(this.firstStep);
       });
 
     useGameStore.subscribe(
@@ -98,41 +89,32 @@ export class Battle extends Phaser.Scene {
     );
 
     useGameStore.subscribe(
-      (state) => state.isGameRunning,
-      (isGameRunning) => {
-        if (isGameRunning) {
-          if (
-            this.timeInBattle > this.totalBattleDuration ||
-            this.timeLoopStarted === 0
-          ) {
-            this.initializeBattle(this.firstStep);
-          }
+      (state) => state.isGamePaused,
+      (isGamePaused) => {
+        this.isGamePaused = isGamePaused;
 
-          this.startLoop();
-        } else {
-          this.stopLoop();
+        if (isGamePaused) {
+          if (this.isPlayingEventAnimation) {
+            this.pauseUnitsAnimations();
+          } else {
+            this.pauseTimeEvents();
+          }
+          return;
         }
+
+        if (this.shouldStartFromBeginning()) {
+          this.initializeUnits(this.firstStep);
+          this.startFromBeggining();
+          return;
+        }
+
+        if (this.isPlayingEventAnimation) {
+          this.resumeUnitsAnimations();
+          return;
+        }
+        this.resumeTimeEvents();
       }
     );
-  }
-
-  initializeBattle(firstFrame: any) {
-    this.timeLoopStarted = 0;
-    this.timeInBattle = 0;
-    this.units.forEach((unit) => {
-      unit.destroy();
-    });
-    this.units = [];
-
-    firstFrame.units.forEach((dataUnit: any) => {
-      const unit = new BattleUnit(
-        this,
-        dataUnit.class.name.toLowerCase(),
-        dataUnit
-      );
-      this.units.push(unit);
-      this.board.add(unit);
-    });
   }
 
   playEvents(step: number) {
@@ -155,17 +137,15 @@ export class Battle extends Phaser.Scene {
         throw Error(`couldnt find unit id: ${event.id}`);
       }
 
-      const target = this.units.find(
-        (unit) => unit.id === event.payload?.target
-      );
+      const target = this.units.find((unit) => unit.id === event.payload?.target);
 
       let onEnd;
       if (event.type === "ATTACK") {
-        console.log("PLAY ATTACK STEP: ", event.step);
         this.board.bringToTop(unit);
-        this.stopLoop({ fromInGame: true });
+        this.isPlayingEventAnimation = true;
+        this.pauseTimeEvents();
         onEnd = () => {
-          this.startLoop({ fromInGame: true });
+          this.resumeTimeEvents();
         };
       }
 
@@ -177,23 +157,64 @@ export class Battle extends Phaser.Scene {
       this.time.addEvent({
         delay: Math.min(GAME_LOOP_SPEED, 100),
         callback: () => {
-          useGameStore.getState().setIsGameRunning(false);
+          useGameStore.getState().setIsGamePaused(true);
         },
       });
     }
   }
 
-  resumeFromPause() {
-    if (this.inGamePaused) return;
+  shouldStartFromBeginning() {
+    const lastTimeEventIndex = this.timeEventsHistory.length - 1;
+    return this.timeEventsHistory.length === 0 || this.timeEventsHistory[lastTimeEventIndex].getRemaining() <= 0;
+  }
+
+  initializeUnits(firstFrame: any) {
+    this.units.forEach((unit) => {
+      unit.destroy();
+    });
+    this.units = [];
+
+    firstFrame.units.forEach((dataUnit: any) => {
+      const unit = new BattleUnit(this, dataUnit.class.name.toLowerCase(), dataUnit);
+      this.units.push(unit);
+      this.board.add(unit);
+    });
+  }
+
+  resumeUnitsAnimations() {
+    this.units.forEach((unit) => {
+      unit.resumeAnimations();
+    });
+  }
+  pauseUnitsAnimations() {
+    this.units.forEach((unit) => {
+      unit.pauseAnimations();
+    });
+  }
+  resumeTimeEvents() {
+    this.isPlayingEventAnimation = false;
+    this.units.forEach((unit) => {
+      unit.resumeApBar();
+    });
     this.timeEventsHistory.forEach((event) => {
       event.paused = false;
     });
   }
+  pauseTimeEvents() {
+    this.units.forEach((unit) => {
+      unit.pauseApBar();
+    });
+    this.timeEventsHistory.forEach((event) => {
+      event.paused = true;
+    });
+  }
 
   startFromBeggining() {
-    const stepsThatHaveEvents = [
-      ...new Set(this.eventHistory.map((event) => event.step)),
-    ];
+    const stepsThatHaveEvents = [...new Set(this.eventHistory.map((event) => event.step))];
+
+    this.units.forEach((unit) => {
+      unit.onStart();
+    });
 
     stepsThatHaveEvents.forEach((step) => {
       const delay = step * GAME_LOOP_SPEED;
@@ -208,55 +229,5 @@ export class Battle extends Phaser.Scene {
 
       this.timeEventsHistory.push(timeEvent);
     });
-  }
-
-  startLoop({ fromInGame = false }: { fromInGame?: boolean } = {}) {
-    this.externalPaused = false;
-    this.inGamePaused = fromInGame ? false : this.inGamePaused;
-
-    const fromResume = this.timeLoopStarted !== 0;
-    this.units.forEach((unit) => {
-      if (unit.isDead) return;
-      unit.onStartBattle({ fromResume, inGamePaused: this.inGamePaused });
-    });
-
-    if (fromResume) {
-      this.resumeFromPause();
-    } else {
-      this.startFromBeggining();
-    }
-
-    this.timeLoopStarted = this.time.now;
-  }
-
-  stopLoop({ fromInGame = false }: { fromInGame?: boolean } = {}) {
-    this.externalPaused = !fromInGame;
-    this.inGamePaused = fromInGame ? fromInGame : this.inGamePaused;
-
-    this.timeEventsHistory.forEach((event) => {
-      event.paused = true;
-    });
-
-    this.units.forEach((unit) => {
-      if (unit.isDead) return;
-      if (unit.apBarTween.isActive()) {
-        unit.apBarTween.pause();
-      }
-
-      if (unit?.attackTweenChain?.isPlaying()) {
-        unit.attackTweenChain.pause();
-      }
-
-      if (unit.sprite.anims.getName() !== "idle") {
-        unit.sprite.anims.pause();
-      }
-    });
-  }
-
-  update(time: number, delta: number): void {
-    // .log(stepsPassed);
-    if (this.externalPaused) return;
-    if (this.inGamePaused) return;
-    this.timeInBattle += delta;
   }
 }

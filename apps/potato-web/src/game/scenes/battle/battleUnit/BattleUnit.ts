@@ -1,12 +1,6 @@
 import Phaser from "phaser";
 import { GAME_LOOP_SPEED, StepEvent } from "../BattleScene";
-import {
-  BAR_WIDTH,
-  createBars,
-  createTexts,
-  getUnitPos,
-  setupUnitPointerEvents,
-} from "./BattleUnitSetup";
+import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import { onReceiveDamage } from "./BattleUnitEventHandler";
 import { createAttackAnimation } from "./BattleUnitAnimations";
 
@@ -255,12 +249,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public fillApBar(currentAp: number, fromResume?: boolean) {
     const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
 
-    const willNeedOneLessStep =
-      (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >=
-      1000;
+    const willNeedOneLessStep = (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >= 1000;
 
-    const stepsToAttack =
-      stepsToAttackFromZeroAP - (willNeedOneLessStep ? 1 : 0);
+    const stepsToAttack = stepsToAttackFromZeroAP - (willNeedOneLessStep ? 1 : 0);
 
     const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
@@ -297,20 +288,30 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }); */
   }
 
-  public onStartBattle({ fromResume = false, inGamePaused = false }) {
-    if (!fromResume) {
-      this.fillApBar(0, fromResume);
-    }
+  public onStart() {
+    this.fillApBar(0);
+  }
 
-    if (this.apBarTween && this.apBarTween.isPaused() && !inGamePaused) {
-      this.apBarTween.resume();
-    }
-
-    if (fromResume && this.attackTweenChain?.isPaused()) {
+  public resumeAnimations() {
+    if (this.attackTweenChain?.isPaused()) {
       this.attackTweenChain.resume();
     }
+  }
+  public pauseAnimations() {
+    if (this.attackTweenChain?.isPlaying()) {
+      this.attackTweenChain.pause();
+    }
+  }
+  public resumeApBar() {
+    if (this.apBarTween && this.apBarTween.isPaused()) {
+      this.apBarTween.resume();
+    }
+  }
 
-    this.sprite.anims.resume();
+  public pauseApBar() {
+    if (this.apBarTween && this.apBarTween.isPlaying()) {
+      this.apBarTween.pause();
+    }
   }
 
   private onDeath() {

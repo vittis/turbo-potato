@@ -1,0 +1,21 @@
+{
+  "name": "Agile",
+  "description": "You are agile and nimble, gain $TIER_VALUE Dex.",
+  "tier": {
+    "1": 5,
+    "2": 10,
+    "3": 15,
+    "4": 20,
+    "5": 25
+  },
+  "trigger": "PASSIVE",
+  "effects": [
+    {
+      "type": "GAIN_STATS",
+      "target": "SELF",
+      "statsModifiers": {
+        "dex": "$TIER_VALUE"
+      }
+    }
+  ]
+}

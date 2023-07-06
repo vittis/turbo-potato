@@ -2,17 +2,17 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 interface GameState {
-  isGameRunning: boolean;
+  isGamePaused: boolean;
   selectedEntity: any;
   setSelectedEntity: (entity: any) => void;
-  setIsGameRunning: (isGameRunning: boolean) => void;
+  setIsGamePaused: (isGameRunning: boolean) => void;
 }
 
 const useGameStore = create<GameState>()(
   subscribeWithSelector((set) => ({
     selectedEntity: null,
-    isGameRunning: false,
-    setIsGameRunning: (isGameRunning: boolean) => set({ isGameRunning }),
+    isGamePaused: true,
+    setIsGamePaused: (isGamePaused: boolean) => set({ isGamePaused }),
     setSelectedEntity: (entity: any) => set({ selectedEntity: entity }),
   }))
 );

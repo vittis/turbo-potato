@@ -1,14 +1,10 @@
 import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
-import {
-  GAME_LOOP_SPEED,
-  fetchBattleSetup,
-} from "./game/scenes/battle/BattleScene";
+import { GAME_LOOP_SPEED, fetchBattleSetup } from "./game/scenes/battle/BattleScene";
 
 function App() {
-  const { selectedEntity, isGameRunning, setSelectedEntity, setIsGameRunning } =
-    useGameStore();
+  const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();
 
   const { data } = useQuery({
     queryKey: ["game/battle/setup"],
@@ -36,13 +32,11 @@ function App() {
       <div className="mt-10 flex justify-center">
         <button
           onClick={() => {
-            setIsGameRunning(!isGameRunning);
+            setIsGamePaused(!isGamePaused);
           }}
-          className={`btn  btn-wide shadow-lg ${
-            isGameRunning ? "btn-neutral" : "btn-secondary"
-          }`}
+          className={`btn  btn-wide shadow-lg ${!isGamePaused ? "btn-neutral" : "btn-secondary"}`}
         >
-          {isGameRunning ? "Stop" : "Start"}
+          {!isGamePaused ? "Stop" : "Start"}
         </button>
       </div>
 
@@ -70,24 +64,17 @@ function App() {
               </thead>
               <tbody className="text-zinc-100">
                 {allUnits.map((unit: any) => {
-                  const stepsToAttack = Math.ceil(
-                    1000 / unit.stats.attackSpeed
-                  );
+                  const stepsToAttack = Math.ceil(1000 / unit.stats.attackSpeed);
                   const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
-                  const stepsInAttackAnimation = Math.ceil(
-                    unit.stats.attackDelay / (10 + unit.stats.attackSpeed / 10)
-                  );
-                  const timeInAttackAnimation =
-                    stepsInAttackAnimation * GAME_LOOP_SPEED;
+                  const stepsInAttackAnimation = Math.ceil(unit.stats.attackDelay / (10 + unit.stats.attackSpeed / 10));
+                  const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
 
                   return (
                     <tr
                       // @todo add an ID
                       onClick={() => {
-                        if (
-                          selectedEntity !== `${unit.owner}${unit.position}`
-                        ) {
+                        if (selectedEntity !== `${unit.owner}${unit.position}`) {
                           setSelectedEntity(`${unit.owner}${unit.position}`);
                         } else {
                           setSelectedEntity(null);
@@ -97,9 +84,7 @@ function App() {
                       className={`border-none hover:brightness-125 cursor-pointer transition-all ${
                         selectedEntity === `${unit.owner}${unit.position}`
                           ? "bg-amber-400 text-zinc-900"
-                          : `${
-                              unit.owner === 0 ? "bg-amber-950" : "bg-slate-800"
-                            }`
+                          : `${unit.owner === 0 ? "bg-amber-950" : "bg-slate-800"}`
                       }`}
                       key={`${unit.owner}${unit.position}`}
                     >
@@ -112,8 +97,7 @@ function App() {
                       <td>{unit.stats.def}</td>
                       <td>{unit.equipment.mainHandWeapon.name}</td>
                       <td>
-                        {unit.stats.attackSpeed} ({stepsToAttack}) (
-                        {timeToAttack / 1000}s)
+                        {unit.stats.attackSpeed} ({stepsToAttack}) ({timeToAttack / 1000}s)
                       </td>
                       <td>{unit.stats.attackDamage}</td>
                       <td>{unit.stats.skillRegen}</td>
@@ -194,9 +178,7 @@ function App() {
       </div>
       {/* Members */}
       <div className="fixed flex flex-col items-center top-5 right-5 px-5 py-2 bg-base-100 shadow rounded z-50">
-        <h1 className="text-primary border-b-[3px] border-primary mb-2">
-          Members
-        </h1>
+        <h1 className="text-primary border-b-[3px] border-primary mb-2">Members</h1>
         {Object.keys([
           {
             name: "kekw",

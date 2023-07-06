@@ -1,0 +1,14 @@
+{
+  "name": "Hardened Skin",
+  "description": "The unit's skin is hard as iron, gain 10 Sturdy.",
+  "trigger": "ON_START",
+  "effects": [
+    {
+      "type": "APPLY_STATUS",
+      "target": "SELF",
+      "statusModifiers": {
+        "sturdy": 10
+      }
+    }
+  ]
+}

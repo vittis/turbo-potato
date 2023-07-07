@@ -1,7 +1,7 @@
 {
     "name": "Plate Mail",
     "implicits": {
-        "armor": 60
+        "shield": 60
     },
     "weight": 10,
     "slot": "CHEST"

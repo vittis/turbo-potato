@@ -1,7 +1,7 @@
 {
     "name": "Cloth Robe",
     "implicits": {
-        "armor": 10
+        "int": 3
     },
     "weight": 1.5,
     "slot": "CHEST"

@@ -3,7 +3,7 @@
   "hp": 120,
   "str": 2,
   "dex": 2,
-  "int": 9,
+  "int": 20,
   "tier": 2,
   "defaultWeapon": "Rusty Wand",
   "defaultSkill": "Healing Word"

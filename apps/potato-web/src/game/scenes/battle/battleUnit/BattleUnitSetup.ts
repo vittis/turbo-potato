@@ -13,11 +13,13 @@ export function createBars(unit: BattleUnit) {
   const apBarHeight = 5;
   const apBarYOffset = 18;
 
-  const armorBar = new Phaser.GameObjects.Rectangle(
+  const shieldBarWidth = (unit.stats.shield / unit.stats.maxHp) * BAR_WIDTH;
+
+  const shieldBar = new Phaser.GameObjects.Rectangle(
     unit.scene,
     unit.sprite.x + borderWidth / 2 - width / 2,
     unit.sprite.y + yOffset + borderWidth / 2,
-    width,
+    shieldBarWidth,
     height,
     0xa7a7a7
   );
@@ -84,8 +86,8 @@ export function createBars(unit: BattleUnit) {
 
   hpBar.setOrigin(0);
   hpBar.setDepth(1);
-  armorBar.setOrigin(0);
-  armorBar.setDepth(1);
+  shieldBar.setOrigin(0);
+  shieldBar.setDepth(1);
   hpBarBorder.setOrigin(0);
   hpBarBorder.setDepth(1);
   spBar.setOrigin(0);
@@ -99,13 +101,13 @@ export function createBars(unit: BattleUnit) {
 
   unit.add(hpBarBorder);
   unit.add(hpBar);
-  unit.add(armorBar);
+  unit.add(shieldBar);
   unit.add(spRectBorder);
   unit.add(spBar);
   unit.add(apRectBorder);
   unit.add(apBar);
 
-  return { hpBar, armorBar, spBar, apBar };
+  return { hpBar, shieldBar, spBar, apBar };
 }
 
 export function createTexts(unit: BattleUnit, x: number, y: number) {
@@ -124,7 +126,7 @@ export function createTexts(unit: BattleUnit, x: number, y: number) {
       stroke: true,
     },
   });
-  const armorText = unit.scene.add.text(x + 42, y + 36, "0", {
+  const shieldText = unit.scene.add.text(x + 42, y + 36, "0", {
     fontSize: "18px",
     color: "#a7a7a7",
     fontFamily: "IM Fell DW Pica",
@@ -140,11 +142,11 @@ export function createTexts(unit: BattleUnit, x: number, y: number) {
     },
   });
   hpText.setOrigin(0.5);
-  armorText.setOrigin(0.5);
+  shieldText.setOrigin(0.5);
 
   unit.add(hpText);
-  unit.add(armorText);
-  return { hpText, armorText };
+  unit.add(shieldText);
+  return { hpText, shieldText };
 }
 
 export function setupUnitAnimations(scene: Phaser.Scene) {
@@ -186,9 +188,7 @@ export function setupUnitPointerEvents(unit: BattleUnit) {
 
   unit.sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
     if (!unit.isSelected) {
-      useGameStore
-        .getState()
-        .setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
+      useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
     } else {
       useGameStore.getState().setSelectedEntity(null);
     }
@@ -229,8 +229,7 @@ export function getUnitPos(position, owner) {
     return (UNIT_OFFSET.x + UNIT_OFFSET.tile * tileOffset) * (owner ? 1 : -1);
   };
   const getUnitPosY = () => {
-    const isTop =
-      position === 0 || position === 1 || position === 2 ? true : false;
+    const isTop = position === 0 || position === 1 || position === 2 ? true : false;
     return UNIT_OFFSET.y * (isTop ? -1 : 1) - 20;
   };
   return { x: getUnitPosX(), y: getUnitPosY() };

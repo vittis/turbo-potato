@@ -5,5 +5,5 @@
   "srAtkMult": 0.1,
   "srAtkBase": 1,
   "srReceiveDamageMult": 0.5,
-  "srReceiveDamageBase": 2
+  "srReceiveDamageBase": 50
 }

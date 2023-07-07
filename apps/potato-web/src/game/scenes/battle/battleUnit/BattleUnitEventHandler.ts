@@ -2,30 +2,30 @@ import { BattleUnit } from "./BattleUnit";
 import { BAR_WIDTH } from "./BattleUnitSetup";
 
 export function onReceiveDamage(unit: BattleUnit, event: any) {
-  const newHp = Math.max(0, event.payload.hp);
-  const newArmorHp = Math.max(0, event.payload.armorHp);
+  const newHp = Math.max(0, event.payload.stats.hp);
+  const newShield = Math.max(0, event.payload.stats.shield);
 
   const hasTakenHpDamage = newHp < unit.stats.hp;
-  const hasTakenArmorDamage = newArmorHp < unit.stats.armorHp;
+  const hasTakenShieldDamage = newShield < unit.stats.shield;
 
   const textTargets = [] as Phaser.GameObjects.Text[];
-  if (hasTakenArmorDamage) {
-    textTargets.push(unit.armorText);
+  if (hasTakenShieldDamage) {
+    textTargets.push(unit.shieldText);
   }
   if (hasTakenHpDamage) {
     textTargets.push(unit.hpText);
   }
 
   unit.hpText.setText(`${newHp}`);
-  unit.armorText.setText(`${newArmorHp}`);
+  unit.shieldText.setText(`${newShield}`);
 
-  if (newArmorHp === 0) {
-    unit.armorText.alpha = 0;
+  if (newShield === 0) {
+    unit.shieldText.alpha = 0;
   }
   if (newHp === 0) {
     unit.hpText.alpha = 0;
     unit.hpBar.alpha = 0;
-    unit.armorBar.alpha = 0;
+    unit.shieldBar.alpha = 0;
     unit.spBar.alpha = 0;
     unit.apBar.alpha = 0;
   }
@@ -66,38 +66,26 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
   const minFontSize = 25;
   const maxFontSize = 70;
 
-  const damage = event.payload.damage;
-  const fontSize =
-    ((damage - minDamage) / (maxDamage - minDamage)) *
-      (maxFontSize - minFontSize) +
-    minFontSize;
+  const damage = event.payload.modifiers.hp * -1;
+  const fontSize = ((damage - minDamage) / (maxDamage - minDamage)) * (maxFontSize - minFontSize) + minFontSize;
   const fontSizePx = `${fontSize.toFixed(0)}px`;
 
-  const damageText = unit.scene.add.text(
-    0,
-    30,
-    "-" + event.payload.damage.toString(),
-    {
-      /* fontSize:
-        event.payload.damage > 50
-          ? `${40 + Phaser.Math.Between(0, 15)}px`
-          : `${25 + Phaser.Math.Between(3, 12)}px`, */
-      fontSize: fontSizePx,
-      color: "#ff121d",
-      fontFamily: "IM Fell DW Pica",
-      stroke: "#000000",
-      strokeThickness: 2,
-      fontStyle: "bold",
-      shadow: {
-        offsetX: 0,
-        offsetY: 3,
-        color: "#000",
-        blur: 0,
-        stroke: true,
-        fill: false,
-      },
-    }
-  );
+  const damageText = unit.scene.add.text(0, 30, "-" + damage, {
+    fontSize: fontSizePx,
+    color: "#ff121d",
+    fontFamily: "IM Fell DW Pica",
+    stroke: "#000000",
+    strokeThickness: 2,
+    fontStyle: "bold",
+    shadow: {
+      offsetX: 0,
+      offsetY: 3,
+      color: "#000",
+      blur: 0,
+      stroke: true,
+      fill: false,
+    },
+  });
   damageText.setOrigin(0.5);
 
   // damage text going up
@@ -106,7 +94,7 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     x: Phaser.Math.Between(-15, 15),
     y: damageText.y - 38 - Phaser.Math.Between(0, 10),
     alpha: 0,
-    duration: event.payload.damage > 50 ? 1900 : 1200,
+    duration: damage > 50 ? 1900 : 1200,
     ease: "Linear",
     onComplete: () => {
       damageText.destroy();
@@ -123,10 +111,10 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     ease: "Linear",
   });
 
-  const newArmorHpValue = (newArmorHp / unit.stats.maxArmorHp) * BAR_WIDTH;
+  const newShieldValue = (newShield / unit.stats.maxHp) * BAR_WIDTH;
   unit.scene.tweens.add({
-    targets: unit.armorBar,
-    width: newArmorHpValue <= 0 ? 0 : newArmorHpValue,
+    targets: unit.shieldBar,
+    width: newShieldValue <= 0 ? 0 : newShieldValue,
     duration: 80,
     ease: "Linear",
   });

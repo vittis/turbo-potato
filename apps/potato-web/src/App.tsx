@@ -48,7 +48,7 @@ function App() {
                 <tr className="text-zinc-100 italic text-md">
                   <th>Name</th>
                   <th>Hp</th>
-                  <th>Armor</th>
+                  <th>Shield</th>
                   <th>Str</th>
                   <th>Dex</th>
                   <th>Int</th>
@@ -90,7 +90,7 @@ function App() {
                     >
                       <td>{unit.name}</td>
                       <td>{unit.stats.hp}</td>
-                      <td>{unit.stats.armorHp}</td>
+                      <td>{unit.stats.shield}</td>
                       <td>{unit.stats.str}</td>
                       <td>{unit.stats.dex}</td>
                       <td>{unit.stats.int}</td>

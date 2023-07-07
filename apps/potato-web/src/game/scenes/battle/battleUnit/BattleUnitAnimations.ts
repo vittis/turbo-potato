@@ -3,10 +3,12 @@ import { BattleUnit } from "./BattleUnit";
 export function createAttackAnimation({
   unit,
   target,
+  onImpactPoint,
   onFinishAnimation,
 }: {
   unit: BattleUnit;
   target: BattleUnit;
+  onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
   const RUN_DISTANCE = unit.owner === 0 ? 70 : -70;
@@ -14,7 +16,7 @@ export function createAttackAnimation({
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 40 : -40;
 
   const attackTweenChain = unit.scene.tweens.chain({
-    delay: 150,
+    delay: 45,
     targets: unit,
     onComplete: () => {
       unit.scene.time.delayedCall(150, onFinishAnimation);
@@ -76,9 +78,10 @@ export function createAttackAnimation({
         yoyo: true,
         ease: Phaser.Math.Easing.Bounce.InOut,
         onYoyo: () => {
+          onImpactPoint();
+
           // particle burst
-          const angle =
-            target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
+          const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
           const xOffset = target.owner === 0 ? -12 : 12;
           const rect = new Phaser.Geom.Line(xOffset, -20, xOffset, 40);
           const emitter = unit.scene.add.particles(xOffset, 15, "square", {
@@ -159,4 +162,45 @@ export function createAttackAnimation({
   });
 
   return { attackTweenChain };
+}
+
+export function createHealingWordAnimation({
+  unit,
+  onImpactPoint,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  onImpactPoint: Function;
+  onFinishAnimation: Function;
+}) {
+  const healingWordTween = unit.scene.tweens.chain({
+    delay: 50,
+    targets: unit,
+    onComplete: () => {
+      unit.scene.time.delayedCall(150, onFinishAnimation);
+    },
+    tweens: [
+      // pulinho
+      {
+        onStart: () => {
+          unit.sprite.setTint(0x00ee00);
+        },
+        targets: unit.sprite,
+        y: unit.sprite.y - 14,
+        duration: 100,
+        yoyo: true,
+        repeat: 2,
+        completeDelay: 70,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+        onComplete: () => {
+          unit.sprite.clearTint();
+
+          onImpactPoint();
+          onFinishAnimation();
+        },
+      },
+    ],
+  });
+
+  return { healingWordTween };
 }

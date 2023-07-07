@@ -14,11 +14,14 @@ enum EVENT_TYPE {
   CAST_SKILL = "CAST_SKILL",
   RECEIVED_HEAL = "RECEIVED_HEAL",
 }
+export type SubStepEvent = Omit<StepEvent, "step" | "subEvents">;
+
 export interface StepEvent {
+  actorId: string;
   type: EVENT_TYPE;
-  id: string;
   payload?: any;
   step: number;
+  subEvents?: SubStepEvent[];
 }
 
 export async function fetchBattleSetup() {
@@ -27,7 +30,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 50;
+export const GAME_LOOP_SPEED = 25;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -122,35 +125,59 @@ export class Battle extends Phaser.Scene {
 
     const orderedEvents = eventsOnThisStep.sort((a, b) => {
       const typeOrder = {
-        RECEIVED_DAMAGE: 0,
+        ATTACK: 0,
         CAST_SKILL: 1,
         HAS_DIED: 2,
-        ATTACK: 3,
       };
-
       return typeOrder[a.type] - typeOrder[b.type];
     });
 
+    const eventPile: any[] = [];
+
+    const onEndAnimation = () => {
+      eventPile.shift();
+      if (eventPile.length > 0) {
+        eventPile[0].unit.playEvent(eventPile[0]);
+      } else {
+        this.resumeTimeEvents();
+      }
+    };
+
     orderedEvents.forEach((event) => {
-      const unit = this.units.find((unit) => unit.id === event.id);
+      const unit = this.units.find((unit) => unit.id === event.actorId);
       if (!unit) {
-        throw Error(`couldnt find unit id: ${event.id}`);
+        throw Error(`couldnt find unit id: ${event.actorId}`);
       }
 
-      const target = this.units.find((unit) => unit.id === event.payload?.target);
+      const targets = this.units.filter((unit) => event.payload?.targetsId.includes(unit.id));
 
       let onEnd;
       if (event.type === "ATTACK") {
         this.board.bringToTop(unit);
+
         this.isPlayingEventAnimation = true;
         this.pauseTimeEvents();
         onEnd = () => {
-          this.resumeTimeEvents();
+          onEndAnimation();
         };
       }
 
-      unit.playEvent({ event, target, onEnd });
+      if (event.type === "CAST_SKILL") {
+        this.board.bringToTop(unit);
+
+        this.isPlayingEventAnimation = true;
+        this.pauseTimeEvents();
+        onEnd = () => {
+          onEndAnimation();
+        };
+      }
+      eventPile.push({ unit, event, targets, onEnd });
+
+      // unit.playEvent({ event, targets, onEnd });
     });
+
+    const unit = eventPile[0].unit;
+    unit.playEvent(eventPile[0]);
 
     const isLastStep = step === this.totalSteps;
     if (isLastStep) {

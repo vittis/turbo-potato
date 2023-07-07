@@ -9,7 +9,6 @@ import { WeaponData } from "./Weapon";
 
 export enum EVENT_TYPE {
   ATTACK = "ATTACK",
-  IS_PREPARING_ATTACK = "IS_PREPARING_ATTACK",
   RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
   HAS_DIED = "HAS_DIED",
   CAST_SKILL = "CAST_SKILL",
@@ -31,8 +30,7 @@ export interface UnitStats {
   int: number;
   hp: number;
   maxHp: number;
-  armorHp: number;
-  maxArmorHp: number;
+  shield: number;
   def: number;
   attackSpeed: number;
   attackDelay: number;
@@ -75,11 +73,14 @@ export interface Equipment {
   head: ArmorData;
 }
 
+type SubStepEvent = Omit<StepEvent, "step" | "subEvents">;
+
 interface StepEvent {
+  actorId: string;
   type: EVENT_TYPE;
-  id: string;
   payload?: any;
   step: number;
+  subEvents?: SubStepEvent[];
 }
 
 export class Unit {
@@ -136,9 +137,9 @@ export class Unit {
 
     const finalHp = uClass.hp * race.hpMultiplier;
 
-    const finalArmor =
-      (equipment.chest.implicits?.armor || 0) +
-      (equipment.head.implicits?.armor || 0);
+    const finalShield =
+      (equipment.chest.implicits?.shield || 0) +
+      (equipment.head.implicits?.shield || 0);
 
     const finalDef = finalStr * Multipliers.defStrBonus;
 
@@ -167,8 +168,7 @@ export class Unit {
       int: finalInt,
       hp: finalHp,
       maxHp: finalHp,
-      armorHp: finalArmor,
-      maxArmorHp: finalArmor,
+      shield: finalShield,
       def: finalDef,
       attackSpeed: finalAttackSpeed,
       attackDelay: finalAttackDelay,
@@ -236,45 +236,55 @@ export class Unit {
         throw Error("Undefined attack target for " + this.toString());
       }
       this.stats.ap -= 1000;
-      this.attackWithMainHand(attackTarget);
+      this.attack(attackTarget);
     }
   }
 
-  attackWithMainHand(target: Unit) {
+  attack(target: Unit) {
     const spGained =
       this.stats.skillRegen * Multipliers.srAtkBase +
       this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
     this.stats.sp += spGained;
 
+    const receiveDamageEvent = target.receiveDamage(
+      this.stats.attackDamage,
+      this.currentStep
+    );
+
     this.stepEvents.push({
-      id: this.id,
+      actorId: this.id,
       type: EVENT_TYPE.ATTACK,
       payload: {
-        target: target.id,
-        currentAp: this.stats.ap,
-        sp: this.stats.sp,
-        spGained,
+        targetsId: [target.id],
+        stats: {
+          ap: this.stats.ap,
+          sp: this.stats.sp,
+        },
+        modifiers: {
+          sp: spGained,
+        },
       },
       step: this.currentStep,
+      subEvents: [receiveDamageEvent],
     });
-
-    target.receiveDamage(this.stats.attackDamage, this.currentStep);
   }
 
   castSkill() {
-    this.skill.cast(this, this.bm);
-    this.skill.afterExecute(this);
+    if (this.skill.shouldCast(this, this.bm)) {
+      this.skill.cast(this, this.bm);
+      this.skill.afterExecute(this);
+    }
   }
 
   receiveDamage(damage: number, stepItWasAttacked: number) {
     const finalDamage = Math.round((damage * 100) / (this.stats.def + 100));
 
-    if (this.stats.armorHp > 0) {
-      this.stats.armorHp -= finalDamage;
-      if (this.stats.armorHp < 0) {
+    if (this.stats.shield > 0) {
+      this.stats.shield -= finalDamage;
+      if (this.stats.shield < 0) {
         // If the armor is now depleted, apply any remaining damage to the unit's HP
-        this.stats.hp += this.stats.armorHp;
-        this.stats.armorHp = 0;
+        this.stats.hp += this.stats.shield;
+        this.stats.shield = 0;
       }
     } else {
       this.stats.hp -= Math.round(finalDamage);
@@ -285,18 +295,23 @@ export class Unit {
       this.stats.skillRegen * damage * Multipliers.srReceiveDamageMult;
     this.stats.sp += spGained;
 
-    this.stepEvents.push({
-      id: this.id,
+    const receiveDamageEvent: SubStepEvent = {
+      actorId: this.id,
       type: EVENT_TYPE.RECEIVED_DAMAGE,
       payload: {
-        hp: this.stats.hp,
-        armorHp: this.stats.armorHp,
-        damage: finalDamage,
-        sp: this.stats.sp,
-        spGained,
+        stats: {
+          hp: this.stats.hp,
+          shield: this.stats.shield,
+          sp: this.stats.sp,
+        },
+        modifiers: {
+          hp: finalDamage * -1,
+          sp: spGained,
+        },
       },
-      step: stepItWasAttacked,
-    });
+    };
+
+    return receiveDamageEvent;
   }
 
   receiveHeal(healValue: number, stepItWasHealed: number) {
@@ -305,12 +320,20 @@ export class Unit {
 
     this.stats.hp = newHp;
 
-    this.stepEvents.push({
-      id: this.id,
+    const receiveHealEvent: SubStepEvent = {
+      actorId: this.id,
       type: EVENT_TYPE.RECEIVED_HEAL,
-      payload: { hp: this.stats.hp, hpHealed },
-      step: stepItWasHealed,
-    });
+      payload: {
+        stats: {
+          hp: this.stats.hp,
+        },
+        modifiers: {
+          hp: hpHealed,
+        },
+      },
+    };
+
+    return receiveHealEvent;
   }
 
   markAsDead() {

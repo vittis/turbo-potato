@@ -1,7 +1,14 @@
 {
   "name": "Hardened Skin",
-  "description": "The unit's skin is hard as iron, gain 10 Sturdy.",
+  "description": "The unit's skin is hard as iron, gain $TIER_VALUE Sturdy.",
   "trigger": "ON_START",
+  "tier": {
+    "1": 5,
+    "2": 10,
+    "3": 15,
+    "4": 20,
+    "5": 25
+  },
   "effects": [
     {
       "type": "APPLY_STATUS",

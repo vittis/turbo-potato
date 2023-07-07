@@ -13,7 +13,7 @@ export class HealingWord extends Skill {
 
   // Temporary - check where should we set these values
   baseHeal = 10;
-  intMultiplier = 1;
+  intMultiplier = 0; // for testing
 
   // Check if there is at least one ally who lost HP, if not skill shouldn't be cast
   shouldCast(unit: Unit, bm: BoardManager): boolean {
@@ -44,17 +44,17 @@ export class HealingWord extends Skill {
     const target = this.getTarget(unit, bm);
     const healValue = this.getHealValue(unit);
 
+    const receiveHealEvent = unit.receiveHeal(healValue, unit.currentStep);
+
     unit.stepEvents.push({
-      id: unit.id,
+      actorId: unit.id,
       type: EVENT_TYPE.CAST_SKILL,
       payload: {
         skillName: this.name,
-        sp: unit.stats.sp,
-        skillTarget: target.id,
+        targetsId: [target.id],
       },
       step: unit.currentStep,
+      subEvents: [receiveHealEvent],
     });
-
-    unit.receiveHeal(healValue, unit.currentStep);
   }
 }

@@ -1,20 +1,20 @@
 import Phaser from "phaser";
-import { GAME_LOOP_SPEED, StepEvent } from "../BattleScene";
+import { GAME_LOOP_SPEED, StepEvent, SubStepEvent } from "../BattleScene";
 import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import { onReceiveDamage } from "./BattleUnitEventHandler";
-import { createAttackAnimation } from "./BattleUnitAnimations";
+import { createAttackAnimation, createHealingWordAnimation } from "./BattleUnitAnimations";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public sprite: Phaser.GameObjects.Sprite;
   public hpBar: Phaser.GameObjects.Rectangle;
-  public armorBar: Phaser.GameObjects.Rectangle;
+  public shieldBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
   public spBar: Phaser.GameObjects.Rectangle;
   public boardPosition: number;
   public owner: number;
   public hpText: Phaser.GameObjects.Text;
-  public armorText: Phaser.GameObjects.Text;
+  public shieldText: Phaser.GameObjects.Text;
 
   public stats: any;
   public equipment: any;
@@ -29,7 +29,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public isDead = false;
   public startingX;
   public startingY: number;
-  public attackTweenChain!: Phaser.Tweens.TweenChain;
+  public currentAnimation!: Phaser.Tweens.TweenChain;
 
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
@@ -77,17 +77,17 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     setupUnitPointerEvents(this);
 
-    const { hpBar, armorBar, apBar, spBar } = createBars(this);
+    const { hpBar, shieldBar, apBar, spBar } = createBars(this);
     this.hpBar = hpBar;
-    this.armorBar = armorBar;
+    this.shieldBar = shieldBar;
     this.apBar = apBar;
     this.spBar = spBar;
 
-    const { hpText, armorText } = createTexts(this, hpBar.x, hpBar.y);
+    const { hpText, shieldText } = createTexts(this, hpBar.x, hpBar.y);
     this.hpText = hpText;
-    this.armorText = armorText;
+    this.shieldText = shieldText;
     this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
-    this.armorText.setText(`${Math.max(0, dataUnit.stats.armorHp)}`);
+    this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
 
     scene.add.existing(this);
 
@@ -122,12 +122,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
   public playEvent({
     event,
-    target,
+    targets,
     onEnd,
-    onAttack,
   }: {
     event: StepEvent;
-    target?: BattleUnit;
+    targets?: BattleUnit[];
     onEnd?: Function;
     onAttack?: Function;
   }) {
@@ -137,41 +136,67 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "ATTACK") {
+      const target = targets?.[0];
+
       if (!target) {
         throw new Error("Attack target is undefined");
       }
 
       const onFinishAnimation = () => {
+        this.fillApBar(event.payload.stats.ap);
         if (onEnd) onEnd();
-        this.fillApBar(event.payload.currentAp);
-        this.fillSpBar(event.payload.sp);
+      };
+      const onImpactPoint = () => {
+        const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
+        this.fillSpBar(event.payload.stats.sp);
+        target.playEvent({ event: receiveDamageEvent });
       };
 
       const { attackTweenChain } = createAttackAnimation({
         unit: this,
         target,
+        onImpactPoint,
         onFinishAnimation,
       });
 
-      this.attackTweenChain = attackTweenChain;
+      this.currentAnimation = attackTweenChain;
     }
 
     if (event.type === "RECEIVED_DAMAGE") {
       onReceiveDamage(this, event);
       // temporary
-      if (event.payload.sp < 1000) {
-        this.fillSpBar(event.payload.sp);
-      }
+
+      this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
     }
 
     if (event.type === "CAST_SKILL") {
+      if (event.payload.skillName === "Healing Word") {
+        const target = targets?.[0];
+
+        const onFinishAnimation = () => {
+          if (onEnd) onEnd();
+        };
+        const onImpactPoint = () => {
+          this.fillSpBar(0);
+          const receiveHealEvent = event.subEvents?.find((e) => e.type === "RECEIVED_HEAL") as StepEvent;
+          target?.playEvent({ event: receiveHealEvent });
+        };
+
+        const { healingWordTween } = createHealingWordAnimation({
+          unit: this,
+          onImpactPoint,
+          onFinishAnimation,
+        });
+
+        this.currentAnimation = healingWordTween;
+      }
       this.fillSpBar(0);
     }
 
     // todo: combine logic of receive damage and heal
     if (event.type === "RECEIVED_HEAL") {
-      const newHp = event.payload.hp;
-      const hpHealed = event.payload.hpHealed;
+      const newHp = event.payload.stats.hp;
+      const hpHealed = event.payload.modifiers.hp;
       this.hpText.setText(`${newHp}`);
 
       this.scene.tweens.add({
@@ -293,13 +318,13 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   }
 
   public resumeAnimations() {
-    if (this.attackTweenChain?.isPaused()) {
-      this.attackTweenChain.resume();
+    if (this.currentAnimation?.isPaused()) {
+      this.currentAnimation.resume();
     }
   }
   public pauseAnimations() {
-    if (this.attackTweenChain?.isPlaying()) {
-      this.attackTweenChain.pause();
+    if (this.currentAnimation?.isPlaying()) {
+      this.currentAnimation.pause();
     }
   }
   public resumeApBar() {

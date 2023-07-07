@@ -63,20 +63,20 @@ export class Game {
       )
     ); */
 
-    /* this.boardManager.addToBoard(
+    this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_TWO,
         POSITION.BOT_BACK,
         Races.Elf,
-        Classes.Ranger,
+        Classes.Cleric,
         {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,
           head: Heads.PlateHelmet as ArmorData,
         }
       )
-    ); */
+    );
 
     this.boardManager.addToBoard(
       new Unit(
@@ -84,10 +84,10 @@ export class Game {
         OWNER.TEAM_TWO,
         POSITION.BOT_MID,
         Races.Elf,
-        Classes.Knight,
+        Classes.Cleric,
         {
           mainHandWeapon: Weapons.Wand as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
+          chest: Chests.ClothRobe as ArmorData,
           head: Heads.ClothHat as ArmorData,
         }
       )
@@ -145,7 +145,7 @@ export class Game {
       {
         name: unit1?.getName(),
         hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
-        armorHp: unit1.stats.armorHp + "/" + unit1.stats.maxArmorHp,
+        shield: unit1.stats.shield,
         def: unit1.stats.def,
         ap: unit1.stats.ap,
         attackSpeed: unit1.stats.attackSpeed,
@@ -162,7 +162,7 @@ export class Game {
       {
         name: unit2?.getName(),
         hp: unit2.stats.hp + "/" + unit2.stats.maxHp,
-        armorHp: unit2.stats.armorHp + "/" + unit2.stats.maxArmorHp,
+        shield: unit2.stats.shield,
         def: unit2.stats.def,
         ap: unit2.stats.ap,
         attackSpeed: unit2.stats.attackSpeed,
@@ -386,7 +386,8 @@ INSTANT EFFECTS
 
 DAMAGE = deal X dmg
 HEAL = heal X hp
-APPLY SHIELD = gain X armor
+APPLY SHIELD = gain X shield
+
 
 
 

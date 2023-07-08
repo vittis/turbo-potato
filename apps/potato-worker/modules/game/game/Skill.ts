@@ -1,31 +1,31 @@
 import { Unit } from "./Unit";
 
-/* export enum SKILL_EFFECT {
-  DAMAGE = "DAMAGE",
-  HEAL = "HEAL",
-  STUN = "STUN",
+export enum STATUS_EFFECT_TYPE {
+  REGEN = "REGEN",
+  FAST = "FAST", // BUFF ATTACK SPEED
+  STRONG = "STRONG", // BUFF ATTACK DAMAGE
+  ENERGIZED = "ENERGIZED", // BUFF SKILL REGEN
+  POISON = "POISON",
+  BLEED = "BLEED",
+  SLOW = "SLOW",
+  VULNERABLE = "VULNERABLE",
+  STURDY = "STURDY",
+  THORN = "THORN",
+  TAUNT = "TAUNT",
 }
 
-export enum SKILL_TARGET {
-  SELF = "SELF",
-  SINGLE_ENEMY = "SINGLE_ENEMY",
-  SINGLE_ALLY = "SINGLE_ALLY",
-  AREA_LINE = "AREA_LINE",
-  AREA_SQUARE = "AREA_SQUARE",
-  ALL_ALLIES = "ALL_ALLIES",
-  ALL_ENEMIES = "ALL_ENEMIES",
-} */
-
-export enum STATUS_EFFECT_TYPE {
+export enum DISABLE_TYPE {
   STUN = "STUN",
-  SILENCE = "SILENCE",
-  DISARM = "DISARM",
 }
 
 export interface StatusEffect {
   type: STATUS_EFFECT_TYPE;
-  durationInSteps: number;
-  value?: number;
+  value: number;
+}
+
+export interface Disable {
+  type: DISABLE_TYPE;
+  duration: number;
 }
 
 export enum SKILL {

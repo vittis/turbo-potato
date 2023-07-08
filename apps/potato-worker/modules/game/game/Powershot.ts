@@ -59,20 +59,19 @@ export class Powershot extends Skill {
     const targets = this.getTarget(unit, bm);
     const damageValue = this.getDamageValue(unit);
 
+    const receiveDamageEvents = targets.map((target) =>
+      target.receiveDamage(damageValue, unit.currentStep)
+    );
+
     unit.stepEvents.push({
-      id: unit.id,
+      actorId: unit.id,
       type: EVENT_TYPE.CAST_SKILL,
       payload: {
         skillName: this.name,
-        sp: unit.stats.sp,
-        currentAp: unit.stats.ap,
-        skillTarget: targets.map((target) => target.id),
+        targetsId: targets.map((target) => target.id),
       },
       step: unit.currentStep,
-    });
-
-    targets.forEach((target) => {
-      target.receiveDamage(damageValue, unit.currentStep);
+      subEvents: receiveDamageEvents,
     });
   }
 }

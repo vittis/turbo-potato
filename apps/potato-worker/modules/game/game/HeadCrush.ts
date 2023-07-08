@@ -1,5 +1,5 @@
-import { BoardManager, ROW } from "./BoardManager";
-import { STATUS_EFFECT_TYPE, Skill } from "./Skill";
+import { BoardManager } from "./BoardManager";
+import { DISABLE_TYPE, Skill } from "./Skill";
 import { EVENT_TYPE, Unit } from "./Unit";
 
 /*
@@ -33,20 +33,24 @@ export class HeadCrush extends Skill {
     const target = this.getTarget(unit, bm);
     const damageValue = this.getDamageValue(unit);
 
+    const receiveDamageEvent = target.receiveDamage(
+      damageValue,
+      unit.currentStep
+    );
+    const receiveDisableEvent = target.receiveDisable(
+      DISABLE_TYPE.STUN,
+      this.stunDurationInSteps
+    );
+
     unit.stepEvents.push({
-      id: unit.id,
+      actorId: unit.id,
       type: EVENT_TYPE.CAST_SKILL,
       payload: {
         skillName: this.name,
-        sp: unit.stats.sp,
-        currentAp: unit.stats.ap,
-        skillTarget: target.id,
+        targetsId: [target.id],
       },
       step: unit.currentStep,
+      subEvents: [receiveDamageEvent, receiveDisableEvent],
     });
-
-    target.receiveDamage(damageValue, unit.currentStep);
-
-    target.applyStatusEffect(STATUS_EFFECT_TYPE.STUN, this.stunDurationInSteps);
   }
 }

@@ -4,7 +4,7 @@ import { Multipliers } from "./data/config";
 import { HeadCrush } from "./HeadCrush";
 import { HealingWord } from "./HealingWord";
 import { Powershot } from "./Powershot";
-import { SKILL, STATUS_EFFECT_TYPE, StatusEffect } from "./Skill";
+import { Disable, DISABLE_TYPE, SKILL, StatusEffect } from "./Skill";
 import { WeaponData } from "./Weapon";
 
 export enum EVENT_TYPE {
@@ -12,8 +12,8 @@ export enum EVENT_TYPE {
   RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
   HAS_DIED = "HAS_DIED",
   CAST_SKILL = "CAST_SKILL",
-  IS_PREPARING_SKILL = "IS_PREPARING_SKILL",
   RECEIVED_HEAL = "RECEIVED_HEAL",
+  RECEIVED_DISABLE = "RECEIVED_DISABLE",
 }
 
 // use for better perfomance
@@ -111,6 +111,7 @@ export class Unit {
   skill: HealingWord | Powershot | HeadCrush;
 
   statusEffects: StatusEffect[] = [];
+  disables: Disable[] = [];
 
   constructor(
     bm: BoardManager,
@@ -222,15 +223,18 @@ export class Unit {
     this.currentStep = stepNumber;
     this.TEST_stepsCounter++;
 
-    this.checkStatusEffects();
+    this.decreaseDisables();
 
-    if (this.hasStatusEffect(STATUS_EFFECT_TYPE.STUN)) return;
+    if (this.hasDisable(DISABLE_TYPE.STUN)) return;
 
     this.stats.ap += this.stats.attackSpeed;
 
     if (this.canCastSkill()) {
       this.castSkill();
-    } else if (this.canAttack()) {
+      return;
+    }
+
+    if (this.canAttack()) {
       const attackTarget = this.bm.getClosestAttackTarget(this);
       if (!attackTarget) {
         throw Error("Undefined attack target for " + this.toString());
@@ -314,7 +318,7 @@ export class Unit {
     return receiveDamageEvent;
   }
 
-  receiveHeal(healValue: number, stepItWasHealed: number) {
+  receiveHeal(healValue: number) {
     const newHp = Math.min(this.stats.hp + healValue, this.stats.maxHp);
     const hpHealed = newHp - this.stats.hp;
 
@@ -363,7 +367,7 @@ export class Unit {
     return `${this.race.name} ${this.class.name}`;
   }
 
-  applyStatusEffect(
+  /* applyStatusEffect(
     type: STATUS_EFFECT_TYPE,
     durationInSteps: number,
     value?: number
@@ -411,6 +415,59 @@ export class Unit {
     return !!this.statusEffects.find(
       (statusEffect) => statusEffect.type === type
     );
+  } */
+
+  receiveDisable(type: DISABLE_TYPE, duration: number) {
+    const sameTypeAlreadyApplied = this.disables.find(
+      (disable) => disable.type === type
+    );
+
+    if (
+      (sameTypeAlreadyApplied && duration > sameTypeAlreadyApplied.duration) ||
+      !sameTypeAlreadyApplied
+    ) {
+      let newDisables = this.disables;
+
+      if (sameTypeAlreadyApplied) {
+        newDisables = this.disables.filter((disable) => disable.type !== type);
+      }
+
+      const newDisable = {
+        type,
+        duration,
+      };
+
+      newDisables.push(newDisable);
+
+      this.disables = newDisables;
+    }
+
+    // sepa só mandar evento dentro do if, e não enviar sub evento caso stun não seja aplicado?
+
+    const receiveDisableEvent: SubStepEvent = {
+      actorId: this.id,
+      type: EVENT_TYPE.RECEIVED_DISABLE,
+      payload: {
+        disableName: DISABLE_TYPE.STUN,
+        duration,
+      },
+    };
+
+    return receiveDisableEvent;
+  }
+
+  decreaseDisables() {
+    if (!this.disables) return;
+
+    this.disables.forEach((disable) => {
+      disable.duration -= 1;
+    });
+
+    this.disables = this.disables.filter((disable) => disable.duration > 0);
+  }
+
+  hasDisable(type: DISABLE_TYPE) {
+    return !!this.disables.find((disable) => disable.type === type);
   }
 
   public toString = (): string => {

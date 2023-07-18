@@ -255,12 +255,12 @@ export class Unit {
     if (event.type === EVENT_TYPE.RECEIVED_DISABLE) {
       if (event.payload.apply) {
         this.disables.push({
-          type: event.payload.type,
+          type: event.payload.disableName,
           duration: event.payload.stats.duration,
         });
       } else {
         this.disables.forEach((disable) => {
-          if (disable.type === event.payload.type) {
+          if (disable.type === event.payload.disableName) {
             disable.duration += event.payload.modifiers.duration;
           }
         });
@@ -415,8 +415,6 @@ export class Unit {
         modifiedDuration = 0;
       }
     }
-
-    console.log(sameTypeAlreadyApplied, !!!sameTypeAlreadyApplied);
 
     const receiveDisableEvent: SubStepEvent = {
       actorId: this.id,

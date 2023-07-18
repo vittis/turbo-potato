@@ -203,3 +203,81 @@ export function createHealingWordAnimation({
 
   return { healingWordTween };
 }
+export function createPowershotAnimation({
+  unit,
+  onImpactPoint,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  onImpactPoint: Function;
+  onFinishAnimation: Function;
+}) {
+  const powershotTween = unit.scene.tweens.chain({
+    delay: 50,
+    targets: unit,
+    onComplete: () => {
+      unit.scene.time.delayedCall(150, onFinishAnimation);
+    },
+    tweens: [
+      // pulinho
+      {
+        onStart: () => {
+          unit.sprite.setTint(0x7914a8);
+        },
+        targets: unit.sprite,
+        y: unit.sprite.y - 14,
+        duration: 100,
+        yoyo: true,
+        repeat: 2,
+        completeDelay: 70,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+        onComplete: () => {
+          unit.sprite.clearTint();
+
+          onImpactPoint();
+        },
+      },
+    ],
+  });
+
+  return { powershotTween };
+}
+export function createHeadCrushAnimation({
+  unit,
+  onImpactPoint,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  onImpactPoint: Function;
+  onFinishAnimation: Function;
+}) {
+  const headCrushTween = unit.scene.tweens.chain({
+    delay: 50,
+    targets: unit,
+    onComplete: () => {
+      unit.scene.time.delayedCall(150, onFinishAnimation);
+    },
+    tweens: [
+      // pulinho
+      {
+        onStart: () => {
+          unit.sprite.setTint(0x054f57);
+        },
+        targets: unit.sprite,
+        y: unit.sprite.y - 14,
+        duration: 100,
+        yoyo: true,
+        repeat: 2,
+        completeDelay: 70,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+        onComplete: () => {
+          unit.sprite.clearTint();
+
+          onImpactPoint();
+        },
+      },
+    ],
+  });
+
+  return { headCrushTween };
+}

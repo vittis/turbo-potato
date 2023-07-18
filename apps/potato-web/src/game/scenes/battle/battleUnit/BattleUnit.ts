@@ -2,7 +2,12 @@ import Phaser from "phaser";
 import { GAME_LOOP_SPEED, StepEvent, SubStepEvent } from "../BattleScene";
 import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import { onReceiveDamage } from "./BattleUnitEventHandler";
-import { createAttackAnimation, createHealingWordAnimation } from "./BattleUnitAnimations";
+import {
+  createAttackAnimation,
+  createHeadCrushAnimation,
+  createHealingWordAnimation,
+  createPowershotAnimation,
+} from "./BattleUnitAnimations";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
@@ -190,6 +195,56 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
         this.currentAnimation = healingWordTween;
       }
+
+      if (event.payload.skillName === "Powershot") {
+        const onFinishAnimation = () => {
+          if (onEnd) onEnd();
+        };
+        const onImpactPoint = () => {
+          this.fillSpBar(0);
+          const receiveDamageEvents = targets?.map(
+            (target) =>
+              event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE" && e.actorId === target.id) as StepEvent
+          );
+
+          if (receiveDamageEvents) {
+            receiveDamageEvents.forEach((e) => {
+              const target = targets?.find((target) => target.id === e.actorId);
+              if (target) target.playEvent({ event: e });
+            });
+          }
+        };
+
+        const { powershotTween } = createPowershotAnimation({
+          unit: this,
+          onImpactPoint,
+          onFinishAnimation,
+        });
+
+        this.currentAnimation = powershotTween;
+      }
+
+      if (event.payload.skillName === "Head Crush") {
+        const target = targets?.[0];
+
+        const onFinishAnimation = () => {
+          if (onEnd) onEnd();
+        };
+        const onImpactPoint = () => {
+          this.fillSpBar(0);
+          const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
+          target?.playEvent({ event: receiveDamageEvent });
+        };
+
+        const { headCrushTween } = createHeadCrushAnimation({
+          unit: this,
+          onImpactPoint,
+          onFinishAnimation,
+        });
+
+        this.currentAnimation = headCrushTween;
+      }
+
       this.fillSpBar(0);
     }
 

@@ -24,7 +24,7 @@ export class Game {
         OWNER.TEAM_ONE,
         POSITION.TOP_FRONT,
         Races.Human,
-        Classes.Cleric,
+        Classes.Knight,
         {
           mainHandWeapon: Weapons.Dagger as WeaponData,
           chest: Chests.LeatherShirt as ArmorData,
@@ -69,7 +69,7 @@ export class Game {
         OWNER.TEAM_TWO,
         POSITION.BOT_BACK,
         Races.Elf,
-        Classes.Cleric,
+        Classes.Knight,
         {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,
@@ -84,7 +84,7 @@ export class Game {
         OWNER.TEAM_TWO,
         POSITION.BOT_MID,
         Races.Elf,
-        Classes.Cleric,
+        Classes.Knight,
         {
           mainHandWeapon: Weapons.Wand as WeaponData,
           chest: Chests.ClothRobe as ArmorData,
@@ -141,7 +141,6 @@ export class Game {
     let currentStep = 1;
     do {
       this.boardManager.getAllAliveUnits().forEach((unit) => {
-        console.log("unitt", unit, unit.step, currentStep);
         unit.step(currentStep);
       });
 

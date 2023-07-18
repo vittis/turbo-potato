@@ -96,6 +96,42 @@ export class Game {
     // this.boardManager.printBoard();
   }
 
+  /* 
+    Function to sort events by type in order CAST_SKILL -> ATTACK
+    Maybe add other criterias in the future, for example should unit x cast skill before unit y?
+  */
+  sortEventsByType(events: any[]) {
+    events.sort(function (a, b) {
+      if (a.type === "CAST_SKILL" && b.type === "ATTACK") {
+        return -1;
+      } else if (a.type === "ATTACK" && b.type === "CAST_SKILL") {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    return events;
+  }
+
+  executeStepEvents(events: any[]) {
+    events.forEach((event) => {
+      this.boardManager
+        .getUnitById(event.actorId)
+        .applyStatsModifiersAfterEvent(event);
+
+      if (event.subEvents) {
+        event.subEvents.forEach((subEvent: any) => {
+          this.boardManager
+            .getUnitById(subEvent.actorId)
+            .applyStatsModifiersAfterEvent(subEvent);
+        });
+      }
+    });
+
+    return events;
+  }
+
   async startGame() {
     const serializedUnits = this.boardManager
       .getAllUnits()
@@ -104,24 +140,33 @@ export class Game {
 
     let currentStep = 1;
     do {
-      this.boardManager.getAllUnits().forEach((unit) => {
-        if (!unit.isDead) {
-          unit.step(currentStep);
-        }
+      this.boardManager.getAllAliveUnits().forEach((unit) => {
+        console.log("unitt", unit, unit.step, currentStep);
+        unit.step(currentStep);
       });
 
-      this.boardManager.getAllUnits().forEach((unit) => {
-        if (!unit.isDead) {
-          this.eventHistory.push(...unit.serializeEvents());
+      const stepEvents: any[] = [];
 
-          if (!unit.isDead && unit.hasDied()) {
-            unit.markAsDead();
-            this.eventHistory.push({
-              id: unit.id,
-              type: EVENT_TYPE.HAS_DIED,
-              step: currentStep,
-            });
-          }
+      this.boardManager.getAllAliveUnits().forEach((unit) => {
+        stepEvents.push(...unit.serializeEvents());
+      });
+
+      const orderedEvents = this.sortEventsByType(stepEvents);
+
+      this.executeStepEvents(orderedEvents);
+
+      orderedEvents.forEach((event) => {
+        this.eventHistory.push(event);
+      });
+
+      this.boardManager.getAllAliveUnits().forEach((unit) => {
+        if (!unit.isDead && unit.hasDied()) {
+          unit.markAsDead();
+          this.eventHistory.push({
+            actorId: unit.id,
+            type: EVENT_TYPE.HAS_DIED,
+            step: currentStep,
+          });
         }
       });
 

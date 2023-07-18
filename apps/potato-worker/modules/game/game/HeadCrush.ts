@@ -33,10 +33,7 @@ export class HeadCrush extends Skill {
     const target = this.getTarget(unit, bm);
     const damageValue = this.getDamageValue(unit);
 
-    const receiveDamageEvent = target.receiveDamage(
-      damageValue,
-      unit.currentStep
-    );
+    const receiveDamageEvent = target.receiveDamage(damageValue);
     const receiveDisableEvent = target.receiveDisable(
       DISABLE_TYPE.STUN,
       this.stunDurationInSteps
@@ -48,6 +45,9 @@ export class HeadCrush extends Skill {
       payload: {
         skillName: this.name,
         targetsId: [target.id],
+        modifiers: {
+          sp: unit.stats.sp * -1,
+        },
       },
       step: unit.currentStep,
       subEvents: [receiveDamageEvent, receiveDisableEvent],

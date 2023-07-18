@@ -196,7 +196,6 @@ export function createHealingWordAnimation({
           unit.sprite.clearTint();
 
           onImpactPoint();
-          onFinishAnimation();
         },
       },
     ],

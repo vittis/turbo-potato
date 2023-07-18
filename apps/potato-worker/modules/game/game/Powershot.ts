@@ -60,7 +60,7 @@ export class Powershot extends Skill {
     const damageValue = this.getDamageValue(unit);
 
     const receiveDamageEvents = targets.map((target) =>
-      target.receiveDamage(damageValue, unit.currentStep)
+      target.receiveDamage(damageValue)
     );
 
     unit.stepEvents.push({
@@ -69,6 +69,9 @@ export class Powershot extends Skill {
       payload: {
         skillName: this.name,
         targetsId: targets.map((target) => target.id),
+        modifiers: {
+          sp: unit.stats.sp * -1,
+        },
       },
       step: unit.currentStep,
       subEvents: receiveDamageEvents,

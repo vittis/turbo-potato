@@ -123,15 +123,6 @@ export class Battle extends Phaser.Scene {
   playEvents(step: number) {
     const eventsOnThisStep = this.eventHistory.filter((e) => e.step === step);
 
-    const orderedEvents = eventsOnThisStep.sort((a, b) => {
-      const typeOrder = {
-        ATTACK: 0,
-        CAST_SKILL: 1,
-        HAS_DIED: 2,
-      };
-      return typeOrder[a.type] - typeOrder[b.type];
-    });
-
     const eventPile: any[] = [];
 
     const onEndAnimation = () => {
@@ -143,7 +134,7 @@ export class Battle extends Phaser.Scene {
       }
     };
 
-    orderedEvents.forEach((event) => {
+    eventsOnThisStep.forEach((event) => {
       const unit = this.units.find((unit) => unit.id === event.actorId);
       if (!unit) {
         throw Error(`couldnt find unit id: ${event.actorId}`);

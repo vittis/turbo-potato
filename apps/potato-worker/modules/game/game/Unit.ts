@@ -239,21 +239,45 @@ export class Unit {
       if (!attackTarget) {
         throw Error("Undefined attack target for " + this.toString());
       }
-      this.stats.ap -= 1000;
       this.attack(attackTarget);
     }
   }
 
+  applyStatsModifiersAfterEvent(event: any) {
+    if (event.payload.modifiers?.ap)
+      this.stats.ap += event.payload.modifiers.ap;
+    if (event.payload.modifiers?.sp)
+      this.stats.sp += event.payload.modifiers.sp;
+    if (event.payload.modifiers?.hp)
+      this.stats.hp += event.payload.modifiers.hp;
+    if (event.payload.modifiers?.shield)
+      this.stats.shield += event.payload.modifiers.shield;
+    if (event.type === EVENT_TYPE.RECEIVED_DISABLE) {
+      if (event.payload.apply) {
+        this.disables.push({
+          type: event.payload.type,
+          duration: event.payload.stats.duration,
+        });
+      } else {
+        this.disables.forEach((disable) => {
+          if (disable.type === event.payload.type) {
+            disable.duration += event.payload.modifiers.duration;
+          }
+        });
+      }
+    }
+    if (event.type === EVENT_TYPE.CAST_SKILL) this.stats.sp = 0;
+  }
+
   attack(target: Unit) {
+    let newSp = this.stats.sp;
+
     const spGained =
       this.stats.skillRegen * Multipliers.srAtkBase +
       this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
-    this.stats.sp += spGained;
+    newSp += spGained;
 
-    const receiveDamageEvent = target.receiveDamage(
-      this.stats.attackDamage,
-      this.currentStep
-    );
+    const receiveDamageEvent = target.receiveDamage(this.stats.attackDamage);
 
     this.stepEvents.push({
       actorId: this.id,
@@ -262,9 +286,10 @@ export class Unit {
         targetsId: [target.id],
         stats: {
           ap: this.stats.ap,
-          sp: this.stats.sp,
+          sp: newSp,
         },
         modifiers: {
+          ap: -1000, // sepa criar variavel pra isso
           sp: spGained,
         },
       },
@@ -276,40 +301,45 @@ export class Unit {
   castSkill() {
     if (this.skill.shouldCast(this, this.bm)) {
       this.skill.cast(this, this.bm);
-      this.skill.afterExecute(this);
+      //this.skill.afterExecute(this);
     }
   }
 
-  receiveDamage(damage: number, stepItWasAttacked: number) {
+  receiveDamage(damage: number) {
+    let newHp = this.stats.hp;
+    let newShield = this.stats.shield;
+    let newSp = this.stats.sp;
+
     const finalDamage = Math.round((damage * 100) / (this.stats.def + 100));
 
     if (this.stats.shield > 0) {
-      this.stats.shield -= finalDamage;
+      newShield -= finalDamage;
       if (this.stats.shield < 0) {
         // If the armor is now depleted, apply any remaining damage to the unit's HP
-        this.stats.hp += this.stats.shield;
-        this.stats.shield = 0;
+        newHp += this.stats.shield;
+        newShield = 0;
       }
     } else {
-      this.stats.hp -= Math.round(finalDamage);
+      newHp -= Math.round(finalDamage);
     }
 
     const spGained =
       this.stats.skillRegen * Multipliers.srReceiveDamageBase +
       this.stats.skillRegen * damage * Multipliers.srReceiveDamageMult;
-    this.stats.sp += spGained;
+    newSp += spGained;
 
     const receiveDamageEvent: SubStepEvent = {
       actorId: this.id,
       type: EVENT_TYPE.RECEIVED_DAMAGE,
       payload: {
         stats: {
-          hp: this.stats.hp,
-          shield: this.stats.shield,
-          sp: this.stats.sp,
+          hp: newHp,
+          shield: newShield,
+          sp: newSp,
         },
         modifiers: {
-          hp: finalDamage * -1,
+          hp: (this.stats.hp - newHp) * -1,
+          shield: (this.stats.shield - newShield) * -1,
           sp: spGained,
         },
       },
@@ -319,17 +349,19 @@ export class Unit {
   }
 
   receiveHeal(healValue: number) {
-    const newHp = Math.min(this.stats.hp + healValue, this.stats.maxHp);
-    const hpHealed = newHp - this.stats.hp;
+    let newHp = this.stats.hp;
 
-    this.stats.hp = newHp;
+    const hpAfterHeal = Math.min(this.stats.hp + healValue, this.stats.maxHp);
+    const hpHealed = hpAfterHeal - this.stats.hp;
+
+    newHp = hpAfterHeal;
 
     const receiveHealEvent: SubStepEvent = {
       actorId: this.id,
       type: EVENT_TYPE.RECEIVED_HEAL,
       payload: {
         stats: {
-          hp: this.stats.hp,
+          hp: newHp,
         },
         modifiers: {
           hp: hpHealed,
@@ -367,89 +399,37 @@ export class Unit {
     return `${this.race.name} ${this.class.name}`;
   }
 
-  /* applyStatusEffect(
-    type: STATUS_EFFECT_TYPE,
-    durationInSteps: number,
-    value?: number
-  ) {
-    const sameTypeAlreadyApplied = this.statusEffects.find(
-      (statusEffect) => statusEffect.type === type
-    );
-
-    if (
-      (sameTypeAlreadyApplied &&
-        durationInSteps > sameTypeAlreadyApplied.durationInSteps) ||
-      !sameTypeAlreadyApplied
-    ) {
-      let newArrStatusEffects = this.statusEffects;
-
-      if (sameTypeAlreadyApplied) {
-        newArrStatusEffects = this.statusEffects.filter(
-          (statusEffect) => statusEffect.type !== type
-        );
-      }
-
-      const newStatusEffect = {
-        type,
-        durationInSteps,
-        ...(value && { value }),
-      };
-
-      newArrStatusEffects.push(newStatusEffect);
-
-      this.statusEffects = newArrStatusEffects;
-    }
-  }
-
-  checkStatusEffects() {
-    this.statusEffects.forEach((statusEffect) => {
-      statusEffect.durationInSteps -= 1;
-    });
-
-    this.statusEffects = this.statusEffects.filter(
-      (statusEffect) => statusEffect.durationInSteps > 0
-    );
-  }
-
-  hasStatusEffect(type: STATUS_EFFECT_TYPE) {
-    return !!this.statusEffects.find(
-      (statusEffect) => statusEffect.type === type
-    );
-  } */
-
   receiveDisable(type: DISABLE_TYPE, duration: number) {
+    let newDuration = duration;
+    let modifiedDuration = duration;
+
     const sameTypeAlreadyApplied = this.disables.find(
       (disable) => disable.type === type
     );
 
-    if (
-      (sameTypeAlreadyApplied && duration > sameTypeAlreadyApplied.duration) ||
-      !sameTypeAlreadyApplied
-    ) {
-      let newDisables = this.disables;
-
-      if (sameTypeAlreadyApplied) {
-        newDisables = this.disables.filter((disable) => disable.type !== type);
+    if (sameTypeAlreadyApplied) {
+      if (duration > sameTypeAlreadyApplied.duration) {
+        modifiedDuration -= sameTypeAlreadyApplied.duration;
+      } else {
+        newDuration = sameTypeAlreadyApplied.duration;
+        modifiedDuration = 0;
       }
-
-      const newDisable = {
-        type,
-        duration,
-      };
-
-      newDisables.push(newDisable);
-
-      this.disables = newDisables;
     }
 
-    // sepa só mandar evento dentro do if, e não enviar sub evento caso stun não seja aplicado?
+    console.log(sameTypeAlreadyApplied, !!!sameTypeAlreadyApplied);
 
     const receiveDisableEvent: SubStepEvent = {
       actorId: this.id,
       type: EVENT_TYPE.RECEIVED_DISABLE,
       payload: {
         disableName: DISABLE_TYPE.STUN,
-        duration,
+        apply: !!!sameTypeAlreadyApplied, //check if working
+        stats: {
+          duration: newDuration,
+        },
+        modifiers: {
+          duration: modifiedDuration,
+        },
       },
     };
 

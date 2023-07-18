@@ -87,6 +87,14 @@ export class BoardManager {
     return this.board[owner].filter((tile) => !!tile) as Unit[];
   }
 
+  getAllAliveUnits(): Unit[] {
+    return this.getAllUnits().filter((unit) => !unit?.isDead) as Unit[];
+  }
+
+  getAllDeadUnits(): Unit[] {
+    return this.getAllUnits().filter((unit) => unit?.isDead) as Unit[];
+  }
+
   getEnemyOwner(owner: OWNER): OWNER {
     if (owner === OWNER.TEAM_ONE) return OWNER.TEAM_TWO;
     else return OWNER.TEAM_ONE;
@@ -121,6 +129,14 @@ export class BoardManager {
     );
 
     return unitsInColumn;
+  }
+
+  getUnitById(id: string): Unit {
+    const unit = this.getAllUnits().find((unit) => unit.id === id);
+    if (!unit) {
+      throw Error(`Tried to getUnitById ${id} that doesnt exist`);
+    }
+    return unit;
   }
 
   getClosestAttackTarget(unit: Unit): Unit {

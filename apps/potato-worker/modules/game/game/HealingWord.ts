@@ -44,7 +44,7 @@ export class HealingWord extends Skill {
     const target = this.getTarget(unit, bm);
     const healValue = this.getHealValue(unit);
 
-    const receiveHealEvent = unit.receiveHeal(healValue, unit.currentStep);
+    const receiveHealEvent = unit.receiveHeal(healValue);
 
     unit.stepEvents.push({
       actorId: unit.id,
@@ -52,6 +52,9 @@ export class HealingWord extends Skill {
       payload: {
         skillName: this.name,
         targetsId: [target.id],
+        modifiers: {
+          sp: unit.stats.sp * -1,
+        },
       },
       step: unit.currentStep,
       subEvents: [receiveHealEvent],

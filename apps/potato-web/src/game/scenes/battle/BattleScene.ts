@@ -170,6 +170,8 @@ export class Battle extends Phaser.Scene {
     const unit = eventPile[0].unit;
     unit.playEvent(eventPile[0]);
 
+    console.log(eventPile[0].event.step);
+
     const isLastStep = step === this.totalSteps;
     if (isLastStep) {
       this.time.addEvent({

@@ -44,7 +44,7 @@ export class HealingWord extends Skill {
     const target = this.getTarget(unit, bm);
     const healValue = this.getHealValue(unit);
 
-    const receiveHealEvent = unit.receiveHeal(healValue);
+    const receiveHealEvent = target.receiveHeal(healValue);
 
     unit.stepEvents.push({
       actorId: unit.id,

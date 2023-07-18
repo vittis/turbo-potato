@@ -24,7 +24,22 @@ export class Game {
         OWNER.TEAM_ONE,
         POSITION.TOP_FRONT,
         Races.Human,
-        Classes.Knight,
+        Classes.Ranger,
+        {
+          mainHandWeapon: Weapons.Dagger as WeaponData,
+          chest: Chests.PlateMail as ArmorData,
+          head: Heads.LeatherHat as ArmorData,
+        }
+      )
+    );
+
+    this.boardManager.addToBoard(
+      new Unit(
+        this.boardManager,
+        OWNER.TEAM_ONE,
+        POSITION.BOT_BACK,
+        Races.Dwarf,
+        Classes.Ranger,
         {
           mainHandWeapon: Weapons.Dagger as WeaponData,
           chest: Chests.LeatherShirt as ArmorData,
@@ -69,7 +84,7 @@ export class Game {
         OWNER.TEAM_TWO,
         POSITION.BOT_BACK,
         Races.Elf,
-        Classes.Knight,
+        Classes.Cleric,
         {
           mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,

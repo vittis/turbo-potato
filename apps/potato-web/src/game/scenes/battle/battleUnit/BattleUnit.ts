@@ -197,6 +197,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }
 
       if (event.payload.skillName === "Powershot") {
+        const target = targets?.[0];
+
+        if (!target) {
+          throw new Error("Attack target is undefined");
+        }
+
         const onFinishAnimation = () => {
           if (onEnd) onEnd();
         };
@@ -215,17 +221,22 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           }
         };
 
-        const { powershotTween } = createPowershotAnimation({
+        const { powershotAnimation } = createPowershotAnimation({
           unit: this,
+          target,
           onImpactPoint,
           onFinishAnimation,
         });
 
-        this.currentAnimation = powershotTween;
+        this.currentAnimation = powershotAnimation;
       }
 
       if (event.payload.skillName === "Head Crush") {
         const target = targets?.[0];
+
+        if (!target) {
+          throw new Error("Attack target is undefined");
+        }
 
         const onFinishAnimation = () => {
           if (onEnd) onEnd();
@@ -236,13 +247,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           target?.playEvent({ event: receiveDamageEvent });
         };
 
-        const { headCrushTween } = createHeadCrushAnimation({
+        const { headCrushAnimation } = createHeadCrushAnimation({
           unit: this,
+          target,
           onImpactPoint,
           onFinishAnimation,
         });
 
-        this.currentAnimation = headCrushTween;
+        this.currentAnimation = headCrushAnimation;
       }
 
       this.fillSpBar(0);

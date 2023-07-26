@@ -183,4 +183,22 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
       }
     });
   }
+
+  addWiggle(dataUnit) {
+    this.iterate((child) => {
+      if (child instanceof Phaser.GameObjects.Sprite) {
+        const xWiggle = dataUnit.owner === 0 ? { from: -0.004, to: 0.004 } : { from: 0.004, to: 0 };
+        const fx = child.preFX?.addDisplacement("distort", 0);
+        this.scene.tweens.add({
+          targets: fx,
+          x: xWiggle,
+          y: { from: -0.0113, to: 0.0113 },
+          yoyo: true,
+          loop: -1,
+          duration: 500,
+          ease: Phaser.Math.Easing.Sine.InOut,
+        });
+      }
+    });
+  }
 }

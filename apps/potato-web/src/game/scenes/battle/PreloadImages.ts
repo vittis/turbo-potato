@@ -17,6 +17,8 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
     frameWidth: 192,
     frameHeight: 192,
   });
+
+  scene.load.image("distort", "assets/noisesmall2.png");
 }
 
 export function loadCharacterAssets(scene: Phaser.Scene) {

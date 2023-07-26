@@ -188,32 +188,46 @@ export function setupUnitAnimations(scene: Phaser.Scene) {
 export function setupUnitPointerEvents(unit: BattleUnit) {
   unit.sprite.setInteractive();
 
-  unit.sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-    if (!unit.isSelected) {
-      useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
-    } else {
-      useGameStore.getState().setSelectedEntity(null);
-    }
-  });
+  unit.sprite.iterate((child) => {
+    // Enable input events for the child object
+    child.setInteractive();
 
-  unit.sprite.on("pointerup", () => {
-    if (!unit.isSelected) {
-      // unit.sprite.clearTint();
-    }
-  });
+    child.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      if (!unit.isSelected) {
+        useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
+      } else {
+        useGameStore.getState().setSelectedEntity(null);
+      }
+    });
 
-  unit.sprite.on("pointerover", () => {
-    // unit.sprite.setTint(0xdddd44);
-    unit.scene.game.canvas.style.cursor = "pointer";
-  });
+    child.on("pointerup", () => {
+      if (!unit.isSelected) {
+        unit.sprite.iterate((child) => {
+          child.clearTint(0xdddd44);
+        });
+      }
+    });
 
-  unit.sprite.on("pointerout", () => {
-    if (!unit.isSelected) {
-      // unit.sprite.clearTint();
-    } else {
-      // unit.sprite.setTint(0xffff44);
-    }
-    unit.scene.game.canvas.style.cursor = "default";
+    // Add pointerover event to the child object
+    child.on("pointerover", () => {
+      unit.scene.game.canvas.style.cursor = "pointer";
+      unit.sprite.iterate((child) => {
+        child.setTint(0xdddd44);
+      });
+    });
+
+    child.on("pointerout", () => {
+      if (!unit.isSelected) {
+        unit.sprite.iterate((child) => {
+          child.clearTint(0xdddd44);
+        });
+      } else {
+        unit.sprite.iterate((child) => {
+          child.setTint(0xdddd44);
+        });
+      }
+      unit.scene.game.canvas.style.cursor = "default";
+    });
   });
 }
 

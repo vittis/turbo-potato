@@ -44,8 +44,6 @@ export class Battle extends Phaser.Scene {
   isGamePaused = true;
   isPlayingEventAnimation = false;
 
-  graphics: any;
-
   constructor() {
     super("GameScene");
   }
@@ -73,6 +71,40 @@ export class Battle extends Phaser.Scene {
     this.board = board;
     console.log(board.x, board.y);
     // board.add(this.text);
+
+    /* this.container = this.add.container(200, 300).setVisible(false);
+    const sprite1 = this.add.sprite(0, 0, "cleric");
+    const sprite2 = this.add.sprite(20, 0, "cleric");
+    this.container.add([sprite1, sprite2]);
+    this.rt = this.add.renderTexture(300, 300, 800, 600);
+    this.rt.draw(this.container);
+    this.rt.saveTexture("kkk");
+    const oi = this.add.image(500, 50, "kkk");
+    oi.setFlipX(true);
+    oi.preFX?.addGlow(0x00ffff, 10); */
+
+    this.time.delayedCall(3000, () => {
+      const oi = this.add.image(200, 200, "00");
+      oi.preFX?.addGlow(0x00ffff, 4);
+      const oi2 = this.add.image(300, 200, "15");
+      oi2.preFX?.addGlow(0x00ffff, 4);
+      const oi3 = this.add.image(400, 200, "14");
+      oi3.preFX?.addGlow(0x00ffff, 4);
+
+      const xWiggle = { from: -0.004, to: 0.004 };
+      const fx = oi.preFX?.addDisplacement("distort", 0);
+      this.tweens.add({
+        targets: fx,
+        x: xWiggle,
+        y: { from: -0.0113, to: 0.0113 },
+        yoyo: true,
+        loop: -1,
+        duration: 500,
+        ease: Phaser.Math.Easing.Sine.InOut,
+      });
+    });
+
+    // this.textures.generate("kkk", this.rt);
 
     queryClient
       .fetchQuery({

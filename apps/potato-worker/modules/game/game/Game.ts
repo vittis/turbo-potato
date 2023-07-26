@@ -26,7 +26,7 @@ export class Game {
         Races.Human,
         Classes.Ranger,
         {
-          mainHandWeapon: Weapons.Dagger as WeaponData,
+          mainHandWeapon: Weapons.Greatsword as WeaponData,
           chest: Chests.PlateMail as ArmorData,
           head: Heads.LeatherHat as ArmorData,
         }

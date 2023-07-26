@@ -52,14 +52,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
-    /* this.sprite = scene.add.sprite(0, 0, texture); */
-    // this.sprite.setScale(0.5, 0.5);
-    /* if (dataUnit.owner === 0) {
-      this.sprite.setFlipX(true);
-    }
- */
-    // const quadrado = scene.add.sprite(x, y, "cleric");
-    // this.add(quadrado);
     this.sprite = new BattleUnitSprite(scene, x, y, dataUnit);
 
     if (dataUnit.owner === 0) {
@@ -81,6 +73,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     shadowContainer.setPosition(this.sprite.x + spriteOffsetX, this.sprite.y + 63);
     this.add(shadowContainer);
     this.add(this.sprite);
+
+    const rt = scene.make.renderTexture({ width: 300, height: 300 }, false);
+    rt.draw(this.sprite, 200, 200);
+    rt.saveTexture(`${dataUnit.id}`);
+    this.sprite.addWiggle(dataUnit);
+
     //this.add(this.sprite);
 
     // idle animation, tween scale

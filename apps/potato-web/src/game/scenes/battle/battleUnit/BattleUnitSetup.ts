@@ -4,10 +4,12 @@ import { BattleUnit } from "./BattleUnit";
 export const BAR_WIDTH = 45;
 
 export function createBars(unit: BattleUnit) {
+  const spriteOffsetX = unit.owner === 0 ? -4 : 4;
+
   const width = BAR_WIDTH;
   const height = 7;
   const borderWidth = 3;
-  const yOffset = 50 + 10;
+  const yOffset = 50 + 10 + 10;
   const spBarHeight = 5;
   const spBarYOffset = 9;
   const apBarHeight = 5;
@@ -17,7 +19,7 @@ export function createBars(unit: BattleUnit) {
 
   const shieldBar = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x + borderWidth / 2 - width / 2,
+    unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + borderWidth / 2,
     shieldBarWidth,
     height,
@@ -26,7 +28,7 @@ export function createBars(unit: BattleUnit) {
 
   const hpBar = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x + borderWidth / 2 - width / 2,
+    unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + borderWidth / 2,
     width,
     height,
@@ -35,7 +37,7 @@ export function createBars(unit: BattleUnit) {
 
   const hpBarBorder = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x - width / 2,
+    unit.sprite.x - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset,
     width + borderWidth,
     height + borderWidth,
@@ -46,7 +48,7 @@ export function createBars(unit: BattleUnit) {
 
   const spBar = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x + borderWidth / 2 - width / 2,
+    unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + borderWidth / 2 + spBarYOffset,
     0,
     spBarHeight,
@@ -55,7 +57,7 @@ export function createBars(unit: BattleUnit) {
 
   const spRectBorder = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x - width / 2,
+    unit.sprite.x - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + spBarYOffset,
     width + borderWidth,
     spBarHeight + borderWidth,
@@ -66,7 +68,7 @@ export function createBars(unit: BattleUnit) {
 
   const apBar = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x + borderWidth / 2 - width / 2,
+    unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + borderWidth / 2 + apBarYOffset,
     0,
     apBarHeight,
@@ -75,7 +77,7 @@ export function createBars(unit: BattleUnit) {
 
   const apRectBorder = new Phaser.GameObjects.Rectangle(
     unit.scene,
-    unit.sprite.x - width / 2,
+    unit.sprite.x - width / 2 + spriteOffsetX,
     unit.sprite.y + yOffset + apBarYOffset,
     width + borderWidth,
     apBarHeight + borderWidth,
@@ -196,20 +198,20 @@ export function setupUnitPointerEvents(unit: BattleUnit) {
 
   unit.sprite.on("pointerup", () => {
     if (!unit.isSelected) {
-      unit.sprite.clearTint();
+      // unit.sprite.clearTint();
     }
   });
 
   unit.sprite.on("pointerover", () => {
-    unit.sprite.setTint(0xdddd44);
+    // unit.sprite.setTint(0xdddd44);
     unit.scene.game.canvas.style.cursor = "pointer";
   });
 
   unit.sprite.on("pointerout", () => {
     if (!unit.isSelected) {
-      unit.sprite.clearTint();
+      // unit.sprite.clearTint();
     } else {
-      unit.sprite.setTint(0xffff44);
+      // unit.sprite.setTint(0xffff44);
     }
     unit.scene.game.canvas.style.cursor = "default";
   });
@@ -217,9 +219,9 @@ export function setupUnitPointerEvents(unit: BattleUnit) {
 
 export function getUnitPos(position, owner) {
   const UNIT_OFFSET = {
-    x: 82,
-    y: 60,
-    tile: 108,
+    x: 37,
+    y: 29,
+    tile: 54,
   };
   const getUnitPosX = () => {
     let tileOffset;
@@ -230,7 +232,7 @@ export function getUnitPos(position, owner) {
   };
   const getUnitPosY = () => {
     const isTop = position === 0 || position === 1 || position === 2 ? true : false;
-    return UNIT_OFFSET.y * (isTop ? -1 : 1) - 20;
+    return UNIT_OFFSET.y * (isTop ? -1 : 1) - 15;
   };
   return { x: getUnitPosX(), y: getUnitPosY() };
 }

@@ -44,6 +44,8 @@ export class Battle extends Phaser.Scene {
   isGamePaused = true;
   isPlayingEventAnimation = false;
 
+  graphics: any;
+
   constructor() {
     super("GameScene");
   }
@@ -53,6 +55,11 @@ export class Battle extends Phaser.Scene {
   }
 
   create() {
+    this.text = this.add.text(100, 50, "Move the mouse", {
+      font: "16px Courier",
+      color: "black",
+    });
+    this.text.setOrigin(0.5);
     // zuera de particula
     const graphics = this.add.graphics();
     graphics.fillStyle(0xffffff);
@@ -64,6 +71,8 @@ export class Battle extends Phaser.Scene {
 
     const { board } = setupBattle(this);
     this.board = board;
+    console.log(board.x, board.y);
+    // board.add(this.text);
 
     queryClient
       .fetchQuery({
@@ -249,5 +258,23 @@ export class Battle extends Phaser.Scene {
 
       this.timeEventsHistory.push(timeEvent);
     });
+  }
+
+  update(time: number, delta: number): void {
+    if (this.units.length === 0) return;
+    const pointer = this.input.activePointer;
+    this.text.setText([
+      "mouse: " + Math.ceil(pointer.x) + "," + Math.ceil(pointer.y),
+      /* "warrior: " +
+            Math.ceil(this.warrior.parentContainer.x + this.warrior.x) +
+            "," +
+            Math.ceil(this.warrior.parentContainer.y + this.warrior.y), */
+      "board: " + Math.ceil(this.board.x) + "," + Math.ceil(this.board.y),
+      "ranger: " + Math.ceil(this.units[0].x) + "," + Math.ceil(this.units[0].y),
+      "ranger: " +
+        Math.ceil(this.units[0].parentContainer.x + this.units[0].x) +
+        "," +
+        Math.ceil(this.units[0].parentContainer.y + this.units[0].y),
+    ]);
   }
 }

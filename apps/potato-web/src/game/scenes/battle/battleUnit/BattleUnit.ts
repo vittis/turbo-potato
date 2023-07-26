@@ -9,12 +9,10 @@ import {
   createPowershotAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
-import { BattleUnitSpriteContainer } from "./BattleUnitSpriteContainer";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
-  public sprite: Phaser.GameObjects.Sprite;
-  public spriteContainer: Phaser.GameObjects.Container;
+  public sprite!: BattleUnitSprite;
   public hpBar: Phaser.GameObjects.Rectangle;
   public shieldBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
@@ -40,9 +38,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public currentAnimation!: Phaser.Tweens.TweenChain;
 
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
-    console.log(dataUnit);
-
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
+
     super(scene, x, y);
     this.startingX = x;
     this.startingY = y;
@@ -55,26 +52,22 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
-    this.sprite = scene.add.sprite(0, 0, texture);
-    //this.sprite.setScale(0.5, 0.5);
-    if (dataUnit.owner === 0) {
+    /* this.sprite = scene.add.sprite(0, 0, texture); */
+    // this.sprite.setScale(0.5, 0.5);
+    /* if (dataUnit.owner === 0) {
       this.sprite.setFlipX(true);
     }
-
-    //this.spriteContainer.setPosition(x, y);
-
-    const newSpriteContainer = new BattleUnitSpriteContainer(scene, 0, 0, dataUnit);
-    this.spriteContainer = scene.add.container();
-
-    newSpriteContainer.getContainer(this.spriteContainer);
+ */
+    // const quadrado = scene.add.sprite(x, y, "cleric");
+    // this.add(quadrado);
+    this.sprite = new BattleUnitSprite(scene, x, y, dataUnit);
 
     if (dataUnit.owner === 0) {
-      newSpriteContainer.flipSpritesInContainer(this.spriteContainer);
+      this.sprite.flipSpritesInContainer();
     }
+    this.sprite.setScale(0.79);
 
-    console.log("x, y", x, y);
-
-    this.spriteContainer.setPosition(x, y);
+    const spriteOffsetX = this.owner === 0 ? -4 : 4;
 
     const shadowContainer = scene.add.container();
     const shadowColor = 0x000000;
@@ -85,30 +78,13 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     shadowCircle.fillStyle(shadowColor, shadowAlpha);
     shadowCircle.fillEllipse(0, 0, shadowWidth, shadowHeight);
     shadowContainer.add(shadowCircle);
-    shadowContainer.setPosition(this.sprite.x, this.sprite.y + 50);
+    shadowContainer.setPosition(this.sprite.x + spriteOffsetX, this.sprite.y + 63);
     this.add(shadowContainer);
+    this.add(this.sprite);
     //this.add(this.sprite);
-    this.add(this.spriteContainer);
-
-    console.log("sprite", this.sprite);
-    console.log("spriteContainer", this.spriteContainer);
-
-    /* console.log("spriteContainer", this.spriteContainer.container);
-
-    const spriteContainerKeys = Object.keys(this.spriteContainer.container);
-    let rs = 16;
-    for (const prop of spriteContainerKeys) {
-      console.log("prop", prop);
-      if (this.spriteContainer.container[prop]) {
-        console.log("this.spriteContainer.container[prop]", this.spriteContainer.container[prop]);
-        this.spriteContainer.container[prop].setDepth(rs);
-        this.add(this.spriteContainer.container[prop]);
-        rs--;
-      }
-    } */
 
     // idle animation, tween scale
-    scene.tweens.add({
+    /* scene.tweens.add({
       targets: this.sprite,
       scaleY: this.sprite.scaleY * 0.995,
       scaleX: this.sprite.scaleX * 0.97,
@@ -116,7 +92,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       duration: 1000,
       yoyo: true,
       repeat: -1,
-    });
+    }); */
 
     setupUnitPointerEvents(this);
 
@@ -133,34 +109,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
 
     scene.add.existing(this);
-
-    this.sprite.anims.create({
-      key: "attack",
-      frames: this.scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 17,
-      }),
-      duration: 650,
-    });
-
-    this.sprite.anims.create({
-      key: "skill",
-      frames: this.scene.anims.generateFrameNumbers("warrior", {
-        start: 12,
-        end: 13,
-      }),
-      duration: 350,
-    });
   }
 
   public onSelected() {
     this.isSelected = true;
-    this.sprite.setTint(0xffff44);
   }
 
   public onDeselected() {
     this.isSelected = false;
-    this.sprite.clearTint();
   }
 
   public playEvent({
@@ -322,14 +278,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       });
 
       if (!this.isSelected) {
-        this.sprite.setTint(0x1dad2e);
+        // this.sprite.setTint(0x1dad2e);
       }
 
       this.scene.time.addEvent({
         delay: 150,
         callback: () => {
           if (!this.isSelected) {
-            this.sprite.clearTint();
+            // this.sprite.clearTint();
           }
         },
       });

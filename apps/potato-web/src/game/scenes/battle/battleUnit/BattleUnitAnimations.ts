@@ -101,7 +101,7 @@ export function createAttackAnimation({
           // target.bringToTop(target.sprite);
 
           // receive damage pushback
-          target.sprite.setTint(0xde3c45);
+          // target.sprite.setTint(0xde3c45);
           target.scene.tweens.add({
             targets: target,
             x: target.owner === 0 ? target.x - 4 : target.x + 4,
@@ -109,8 +109,8 @@ export function createAttackAnimation({
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
-              target.sprite.clearTint();
-              unit.sprite.setFlipX(unit.owner === 0 ? false : true);
+              // target.sprite.clearTint();
+              unit.sprite.flipSpritesInContainer();
             },
           });
         },
@@ -144,7 +144,7 @@ export function createAttackAnimation({
         y: { from: unit.startingY, to: unit.startingY },
         duration: 200,
         onComplete: () => {
-          unit.sprite.setFlipX(unit.owner === 1 ? false : true);
+          unit.sprite.flipSpritesInContainer();
         },
         onStart: () => {
           // start bouncing
@@ -183,7 +183,7 @@ export function createHealingWordAnimation({
       // pulinho
       {
         onStart: () => {
-          unit.sprite.setTint(0x00ee00);
+          // unit.sprite.setTint(0x00ee00);
         },
         targets: unit.sprite,
         y: unit.sprite.y - 14,
@@ -193,7 +193,7 @@ export function createHealingWordAnimation({
         completeDelay: 70,
         ease: Phaser.Math.Easing.Bounce.InOut,
         onComplete: () => {
-          unit.sprite.clearTint();
+          // unit.sprite.clearTint();
 
           onImpactPoint();
         },
@@ -232,7 +232,7 @@ export function createPowershotAnimation({
         duration: 125,
         yoyo: true,
         onYoyo: () => {
-          unit.sprite.setTint(0x054f57);
+          // unit.sprite.setTint(0x054f57);
         },
         ease: Phaser.Math.Easing.Bounce.InOut,
       },
@@ -286,7 +286,7 @@ export function createPowershotAnimation({
         onYoyo: () => {
           onImpactPoint();
 
-          unit.sprite.clearTint();
+          // unit.sprite.clearTint();
 
           // particle burst
           const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
@@ -309,7 +309,7 @@ export function createPowershotAnimation({
           // target.bringToTop(target.sprite);
 
           // receive damage pushback
-          target.sprite.setTint(0xde3c45);
+          // target.sprite.setTint(0xde3c45);
           target.scene.tweens.add({
             targets: target,
             x: target.owner === 0 ? target.x - 4 : target.x + 4,
@@ -317,8 +317,8 @@ export function createPowershotAnimation({
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
-              target.sprite.clearTint();
-              unit.sprite.setFlipX(unit.owner === 0 ? false : true);
+              // target.sprite.clearTint();
+              unit.sprite.flipSpritesInContainer();
             },
           });
         },
@@ -352,7 +352,7 @@ export function createPowershotAnimation({
         y: { from: unit.startingY, to: unit.startingY },
         duration: 200,
         onComplete: () => {
-          unit.sprite.setFlipX(unit.owner === 1 ? false : true);
+          unit.sprite.flipSpritesInContainer();
         },
         onStart: () => {
           // start bouncing
@@ -400,7 +400,7 @@ export function createHeadCrushAnimation({
         duration: 125,
         yoyo: true,
         onYoyo: () => {
-          unit.sprite.setTint(0x054f57);
+          // unit.sprite.setTint(0x054f57);
         },
         ease: Phaser.Math.Easing.Bounce.InOut,
       },
@@ -454,7 +454,7 @@ export function createHeadCrushAnimation({
         onYoyo: () => {
           onImpactPoint();
 
-          unit.sprite.clearTint();
+          //unit.sprite.clearTint();
 
           // particle burst
           const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
@@ -477,7 +477,7 @@ export function createHeadCrushAnimation({
           // target.bringToTop(target.sprite);
 
           // receive damage pushback
-          target.sprite.setTint(0xde3c45);
+          // target.sprite.setTint(0xde3c45);
           target.scene.tweens.add({
             targets: target,
             x: target.owner === 0 ? target.x - 4 : target.x + 4,
@@ -485,8 +485,8 @@ export function createHeadCrushAnimation({
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
-              target.sprite.clearTint();
-              unit.sprite.setFlipX(unit.owner === 0 ? false : true);
+              // target.sprite.clearTint();
+              unit.sprite.flipSpritesInContainer();
             },
           });
         },
@@ -520,7 +520,7 @@ export function createHeadCrushAnimation({
         y: { from: unit.startingY, to: unit.startingY },
         duration: 200,
         onComplete: () => {
-          unit.sprite.setFlipX(unit.owner === 1 ? false : true);
+          unit.sprite.flipSpritesInContainer();
         },
         onStart: () => {
           // start bouncing

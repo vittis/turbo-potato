@@ -2,178 +2,169 @@ import { toCamelCase } from "../../../../utils/formatString";
 import { showArms, showNeck } from "../../../data/equipment/armor/chest/chests";
 import { showHead } from "../../../data/equipment/armor/head/heads";
 
-interface UnitSpriteContainer {
-  weapon?: Phaser.GameObjects.Sprite | null;
-  offhand?: Phaser.GameObjects.Sprite | null;
-  helmet?: Phaser.GameObjects.Sprite | null;
-  headLine?: Phaser.GameObjects.Sprite | null;
-  headSkin?: Phaser.GameObjects.Sprite | null;
-  neckLine?: Phaser.GameObjects.Sprite | null;
-  neckSkin?: Phaser.GameObjects.Sprite | null;
-  leftArmLine?: Phaser.GameObjects.Sprite | null;
-  leftArmSkin?: Phaser.GameObjects.Sprite | null;
-  chest?: Phaser.GameObjects.Sprite | null;
-  bodyLine?: Phaser.GameObjects.Sprite | null;
-  bodySkinTop?: Phaser.GameObjects.Sprite | null;
-  bodyBot?: Phaser.GameObjects.Sprite | null;
-  rightArmLine?: Phaser.GameObjects.Sprite | null;
-  rightArmSkin?: Phaser.GameObjects.Sprite | null;
-  back?: Phaser.GameObjects.Sprite | null;
-}
-
-export class BattleUnitSprite {
-  public scene: Phaser.Scene;
-  public x: number;
-  public y: number;
-  public dataUnit: any;
-
-  public container: UnitSpriteContainer;
+export class BattleUnitSprite extends Phaser.GameObjects.Container {
+  public weapon?: Phaser.GameObjects.Sprite;
+  public offhand?: Phaser.GameObjects.Sprite | null;
+  public helmet?: Phaser.GameObjects.Sprite | null;
+  public headLine?: Phaser.GameObjects.Sprite | null;
+  public headSkin?: Phaser.GameObjects.Sprite | null;
+  public neckLine?: Phaser.GameObjects.Sprite | null;
+  public neckSkin?: Phaser.GameObjects.Sprite | null;
+  public leftArmLine?: Phaser.GameObjects.Sprite | null;
+  public leftArmSkin?: Phaser.GameObjects.Sprite | null;
+  public chest?: Phaser.GameObjects.Sprite | null;
+  public bodyLine?: Phaser.GameObjects.Sprite | null;
+  public bodySkinTop?: Phaser.GameObjects.Sprite | null;
+  public bodyBot?: Phaser.GameObjects.Sprite | null;
+  public rightArmLine?: Phaser.GameObjects.Sprite | null;
+  public rightArmSkin?: Phaser.GameObjects.Sprite | null;
+  public back?: Phaser.GameObjects.Sprite | null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, dataUnit: any) {
-    this.scene = scene;
-    this.x = x;
-    this.y = y;
-    this.dataUnit = dataUnit;
+    super(scene, x, y);
 
-    this.container = {};
+    //this = {};
 
-    this.setupBodyParts();
+    this.setupBodyParts(dataUnit);
 
-    this.setupEquipments();
+    this.setupEquipments(dataUnit);
+
+    this.setupContainer();
 
     this.setupZIndex();
-
-    console.log(dataUnit);
-    console.log(this.container);
   }
 
-  /* getContainer(scene: Phaser.Scene) {
-    const newContainer = [];
-
-    const spriteContainerKeys = Object.keys(this.container);
-
-    for (const prop of spriteContainerKeys) {
-      console.log("aprop", prop);
-      if (this.container[prop]) {
-        console.log("athis.container[prop]", this.container[prop]);
-        //this.container[prop].setDepth(rs);
-        scene.add(this.container[prop]);
-        //rs--;
-      }
-    }
-  } */
+  setupContainer() {
+    if (this.weapon) this.add(this.weapon);
+    if (this.offhand) this.add(this.offhand);
+    if (this.helmet) this.add(this.helmet);
+    if (this.headLine) this.add(this.headLine);
+    if (this.headSkin) this.add(this.headSkin);
+    if (this.neckLine) this.add(this.neckLine);
+    if (this.neckSkin) this.add(this.neckSkin);
+    if (this.leftArmLine) this.add(this.leftArmLine);
+    if (this.leftArmSkin) this.add(this.leftArmSkin);
+    if (this.chest) this.add(this.chest);
+    if (this.bodyLine) this.add(this.bodyLine);
+    if (this.bodyBot) this.add(this.bodyBot);
+    if (this.bodySkinTop) this.add(this.bodySkinTop);
+    if (this.rightArmLine) this.add(this.rightArmLine);
+    if (this.rightArmSkin) this.add(this.rightArmSkin);
+    if (this.back) this.add(this.back);
+  }
 
   setupZIndex() {
-    if (this.container.weapon) this.container.weapon.setDepth(16);
-    if (this.container.offhand) this.container.offhand.setDepth(15);
-    if (this.container.helmet) this.container.helmet.setDepth(30);
-    if (this.container.headLine) this.container.headLine.setDepth(13);
-    if (this.container.headSkin) this.container.headSkin.setDepth(12);
-    if (this.container.neckLine) this.container.neckLine.setDepth(11);
-    if (this.container.neckSkin) this.container.neckSkin.setDepth(10);
-    if (this.container.leftArmLine) this.container.leftArmLine.setDepth(9);
-    if (this.container.leftArmSkin) this.container.leftArmSkin.setDepth(8);
-    if (this.container.chest) this.container.chest.setDepth(7);
-    if (this.container.bodyLine) this.container.bodyLine.setDepth(6);
-    if (this.container.bodySkinTop) this.container.bodySkinTop.setDepth(5);
-    if (this.container.bodyBot) this.container.bodyBot.setDepth(4);
-    if (this.container.rightArmLine) this.container.rightArmLine.setDepth(3);
-    if (this.container.rightArmSkin) this.container.rightArmSkin.setDepth(2);
-    if (this.container.back) this.container.back.setDepth(1);
+    this.bringToTop(this.back);
+    this.bringToTop(this.rightArmSkin);
+    this.bringToTop(this.rightArmLine);
+    this.bringToTop(this.bodyBot);
+    this.bringToTop(this.bodySkinTop);
+    this.bringToTop(this.bodyLine);
+    this.bringToTop(this.chest);
+    this.bringToTop(this.leftArmSkin);
+    this.bringToTop(this.leftArmLine);
+    this.bringToTop(this.neckSkin);
+    this.bringToTop(this.neckLine);
+    this.bringToTop(this.headSkin);
+    this.bringToTop(this.headLine);
+    this.bringToTop(this.helmet);
+    this.bringToTop(this.offhand);
+    this.bringToTop(this.weapon);
   }
 
-  setupBodyParts() {
-    this.container.bodySkinTop = this.scene.add.sprite(this.x, this.y, "races_parts_bodyTopSkin");
-    this.container.bodyLine = this.scene.add.sprite(this.x, this.y, "races_parts_bodyLine");
-    this.container.bodyBot = this.scene.add.sprite(this.x, this.y, "races_parts_bodyBot");
+  setupBodyParts(dataUnit: any) {
+    this.bodySkinTop = this.scene.add.sprite(0, 0, "races_parts_bodyTopSkin");
+    this.bodyLine = this.scene.add.sprite(0, 0, "races_parts_bodyLine");
+    this.bodyBot = this.scene.add.sprite(0, 0, "races_parts_bodyBot");
 
-    if (this.showHead()) {
-      this.container.headLine = this.scene.add.sprite(this.x, this.y, `races_parts_headLine${this.getRace()}`);
-      this.container.headSkin = this.scene.add.sprite(this.x, this.y, `races_parts_headSkin${this.getRace()}`);
+    if (this.showHead(dataUnit)) {
+      this.headLine = this.scene.add.sprite(0, 0, `races_parts_headLine${this.getRace(dataUnit)}`);
+      this.headSkin = this.scene.add.sprite(0, 0, `races_parts_headSkin${this.getRace(dataUnit)}`);
     }
 
-    if (this.showNeck()) {
-      this.container.neckLine = null;
-      this.container.neckSkin = null;
+    if (this.showNeck(dataUnit)) {
+      this.neckLine = this.scene.add.sprite(0, 0, `races_parts_neckLine`);
+      this.neckSkin = this.scene.add.sprite(0, 0, `races_parts_neckSkin`);
     }
 
-    if (this.showArms()) {
-      this.container.leftArmLine = this.scene.add.sprite(this.x, this.y, "races_parts_leftArmLine");
-      this.container.leftArmSkin = this.scene.add.sprite(this.x, this.y, "races_parts_leftArmSkin");
-      this.container.rightArmLine = this.scene.add.sprite(this.x, this.y, "races_parts_rightArmLine");
-      this.container.rightArmSkin = this.scene.add.sprite(this.x, this.y, "races_parts_rightArmSkin");
+    if (this.showArms(dataUnit)) {
+      this.leftArmLine = this.scene.add.sprite(0, 0, "races_parts_leftArmLine");
+      this.leftArmSkin = this.scene.add.sprite(0, 0, "races_parts_leftArmSkin");
+      this.rightArmLine = this.scene.add.sprite(0, 0, "races_parts_rightArmLine");
+      this.rightArmSkin = this.scene.add.sprite(0, 0, "races_parts_rightArmSkin");
     }
 
-    const skinColor = this.getRaceColor();
+    const skinColor = this.getRaceColor(dataUnit);
 
-    if (this.container.headSkin) this.container.headSkin.setTint(skinColor);
-    if (this.container.neckSkin) this.container.neckSkin.setTint(skinColor);
-    if (this.container.leftArmSkin) this.container.leftArmSkin.setTint(skinColor);
-    if (this.container.bodySkinTop) this.container.bodySkinTop.setTint(skinColor);
-    if (this.container.rightArmSkin) this.container.rightArmSkin.setTint(skinColor);
+    if (this.headSkin) this.headSkin.setTint(skinColor);
+    if (this.neckSkin) this.neckSkin.setTint(skinColor);
+    if (this.leftArmSkin) this.leftArmSkin.setTint(skinColor);
+    if (this.bodySkinTop) this.bodySkinTop.setTint(skinColor);
+    if (this.rightArmSkin) this.rightArmSkin.setTint(skinColor);
   }
 
-  setupEquipments() {
-    const equips = this.getEquips();
+  setupEquipments(dataUnit) {
+    const equips = this.getEquips(dataUnit);
 
     if (equips.weapon) {
-      this.container.weapon = this.scene.add.sprite(this.x, this.y, `equip_weapon_${toCamelCase(equips.weapon)}`);
+      this.weapon = this.scene.add.sprite(0, 0, `equip_weapon_${toCamelCase(equips.weapon)}`);
     }
 
     if (equips.offhand) {
-      this.container.offhand = this.scene.add.sprite(this.x, this.y, `equip_offhand_${toCamelCase(equips.offhand)}`);
+      this.offhand = this.scene.add.sprite(0, 0, `equip_offhand_${toCamelCase(equips.offhand)}`);
     } else {
       if (equips?.weapon?.includes("bow")) {
-        this.container.offhand = this.scene.add.sprite(this.x, this.y, "equip_offhand_arrow");
+        this.offhand = this.scene.add.sprite(0, 0, "equip_offhand_arrow");
       }
     }
 
     if (equips.helmet) {
-      this.container.helmet = this.scene.add.sprite(this.x, this.y, `equip_head_${toCamelCase(equips.helmet)}`);
+      console.log(`equip_head_${toCamelCase(equips.helmet)}`);
+      this.helmet = this.scene.add.sprite(0, 0, `equip_head_${toCamelCase(equips.helmet)}`);
     }
 
     if (equips.chest) {
-      this.container.chest = this.scene.add.sprite(this.x, this.y, `equip_body_${toCamelCase(equips.chest)}`);
+      this.chest = this.scene.add.sprite(0, 0, `equip_body_${toCamelCase(equips.chest)}`);
     }
 
-    this.container.back = this.getEquipBack();
+    this.back = this.getEquipBack(dataUnit);
   }
 
-  showHead() {
-    return showHead(this.dataUnit.equipment.head.name);
+  showHead(dataUnit) {
+    return showHead(dataUnit.equipment.head.name);
   }
 
-  showNeck() {
-    return showNeck(this.dataUnit.equipment.chest.name);
+  showNeck(dataUnit) {
+    return showNeck(dataUnit.equipment.chest.name);
   }
 
-  showArms() {
-    return showArms(this.dataUnit.equipment.chest.name);
+  showArms(dataUnit) {
+    return showArms(dataUnit.equipment.chest.name);
   }
 
-  getEquipBack() {
-    if (this.dataUnit.equipment?.mainHandWeapon?.name.includes("bow")) {
-      return this.scene.add.sprite(this.x, this.y, "equip_back_quiver");
+  getEquipBack(dataUnit) {
+    if (dataUnit.equipment?.mainHandWeapon?.name.includes("bow")) {
+      return this.scene.add.sprite(0, 0, "equip_back_quiver");
     }
 
     return null;
   }
 
-  getEquips() {
+  getEquips(dataUnit) {
     return {
-      weapon: this.dataUnit.equipment?.mainHandWeapon?.name,
-      offhand: this.dataUnit.equipment?.offHandWeapon?.name,
-      helmet: this.dataUnit.equipment?.head?.name,
-      chest: this.dataUnit.equipment?.chest?.name,
+      weapon: dataUnit.equipment?.mainHandWeapon?.name,
+      offhand: dataUnit.equipment?.offHandWeapon?.name,
+      helmet: dataUnit.equipment?.head?.name,
+      chest: dataUnit.equipment?.chest?.name,
     };
   }
 
-  getRace() {
-    return this.dataUnit.race.name;
+  getRace(dataUnit) {
+    return dataUnit.race.name;
   }
 
-  getRaceColor() {
-    switch (this.getRace()) {
+  getRaceColor(dataUnit) {
+    switch (this.getRace(dataUnit)) {
       case "Human":
         return 0xebbc9e;
       case "Elf":
@@ -183,5 +174,13 @@ export class BattleUnitSprite {
       default:
         return 0xebbc9e;
     }
+  }
+
+  flipSpritesInContainer() {
+    this.iterate((child) => {
+      if (child instanceof Phaser.GameObjects.Sprite) {
+        child.flipX = !child.flipX; // Flip the horizontal state
+      }
+    });
   }
 }

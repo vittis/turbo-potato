@@ -8,10 +8,13 @@ import {
   createHealingWordAnimation,
   createPowershotAnimation,
 } from "./BattleUnitAnimations";
+import { BattleUnitSprite } from "./BattleUnitSprite";
+import { BattleUnitSpriteContainer } from "./BattleUnitSpriteContainer";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public sprite: Phaser.GameObjects.Sprite;
+  public spriteContainer: Phaser.GameObjects.Container;
   public hpBar: Phaser.GameObjects.Rectangle;
   public shieldBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
@@ -37,6 +40,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public currentAnimation!: Phaser.Tweens.TweenChain;
 
   constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
+    console.log(dataUnit);
+
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
     super(scene, x, y);
     this.startingX = x;
@@ -51,10 +56,25 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.owner = dataUnit.owner;
 
     this.sprite = scene.add.sprite(0, 0, texture);
-    this.sprite.setScale(0.5, 0.5);
+    //this.sprite.setScale(0.5, 0.5);
     if (dataUnit.owner === 0) {
       this.sprite.setFlipX(true);
     }
+
+    //this.spriteContainer.setPosition(x, y);
+
+    const newSpriteContainer = new BattleUnitSpriteContainer(scene, 0, 0, dataUnit);
+    this.spriteContainer = scene.add.container();
+
+    newSpriteContainer.getContainer(this.spriteContainer);
+
+    if (dataUnit.owner === 0) {
+      newSpriteContainer.flipSpritesInContainer(this.spriteContainer);
+    }
+
+    console.log("x, y", x, y);
+
+    this.spriteContainer.setPosition(x, y);
 
     const shadowContainer = scene.add.container();
     const shadowColor = 0x000000;
@@ -67,7 +87,25 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     shadowContainer.add(shadowCircle);
     shadowContainer.setPosition(this.sprite.x, this.sprite.y + 50);
     this.add(shadowContainer);
-    this.add(this.sprite);
+    //this.add(this.sprite);
+    this.add(this.spriteContainer);
+
+    console.log("sprite", this.sprite);
+    console.log("spriteContainer", this.spriteContainer);
+
+    /* console.log("spriteContainer", this.spriteContainer.container);
+
+    const spriteContainerKeys = Object.keys(this.spriteContainer.container);
+    let rs = 16;
+    for (const prop of spriteContainerKeys) {
+      console.log("prop", prop);
+      if (this.spriteContainer.container[prop]) {
+        console.log("this.spriteContainer.container[prop]", this.spriteContainer.container[prop]);
+        this.spriteContainer.container[prop].setDepth(rs);
+        this.add(this.spriteContainer.container[prop]);
+        rs--;
+      }
+    } */
 
     // idle animation, tween scale
     scene.tweens.add({

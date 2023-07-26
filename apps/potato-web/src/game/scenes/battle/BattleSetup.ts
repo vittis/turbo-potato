@@ -1,22 +1,8 @@
+import { loadCurrentAssets, loadCharacterAssets } from "./PreloadImages";
+
 export function preloadBattle(scene: Phaser.Scene) {
-  scene.load.image("board", "assets/board3.png");
-  scene.load.image("castle", "assets/castle.png");
-
-  scene.load.spritesheet("warrior", "assets/Warrior.png", {
-    frameWidth: 192,
-    frameHeight: 192,
-  });
-
-  scene.load.image("ranger", "assets/units/archer.png");
-
-  scene.load.image("cleric", "assets/units/cleric.png");
-
-  scene.load.image("knight", "assets/units/knight.png");
-
-  scene.load.spritesheet("tree", "assets/tree.png", {
-    frameWidth: 192,
-    frameHeight: 192,
-  });
+  loadCurrentAssets(scene);
+  loadCharacterAssets(scene);
 }
 
 export function setupBattle(scene: Phaser.Scene) {
@@ -71,3 +57,38 @@ function addTrees(scene: Phaser.Scene) {
 
   return [tree, tree2, tree3, tree4];
 }
+
+/* 
+
+UNIT SPRITE ORDER:
+
+WEAPON      1
+OFFHAND     2
+
+HELMET      3
+
+OPT (depende do helmet)
+LINE HEAD     4
+SKIN HEAD     5
+
+OPT (depende do body)
+LINE NECK     6
+SKIN NECK     7
+
+OPT (depende do body)
+LEFT ARM      8
+SKIN LEFT ARM (fill)       9
+
+BODY      10
+LINE BODY     11
+SKIN TOP BODY     12
+SKIN BOT BODY     13
+
+OPT (depende do body)
+RIGHT ARM     14
+SKIN RIGHT ARM (fill)     15
+
+OPT
+BACK      16
+
+ */

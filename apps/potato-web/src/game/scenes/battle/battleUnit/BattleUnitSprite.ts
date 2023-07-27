@@ -73,25 +73,25 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
   }
 
   setupBodyParts(dataUnit: any) {
-    this.bodySkinTop = this.scene.add.sprite(0, 0, "races_parts_bodyTopSkin");
-    this.bodyLine = this.scene.add.sprite(0, 0, "races_parts_bodyLine");
-    this.bodyBot = this.scene.add.sprite(0, 0, "races_parts_bodyBot");
+    this.bodySkinTop = this.scene.add.sprite(0, 0, "unit_bodyTopSkin");
+    this.bodyLine = this.scene.add.sprite(0, 0, "unit_bodyLine");
+    this.bodyBot = this.scene.add.sprite(0, 0, "unit_bodyBot");
 
     if (this.showHead(dataUnit)) {
-      this.headLine = this.scene.add.sprite(0, 0, `races_parts_headLine${this.getRace(dataUnit)}`);
-      this.headSkin = this.scene.add.sprite(0, 0, `races_parts_headSkin${this.getRace(dataUnit)}`);
+      this.headLine = this.scene.add.sprite(0, 0, `unit_headLine${this.getRace(dataUnit)}`);
+      this.headSkin = this.scene.add.sprite(0, 0, `unit_headSkin${this.getRace(dataUnit)}`);
     }
 
     if (this.showNeck(dataUnit)) {
-      this.neckLine = this.scene.add.sprite(0, 0, `races_parts_neckLine`);
-      this.neckSkin = this.scene.add.sprite(0, 0, `races_parts_neckSkin`);
+      this.neckLine = this.scene.add.sprite(0, 0, `unit_neckLine`);
+      this.neckSkin = this.scene.add.sprite(0, 0, `unit_neckSkin`);
     }
 
     if (this.showArms(dataUnit)) {
-      this.leftArmLine = this.scene.add.sprite(0, 0, "races_parts_leftArmLine");
-      this.leftArmSkin = this.scene.add.sprite(0, 0, "races_parts_leftArmSkin");
-      this.rightArmLine = this.scene.add.sprite(0, 0, "races_parts_rightArmLine");
-      this.rightArmSkin = this.scene.add.sprite(0, 0, "races_parts_rightArmSkin");
+      this.leftArmLine = this.scene.add.sprite(0, 0, "unit_leftArmLine");
+      this.leftArmSkin = this.scene.add.sprite(0, 0, "unit_leftArmSkin");
+      this.rightArmLine = this.scene.add.sprite(0, 0, "unit_rightArmLine");
+      this.rightArmSkin = this.scene.add.sprite(0, 0, "unit_rightArmSkin");
     }
 
     const skinColor = this.getRaceColor(dataUnit);

@@ -1,8 +1,8 @@
-import { loadCurrentAssets, loadCharacterAssets } from "./PreloadImages";
+import { loadCurrentAssets, loadAssets } from "./PreloadImages";
 
 export function preloadBattle(scene: Phaser.Scene) {
   loadCurrentAssets(scene);
-  loadCharacterAssets(scene);
+  loadAssets(scene);
 }
 
 export function setupBattle(scene: Phaser.Scene) {

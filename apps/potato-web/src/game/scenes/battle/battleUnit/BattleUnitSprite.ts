@@ -1,6 +1,14 @@
 import { toCamelCase } from "../../../../utils/formatString";
 import { showArms, showNeck } from "../../../data/equipment/armor/chest/chests";
 import { showHead } from "../../../data/equipment/armor/head/heads";
+import {
+  addEquipBackSprite,
+  addEquipChestSprite,
+  addEquipHelmetSprite,
+  addEquipOffhandSprite,
+  addEquipWeaponSprite,
+  addUnitSprite,
+} from "../AddSpriteFromSpritesheet";
 
 export class BattleUnitSprite extends Phaser.GameObjects.Container {
   public weapon?: Phaser.GameObjects.Sprite;
@@ -22,8 +30,6 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene, x: number, y: number, dataUnit: any) {
     super(scene, x, y);
-
-    //this = {};
 
     this.setupBodyParts(dataUnit);
 
@@ -54,44 +60,45 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
   }
 
   setupZIndex() {
-    this.bringToTop(this.back);
-    this.bringToTop(this.rightArmSkin);
-    this.bringToTop(this.rightArmLine);
-    this.bringToTop(this.bodyBot);
-    this.bringToTop(this.bodySkinTop);
-    this.bringToTop(this.bodyLine);
-    this.bringToTop(this.chest);
-    this.bringToTop(this.leftArmSkin);
-    this.bringToTop(this.leftArmLine);
-    this.bringToTop(this.neckSkin);
-    this.bringToTop(this.neckLine);
-    this.bringToTop(this.headSkin);
-    this.bringToTop(this.headLine);
-    this.bringToTop(this.helmet);
-    this.bringToTop(this.offhand);
-    this.bringToTop(this.weapon);
+    if (this.back) this.bringToTop(this.back);
+    if (this.rightArmSkin) this.bringToTop(this.rightArmSkin);
+    if (this.rightArmLine) this.bringToTop(this.rightArmLine);
+    if (this.bodyBot) this.bringToTop(this.bodyBot);
+    if (this.bodySkinTop) this.bringToTop(this.bodySkinTop);
+    if (this.bodyLine) this.bringToTop(this.bodyLine);
+    if (this.chest) this.bringToTop(this.chest);
+    if (this.leftArmSkin) this.bringToTop(this.leftArmSkin);
+    if (this.leftArmLine) this.bringToTop(this.leftArmLine);
+    if (this.neckSkin) this.bringToTop(this.neckSkin);
+    if (this.neckLine) this.bringToTop(this.neckLine);
+    if (this.headSkin) this.bringToTop(this.headSkin);
+    if (this.headLine) this.bringToTop(this.headLine);
+    if (this.helmet) this.bringToTop(this.helmet);
+    if (this.offhand) this.bringToTop(this.offhand);
+    if (this.weapon) this.bringToTop(this.weapon);
   }
 
   setupBodyParts(dataUnit: any) {
-    this.bodySkinTop = this.scene.add.sprite(0, 0, "unit_bodyTopSkin");
-    this.bodyLine = this.scene.add.sprite(0, 0, "unit_bodyLine");
-    this.bodyBot = this.scene.add.sprite(0, 0, "unit_bodyBot");
+    this.bodySkinTop = addUnitSprite(this.scene, 0, 0, "bodyTopSkin");
+    this.bodySkinTop = addUnitSprite(this.scene, 0, 0, "bodyTopSkin");
+    this.bodyLine = addUnitSprite(this.scene, 0, 0, "bodyLine");
+    this.bodyBot = addUnitSprite(this.scene, 0, 0, "bodyBot");
 
     if (this.showHead(dataUnit)) {
-      this.headLine = this.scene.add.sprite(0, 0, `unit_headLine${this.getRace(dataUnit)}`);
-      this.headSkin = this.scene.add.sprite(0, 0, `unit_headSkin${this.getRace(dataUnit)}`);
+      this.headLine = addUnitSprite(this.scene, 0, 0, `headLine${this.getRace(dataUnit)}`);
+      this.headSkin = addUnitSprite(this.scene, 0, 0, `headSkin${this.getRace(dataUnit)}`);
     }
 
     if (this.showNeck(dataUnit)) {
-      this.neckLine = this.scene.add.sprite(0, 0, `unit_neckLine`);
-      this.neckSkin = this.scene.add.sprite(0, 0, `unit_neckSkin`);
+      this.neckLine = addUnitSprite(this.scene, 0, 0, `neckLine`);
+      this.neckSkin = addUnitSprite(this.scene, 0, 0, `neckSkin`);
     }
 
     if (this.showArms(dataUnit)) {
-      this.leftArmLine = this.scene.add.sprite(0, 0, "unit_leftArmLine");
-      this.leftArmSkin = this.scene.add.sprite(0, 0, "unit_leftArmSkin");
-      this.rightArmLine = this.scene.add.sprite(0, 0, "unit_rightArmLine");
-      this.rightArmSkin = this.scene.add.sprite(0, 0, "unit_rightArmSkin");
+      this.leftArmLine = addUnitSprite(this.scene, 0, 0, "leftArmLine");
+      this.leftArmSkin = addUnitSprite(this.scene, 0, 0, "leftArmSkin");
+      this.rightArmLine = addUnitSprite(this.scene, 0, 0, "rightArmLine");
+      this.rightArmSkin = addUnitSprite(this.scene, 0, 0, "rightArmSkin");
     }
 
     const skinColor = this.getRaceColor(dataUnit);
@@ -107,24 +114,23 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     const equips = this.getEquips(dataUnit);
 
     if (equips.weapon) {
-      this.weapon = this.scene.add.sprite(0, 0, `equip_weapon_${toCamelCase(equips.weapon)}`);
+      this.weapon = addEquipWeaponSprite(this.scene, 0, 0, toCamelCase(equips.weapon));
     }
 
     if (equips.offhand) {
-      this.offhand = this.scene.add.sprite(0, 0, `equip_offhand_${toCamelCase(equips.offhand)}`);
+      this.offhand = addEquipOffhandSprite(this.scene, 0, 0, toCamelCase(equips.offhand));
     } else {
       if (equips?.weapon?.includes("bow")) {
-        this.offhand = this.scene.add.sprite(0, 0, "equip_offhand_arrow");
+        this.offhand = addEquipOffhandSprite(this.scene, 0, 0, "arrow");
       }
     }
 
     if (equips.helmet) {
-      console.log(`equip_head_${toCamelCase(equips.helmet)}`);
-      this.helmet = this.scene.add.sprite(0, 0, `equip_head_${toCamelCase(equips.helmet)}`);
+      this.helmet = addEquipHelmetSprite(this.scene, 0, 0, toCamelCase(equips.helmet));
     }
 
     if (equips.chest) {
-      this.chest = this.scene.add.sprite(0, 0, `equip_body_${toCamelCase(equips.chest)}`);
+      this.chest = addEquipChestSprite(this.scene, 0, 0, toCamelCase(equips.chest));
     }
 
     this.back = this.getEquipBack(dataUnit);
@@ -144,7 +150,7 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
 
   getEquipBack(dataUnit) {
     if (dataUnit.equipment?.mainHandWeapon?.name.includes("bow")) {
-      return this.scene.add.sprite(0, 0, "equip_back_quiver");
+      return addEquipBackSprite(this.scene, 0, 0, "quiver");
     }
 
     return null;

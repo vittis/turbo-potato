@@ -22,6 +22,12 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
 }
 
 export function loadAssets(scene: Phaser.Scene) {
+  // Unit
+  scene.load.spritesheet("unit", "assets/unit.png", {
+    frameWidth: 180,
+    frameHeight: 180,
+  });
+
   // Equipment Back
   scene.load.spritesheet("equip_back", "assets/equipment/back.png", {
     frameWidth: 180,
@@ -48,12 +54,6 @@ export function loadAssets(scene: Phaser.Scene) {
 
   // Equipment Weapon
   scene.load.spritesheet("equip_weapon", "assets/equipment/weapon.png", {
-    frameWidth: 180,
-    frameHeight: 180,
-  });
-
-  // Unit
-  scene.load.spritesheet("unit", "assets/unit.png", {
     frameWidth: 180,
     frameHeight: 180,
   });

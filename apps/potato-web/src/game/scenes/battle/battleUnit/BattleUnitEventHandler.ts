@@ -40,33 +40,12 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     yoyo: true,
   });
 
-  // todo: revisit this later: pushback is now on Attack animation instead of onReceiveDamage
-  // pushback
-  /* unit.scene.tweens.add({
-    targets: unit,
-    x: unit.owner === 0 ? unit.x - 15 : unit.x + 15,
-    duration: 150,
-    yoyo: true,
-    ease: Phaser.Math.Easing.Bounce.InOut,
-  }); */
-  /* if (!unit.isSelected) {
-    unit.sprite.setTint(0xde3c45);
-  }
-  unit.scene.time.addEvent({
-    delay: 250,
-    callback: () => {
-      if (!unit.isSelected) {
-        unit.sprite.clearTint();
-      }
-    },
-  }); */
-
   const minDamage = 0;
   const maxDamage = 75;
   const minFontSize = 25;
   const maxFontSize = 70;
 
-  const damage = event.payload.modifiers.hp * -1;
+  const damage = (event.payload.modifiers.hp + event.payload.modifiers.shield) * -1;
   const fontSize = ((damage - minDamage) / (maxDamage - minDamage)) * (maxFontSize - minFontSize) + minFontSize;
   const fontSizePx = `${fontSize.toFixed(0)}px`;
 

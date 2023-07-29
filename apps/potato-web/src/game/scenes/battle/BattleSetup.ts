@@ -57,38 +57,3 @@ function addTrees(scene: Phaser.Scene) {
 
   return [tree, tree2, tree3, tree4];
 }
-
-/* 
-
-UNIT SPRITE ORDER:
-
-WEAPON      1
-OFFHAND     2
-
-HELMET      3
-
-OPT (depende do helmet)
-LINE HEAD     4
-SKIN HEAD     5
-
-OPT (depende do body)
-LINE NECK     6
-SKIN NECK     7
-
-OPT (depende do body)
-LEFT ARM      8
-SKIN LEFT ARM (fill)       9
-
-BODY      10
-LINE BODY     11
-SKIN TOP BODY     12
-SKIN BOT BODY     13
-
-OPT (depende do body)
-RIGHT ARM     14
-SKIN RIGHT ARM (fill)     15
-
-OPT
-BACK      16
-
- */

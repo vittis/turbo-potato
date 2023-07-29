@@ -188,54 +188,36 @@ export function setupUnitAnimations(scene: Phaser.Scene) {
 export function setupUnitPointerEvents(unit: BattleUnit) {
   unit.sprite.setInteractive();
 
-  unit.sprite.iterate((child) => {
-    // Enable input events for the child object
-    child.setInteractive();
+  unit.sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+    if (!unit.isSelected) {
+      useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
+    } else {
+      useGameStore.getState().setSelectedEntity(null);
+    }
+  });
 
-    child.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      if (!unit.isSelected) {
-        useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
-      } else {
-        useGameStore.getState().setSelectedEntity(null);
-      }
-    });
+  /*   unit.sprite.on("pointerup", () => {
+  }); */
 
-    child.on("pointerup", () => {
-      if (!unit.isSelected) {
-        unit.sprite.iterate((child) => {
-          child.clearTint(0xdddd44);
-        });
-      }
-    });
+  unit.sprite.on("pointerover", () => {
+    unit.scene.game.canvas.style.cursor = "pointer";
+    if (unit.glow) unit.glow.setActive(true);
+  });
 
-    // Add pointerover event to the child object
-    child.on("pointerover", () => {
-      unit.scene.game.canvas.style.cursor = "pointer";
-      unit.sprite.iterate((child) => {
-        child.setTint(0xdddd44);
-      });
-    });
-
-    child.on("pointerout", () => {
-      if (!unit.isSelected) {
-        unit.sprite.iterate((child) => {
-          child.clearTint(0xdddd44);
-        });
-      } else {
-        unit.sprite.iterate((child) => {
-          child.setTint(0xdddd44);
-        });
-      }
-      unit.scene.game.canvas.style.cursor = "default";
-    });
+  unit.sprite.on("pointerout", () => {
+    unit.scene.game.canvas.style.cursor = "default";
+    if (!unit.isSelected) {
+      if (unit.glow) unit.glow.setActive(false);
+    }
   });
 }
 
 export function getUnitPos(position, owner) {
   const UNIT_OFFSET = {
-    x: 37,
-    y: 29,
-    tile: 54,
+    x: 75,
+    y: 60,
+    tile: 109,
+    yOffset: -35,
   };
   const getUnitPosX = () => {
     let tileOffset;
@@ -246,7 +228,7 @@ export function getUnitPos(position, owner) {
   };
   const getUnitPosY = () => {
     const isTop = position === 0 || position === 1 || position === 2 ? true : false;
-    return UNIT_OFFSET.y * (isTop ? -1 : 1) - 15;
+    return UNIT_OFFSET.y * (isTop ? -1 : 1) + UNIT_OFFSET.yOffset;
   };
   return { x: getUnitPosX(), y: getUnitPosY() };
 }

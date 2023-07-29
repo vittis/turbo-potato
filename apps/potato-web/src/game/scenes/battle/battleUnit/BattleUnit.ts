@@ -4,15 +4,18 @@ import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents 
 import { onReceiveDamage } from "./BattleUnitEventHandler";
 import {
   createAttackAnimation,
+  createDeathAnimation,
   createHeadCrushAnimation,
   createHealingWordAnimation,
   createPowershotAnimation,
+  createWiggleAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
-  public sprite!: BattleUnitSprite;
+  public battleUnitSprite!: BattleUnitSprite;
+  public sprite!: Phaser.GameObjects.Image;
   public hpBar: Phaser.GameObjects.Rectangle;
   public shieldBar: Phaser.GameObjects.Rectangle;
   public apBar: Phaser.GameObjects.Rectangle;
@@ -35,9 +38,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public isDead = false;
   public startingX;
   public startingY: number;
-  public currentAnimation!: Phaser.Tweens.TweenChain;
+  public currentAnimation!: Phaser.Tweens.TweenChain | Phaser.Tweens.Tween;
 
-  constructor(scene: Phaser.Scene, texture: string, dataUnit: any) {
+  public glow: Phaser.FX.Glow | undefined;
+
+  constructor(scene: Phaser.Scene, dataUnit: any) {
     const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
 
     super(scene, x, y);
@@ -52,10 +57,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
-    this.sprite = new BattleUnitSprite(scene, x, y, dataUnit);
+    this.battleUnitSprite = new BattleUnitSprite(scene, x, y, dataUnit);
+
+    this.sprite = scene.add.image(0, 0, this.battleUnitSprite.textureName);
 
     if (dataUnit.owner === 0) {
-      this.sprite.flipSpritesInContainer();
+      this.sprite.flipX = true;
     }
     this.sprite.setScale(0.79);
 
@@ -72,25 +79,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     shadowContainer.add(shadowCircle);
     shadowContainer.setPosition(this.sprite.x + spriteOffsetX, this.sprite.y + 63);
     this.add(shadowContainer);
-    this.add(this.sprite);
-
-    const rt = scene.make.renderTexture({ width: 300, height: 300 }, false);
-    rt.draw(this.sprite, 200, 200);
-    rt.saveTexture(`${dataUnit.id}`);
-    this.sprite.addWiggle(dataUnit);
-
-    //this.add(this.sprite);
-
-    // idle animation, tween scale
-    /* scene.tweens.add({
-      targets: this.sprite,
-      scaleY: this.sprite.scaleY * 0.995,
-      scaleX: this.sprite.scaleX * 0.97,
-      ease: Phaser.Math.Easing.Sine.InOut,
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-    }); */
 
     setupUnitPointerEvents(this);
 
@@ -106,15 +94,24 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
     this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
 
+    this.glow = this.sprite.preFX?.addGlow(0xdddd44, 4);
+    this.glow?.setActive(false);
+
+    this.add(this.sprite);
+
+    createWiggleAnimation(this);
+
     scene.add.existing(this);
   }
 
   public onSelected() {
     this.isSelected = true;
+    this.glow?.setActive(true);
   }
 
   public onDeselected() {
     this.isSelected = false;
+    this.glow?.setActive(false);
   }
 
   public playEvent({
@@ -128,8 +125,18 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     onAttack?: Function;
   }) {
     if (event.type === "HAS_DIED") {
-      console.log("has died event");
-      this.onDeath();
+      const onFinishAnimation = () => {
+        this.setVisible(false);
+        this.isDead = true;
+        if (onEnd) onEnd();
+      };
+
+      const { deathTween } = createDeathAnimation({
+        unit: this,
+        onFinishAnimation,
+      });
+
+      this.currentAnimation = deathTween;
     }
 
     if (event.type === "ATTACK") {
@@ -396,25 +403,5 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     if (this.apBarTween && this.apBarTween.isPlaying()) {
       this.apBarTween.pause();
     }
-  }
-
-  private onDeath() {
-    console.log("onDeath");
-
-    this.scene.tweens.add({
-      targets: this,
-      alpha: 0,
-      scaleX: 0,
-      scaleY: 0,
-      angle: 180,
-      duration: 1400,
-      delay: Math.min(250, GAME_LOOP_SPEED * 1.5),
-      ease: "Sine.easeInOut",
-      onComplete: () => {
-        console.log("onComplete");
-        this.setVisible(false);
-        this.isDead = true;
-      },
-    });
   }
 }

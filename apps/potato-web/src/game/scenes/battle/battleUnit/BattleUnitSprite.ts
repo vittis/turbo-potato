@@ -11,22 +11,24 @@ import {
 } from "../AddSpriteFromSpritesheet";
 
 export class BattleUnitSprite extends Phaser.GameObjects.Container {
-  public weapon?: Phaser.GameObjects.Sprite;
-  public offhand?: Phaser.GameObjects.Sprite | null;
-  public helmet?: Phaser.GameObjects.Sprite | null;
-  public headLine?: Phaser.GameObjects.Sprite | null;
-  public headSkin?: Phaser.GameObjects.Sprite | null;
-  public neckLine?: Phaser.GameObjects.Sprite | null;
-  public neckSkin?: Phaser.GameObjects.Sprite | null;
-  public leftArmLine?: Phaser.GameObjects.Sprite | null;
-  public leftArmSkin?: Phaser.GameObjects.Sprite | null;
-  public chest?: Phaser.GameObjects.Sprite | null;
-  public bodyLine?: Phaser.GameObjects.Sprite | null;
-  public bodySkinTop?: Phaser.GameObjects.Sprite | null;
-  public bodyBot?: Phaser.GameObjects.Sprite | null;
-  public rightArmLine?: Phaser.GameObjects.Sprite | null;
-  public rightArmSkin?: Phaser.GameObjects.Sprite | null;
-  public back?: Phaser.GameObjects.Sprite | null;
+  weapon?: Phaser.GameObjects.Sprite | null;
+  offhand?: Phaser.GameObjects.Sprite | null;
+  helmet?: Phaser.GameObjects.Sprite | null;
+  headLine?: Phaser.GameObjects.Sprite | null;
+  headSkin?: Phaser.GameObjects.Sprite | null;
+  neckLine?: Phaser.GameObjects.Sprite | null;
+  neckSkin?: Phaser.GameObjects.Sprite | null;
+  leftArmLine?: Phaser.GameObjects.Sprite | null;
+  leftArmSkin?: Phaser.GameObjects.Sprite | null;
+  chest?: Phaser.GameObjects.Sprite | null;
+  bodyLine?: Phaser.GameObjects.Sprite | null;
+  bodySkinTop?: Phaser.GameObjects.Sprite | null;
+  bodyBot?: Phaser.GameObjects.Sprite | null;
+  rightArmLine?: Phaser.GameObjects.Sprite | null;
+  rightArmSkin?: Phaser.GameObjects.Sprite | null;
+  back?: Phaser.GameObjects.Sprite | null;
+
+  textureName!: string;
 
   constructor(scene: Phaser.Scene, x: number, y: number, dataUnit: any) {
     super(scene, x, y);
@@ -38,6 +40,8 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     this.setupContainer();
 
     this.setupZIndex();
+
+    this.createTexture(dataUnit);
   }
 
   setupContainer() {
@@ -79,7 +83,6 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
   }
 
   setupBodyParts(dataUnit: any) {
-    this.bodySkinTop = addUnitSprite(this.scene, 0, 0, "bodyTopSkin");
     this.bodySkinTop = addUnitSprite(this.scene, 0, 0, "bodyTopSkin");
     this.bodyLine = addUnitSprite(this.scene, 0, 0, "bodyLine");
     this.bodyBot = addUnitSprite(this.scene, 0, 0, "bodyBot");
@@ -182,29 +185,12 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     }
   }
 
-  flipSpritesInContainer() {
-    this.iterate((child) => {
-      if (child instanceof Phaser.GameObjects.Sprite) {
-        child.flipX = !child.flipX; // Flip the horizontal state
-      }
-    });
-  }
+  createTexture(dataUnit) {
+    const texture = this.scene.make.renderTexture({ width: 180, height: 180 }, false);
+    texture.draw(this, 90, 90);
 
-  addWiggle(dataUnit) {
-    this.iterate((child) => {
-      if (child instanceof Phaser.GameObjects.Sprite) {
-        const xWiggle = dataUnit.owner === 0 ? { from: -0.004, to: 0.004 } : { from: 0.004, to: 0 };
-        const fx = child.preFX?.addDisplacement("distort", 0);
-        this.scene.tweens.add({
-          targets: fx,
-          x: xWiggle,
-          y: { from: -0.0113, to: 0.0113 },
-          yoyo: true,
-          loop: -1,
-          duration: 500,
-          ease: Phaser.Math.Easing.Sine.InOut,
-        });
-      }
-    });
+    this.textureName = `unitTexture${dataUnit.id}`;
+
+    texture.saveTexture(this.textureName);
   }
 }

@@ -72,40 +72,6 @@ export class Battle extends Phaser.Scene {
     console.log(board.x, board.y);
     // board.add(this.text);
 
-    /* this.container = this.add.container(200, 300).setVisible(false);
-    const sprite1 = this.add.sprite(0, 0, "cleric");
-    const sprite2 = this.add.sprite(20, 0, "cleric");
-    this.container.add([sprite1, sprite2]);
-    this.rt = this.add.renderTexture(300, 300, 800, 600);
-    this.rt.draw(this.container);
-    this.rt.saveTexture("kkk");
-    const oi = this.add.image(500, 50, "kkk");
-    oi.setFlipX(true);
-    oi.preFX?.addGlow(0x00ffff, 10); */
-
-    this.time.delayedCall(3000, () => {
-      const oi = this.add.image(200, 200, "00");
-      oi.preFX?.addGlow(0x00ffff, 4);
-      const oi2 = this.add.image(300, 200, "15");
-      oi2.preFX?.addGlow(0x00ffff, 4);
-      const oi3 = this.add.image(400, 200, "14");
-      oi3.preFX?.addGlow(0x00ffff, 4);
-
-      const xWiggle = { from: -0.004, to: 0.004 };
-      const fx = oi.preFX?.addDisplacement("distort", 0);
-      this.tweens.add({
-        targets: fx,
-        x: xWiggle,
-        y: { from: -0.0113, to: 0.0113 },
-        yoyo: true,
-        loop: -1,
-        duration: 500,
-        ease: Phaser.Math.Easing.Sine.InOut,
-      });
-    });
-
-    // this.textures.generate("kkk", this.rt);
-
     queryClient
       .fetchQuery({
         queryKey: ["game/battle/setup"],
@@ -123,6 +89,7 @@ export class Battle extends Phaser.Scene {
       (state) => state.selectedEntity,
       (selectedEntity) => {
         this.units.forEach((unit) => {
+          console.log(unit.id, selectedEntity);
           if (unit.id === selectedEntity) {
             unit.onSelected();
           } else {
@@ -203,6 +170,17 @@ export class Battle extends Phaser.Scene {
           onEndAnimation();
         };
       }
+
+      if (event.type === "HAS_DIED") {
+        this.board.bringToTop(unit);
+
+        this.isPlayingEventAnimation = true;
+        this.pauseTimeEvents();
+        onEnd = () => {
+          onEndAnimation();
+        };
+      }
+
       eventPile.push({ unit, event, targets, onEnd });
 
       // unit.playEvent({ event, targets, onEnd });
@@ -236,7 +214,7 @@ export class Battle extends Phaser.Scene {
     this.units = [];
 
     firstFrame.units.forEach((dataUnit: any) => {
-      const unit = new BattleUnit(this, dataUnit.class.name.toLowerCase(), dataUnit);
+      const unit = new BattleUnit(this, dataUnit);
       this.units.push(unit);
       this.board.add(unit);
     });

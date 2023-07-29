@@ -312,11 +312,11 @@ export class Unit {
 
     const finalDamage = Math.round((damage * 100) / (this.stats.def + 100));
 
-    if (this.stats.shield > 0) {
+    if (newShield > 0) {
       newShield -= finalDamage;
-      if (this.stats.shield < 0) {
+      if (newShield < 0) {
         // If the armor is now depleted, apply any remaining damage to the unit's HP
-        newHp += this.stats.shield;
+        newHp += newShield;
         newShield = 0;
       }
     } else {

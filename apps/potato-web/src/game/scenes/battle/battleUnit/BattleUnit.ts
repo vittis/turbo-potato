@@ -94,7 +94,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
     this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
 
-    this.glow = this.sprite.preFX?.addGlow(0xdddd44, 4);
+    this.glow = this.sprite.preFX?.addGlow(0xeeee00, 4);
     this.glow?.setActive(false);
 
     this.add(this.sprite);

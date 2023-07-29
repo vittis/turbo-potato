@@ -7,10 +7,10 @@ export function createWiggleAnimation(unit: BattleUnit) {
   unit.scene.tweens.add({
     targets: fx,
     x: { from: -0.004, to: 0.004 },
-    y: { from: -0.0113, to: 0.0113 },
+    y: { from: -0.011, to: 0.011 },
     yoyo: true,
     loop: -1,
-    duration: 500 * animationSpeed,
+    duration: Phaser.Math.Between(500, 700) * animationSpeed,
     ease: Phaser.Math.Easing.Sine.InOut,
   });
 }
@@ -44,6 +44,13 @@ export function createAttackAnimation({
   onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
+  const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
+  unit.scene.tweens.add({
+    targets: targetGlowFx,
+    outerStrength: 2,
+    duration: 260 * animationSpeed,
+  });
+
   const RUN_DISTANCE = unit.owner === 0 ? 70 : -70;
   const DISTANCE_TO_ENEMY = unit.owner === 0 ? 80 : -80;
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 45 : -45;
@@ -112,6 +119,7 @@ export function createAttackAnimation({
         ease: Phaser.Math.Easing.Bounce.InOut,
         onYoyo: () => {
           onImpactPoint();
+          targetGlowFx?.destroy();
 
           // particle burst
           const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };

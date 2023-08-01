@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { getGameEventHistory, getGameHistory } from "../modules/game";
 import { cors } from "hono/cors";
+import { Ability, AbilityData } from "../modules/game/game/Ability";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -67,6 +68,11 @@ app.get("/game/battle/setup", async (c) => {
     totalSteps: history.length - 1,
     eventHistory,
   });
+});
+import Attacks from "../modules/game/game/data/attacks";
+app.get("/test", async (c) => {
+  const ability = new Ability(Attacks.Thrust as AbilityData);
+  return c.json(ability);
 });
 
 export default app;

@@ -1,0 +1,8 @@
+{
+  "name": "Thrust",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 50,
+  "cooldown": 100
+}

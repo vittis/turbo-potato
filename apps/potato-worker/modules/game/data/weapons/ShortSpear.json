@@ -1,0 +1,28 @@
+{
+  "name": "Short Spear",
+  "slot": [
+    "MAIN_HAND"
+  ],
+  "implicits": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Thrust"
+      }
+    },
+    {
+      "type": "GRANT_PERK",
+      "payload": {
+        "name": "Penetrating Attacks",
+        "tier": 1
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_DAMAGE",
+        "value": 5
+      }
+    }
+  ]
+}

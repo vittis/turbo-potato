@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { getGameEventHistory, getGameHistory } from "../modules/game";
 import { cors } from "hono/cors";
-import { Ability, AbilityData } from "../modules/game/game/Ability";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -69,10 +68,24 @@ app.get("/game/battle/setup", async (c) => {
     eventHistory,
   });
 });
+
+// teste de validação do JSON, remover dps
+import { Ability } from "../modules/game/game/Ability/Ability";
 import Attacks from "../modules/game/game/data/attacks";
-app.get("/test", async (c) => {
-  const ability = new Ability(Attacks.Thrust as AbilityData);
+app.get("/ability", async (c) => {
+  const ability = new Ability(Attacks.Thrust);
   return c.json(ability);
+});
+
+import Weapons from "../modules/game/game/data/weapons";
+import { Equipment } from "../modules/game/game/Equipment/Equipment";
+app.get("/equip", async (c) => {
+  try {
+    const equip = new Equipment(Weapons.ShortSpear);
+    return c.json(equip);
+  } catch (e) {
+    return c.json(e);
+  }
 });
 
 export default app;

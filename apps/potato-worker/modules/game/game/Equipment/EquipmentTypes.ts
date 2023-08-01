@@ -1,4 +1,4 @@
-export enum WEAPON_SLOT {
+export enum EQUIPMENT_SLOT {
   MAIN_HAND = "MAIN_HAND",
   OFF_HAND = "OFF_HAND",
   TWO_HANDED = "TWO_HANDED",
@@ -16,11 +16,11 @@ interface GrantAbilityPayload {
 
 interface GrantPerkPayload {
   name: string;
-  tier: number;
+  tier?: number;
 }
 
 interface GrantBaseStatPayload {
-  stat: string;
+  stat: string; // todo use a enum
   value: number;
 }
 
@@ -35,20 +35,13 @@ interface Implicit<T extends IMPLICIT_TYPE> {
   payload: ImplicitPayloadMap[T];
 }
 
-export interface WeaponData {
+// this represents the JSON of the equipment
+export interface EquipmentData {
   name: string;
-  slot: WEAPON_SLOT[];
+  slot: EQUIPMENT_SLOT[];
   implicits: Array<
     | Implicit<IMPLICIT_TYPE.GRANT_ABILITY>
     | Implicit<IMPLICIT_TYPE.GRANT_PERK>
     | Implicit<IMPLICIT_TYPE.GRANT_BASE_STAT>
   >;
-}
-
-export abstract class Weapon {
-  data: WeaponData;
-
-  constructor(data: WeaponData) {
-    this.data = data;
-  }
 }

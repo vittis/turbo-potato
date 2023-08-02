@@ -69,4 +69,23 @@ app.get("/game/battle/setup", async (c) => {
   });
 });
 
+import Classes from "../modules/game/game/data/newClasses";
+import { Class } from "../modules/game/game/Class/Class";
+app.get("/class/ranger", async (c) => {
+  try {
+    const ranger = new Class(Classes.Ranger);
+    return c.json(ranger);
+  } catch (e) {
+    return c.json(e);
+  }
+});
+app.get("/class/blacksmith", async (c) => {
+  try {
+    const blacksmith = new Class(Classes.Blacksmith);
+    return c.json(blacksmith);
+  } catch (e) {
+    return c.json(e);
+  }
+});
+
 export default app;

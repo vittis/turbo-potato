@@ -1,0 +1,8 @@
+{
+  "name": "Slash",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 30,
+  "cooldown": 80
+}

@@ -1,6 +1,6 @@
 {
   "name": "Short Spear",
-  "slot": [
+  "allowedSlots": [
     "MAIN_HAND"
   ],
   "implicits": [

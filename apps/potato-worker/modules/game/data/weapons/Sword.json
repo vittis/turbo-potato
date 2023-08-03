@@ -1,0 +1,15 @@
+{
+  "name": "Sword",
+  "allowedSlots": [
+    "MAIN_HAND",
+    "OFF_HAND"
+  ],
+  "implicits": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Thrust"
+      }
+    }
+  ]
+}

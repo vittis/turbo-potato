@@ -9,7 +9,9 @@ import Heads from "./data/heads";
 
 import { WeaponData } from "./Weapon";
 import { ArmorData } from "./Armor";
-
+import { UnitNew } from "./Unit/UnitNew";
+import { Equipment } from "./Equipment/Equipment";
+import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
@@ -17,6 +19,10 @@ export class Game {
 
   constructor() {
     this.boardManager = new BoardManager();
+
+    const unitTest = new UnitNew(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+    unitTest.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
     this.boardManager.addToBoard(
       new Unit(
@@ -291,12 +297,11 @@ OR start with X fast
 STATUS EFFECTS
 
 REGEN = heal 1 hp per stack per 5 steps and remove 1 stack
-BUFF ATTACK SPEED (FAST) = increase 1 attack speed per stack and remove 1 per attack
-BUFF SKILL SPEED (FOCUS) = increase 1 skill speed per stack and remove 1 per skill used
-BUFF ATTACK DAMAGE (A. DAMAGE) = increase 1 attack damage per stack and remove 1 per attack
-BUFF SKILL DAMAGE (S. DAMAGE) = increase 1 skill damage per stack and remove 1 per skill use
+FAST = increase 1 attack speed per stack and remove 1 per attack
+FOCUS)= increase 1 skill speed per stack and remove 1 per skill used
+ATTACK POWER = increase 1 attack damage per stack and remove 1 per attack
+SPELL POTENCY = increase 1 skill damage per stack and remove 1 per skill use
 POISON = deal 1 dmg per stack per 5 steps and remove 1 stack
-BLEED = deal 1 dmg per stack per 5 steps and remove 1 stack
 SLOW = reduce 1 attack speed per stack per 5 steps and remove 1 stack per attack
 VULNERABLE = increase 1% damage taken per stack, remove all on hit
 STURDY = reduce 1% damage taken per stack, remove 1 stack on hit
@@ -304,12 +309,7 @@ THORN = deal 1 dmg per stack on hit and remove 1 stack
 TAUNT = force enemy units to attack this unit, remove 1 stack on hit
 MULTISTRIKE = on weapon attack/skill immediately trigger the attack again more X times and remove all stacks
 
-
-
-
-
-
-DISABLE
+DISABLES
 
 STUN = barrinha (duração em step) e icone
 
@@ -319,6 +319,11 @@ INSTANT EFFECTS
 DAMAGE = deal X dmg
 HEAL = heal X hp
 APPLY SHIELD = gain X shield
+
+
+
+
+
 
 
 

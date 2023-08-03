@@ -10,16 +10,16 @@ export enum IMPLICIT_TYPE {
   GRANT_BASE_STAT = "GRANT_BASE_STAT",
 }
 
-interface GrantAbilityPayload {
+export interface GrantAbilityPayload {
   name: string;
 }
 
-interface GrantPerkPayload {
+export interface GrantPerkPayload {
   name: string;
   tier?: number;
 }
 
-interface GrantBaseStatPayload {
+export interface GrantBaseStatPayload {
   stat: string; // todo use a enum
   value: number;
 }
@@ -30,7 +30,7 @@ type ImplicitPayloadMap = {
   [IMPLICIT_TYPE.GRANT_BASE_STAT]: GrantBaseStatPayload;
 };
 
-interface Implicit<T extends IMPLICIT_TYPE> {
+export interface Implicit<T extends IMPLICIT_TYPE> {
   type: T;
   payload: ImplicitPayloadMap[T];
 }
@@ -38,7 +38,7 @@ interface Implicit<T extends IMPLICIT_TYPE> {
 // this represents the JSON of the equipment
 export interface EquipmentData {
   name: string;
-  slot: EQUIPMENT_SLOT[];
+  allowedSlots: EQUIPMENT_SLOT[];
   implicits: Array<
     | Implicit<IMPLICIT_TYPE.GRANT_ABILITY>
     | Implicit<IMPLICIT_TYPE.GRANT_PERK>

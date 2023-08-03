@@ -17,7 +17,7 @@ const GrantBaseStatPayloadSchema = z.object({
 
 export const EquipmentDataSchema = z.object({
   name: z.string(),
-  slot: z.array(z.nativeEnum(EQUIPMENT_SLOT)),
+  allowedSlots: z.array(z.nativeEnum(EQUIPMENT_SLOT)),
   implicits: z.array(
     z.union([
       z.object({

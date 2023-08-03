@@ -1,6 +1,6 @@
 import { EquipmentData } from "../Equipment/EquipmentTypes";
-import * as ShortSpear from "../../data/weapons/ShortSpear.json";
-import * as Sword from "../../data/weapons/Sword.json";
+import * as ShortSpear from "../../data/equipment/weapons/ShortSpear.json";
+import * as Sword from "../../data/equipment/weapons/Sword.json";
 
 export default {
   ShortSpear: ShortSpear as EquipmentData,

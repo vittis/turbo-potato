@@ -1,8 +1,0 @@
-{
-    "name": "Plate Helmet",
-    "implicits": {
-        "shield": 20
-    },
-    "weight": 3.5,
-    "slot": "HEAD"
-}

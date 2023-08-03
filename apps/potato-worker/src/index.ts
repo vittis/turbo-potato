@@ -69,23 +69,4 @@ app.get("/game/battle/setup", async (c) => {
   });
 });
 
-// teste de validação do JSON, remover dps
-import { Ability } from "../modules/game/game/Ability/Ability";
-import Attacks from "../modules/game/game/data/attacks";
-app.get("/ability", async (c) => {
-  const ability = new Ability(Attacks.Thrust);
-  return c.json(ability);
-});
-
-import Weapons from "../modules/game/game/data/weapons";
-import { Equipment } from "../modules/game/game/Equipment/Equipment";
-app.get("/equip", async (c) => {
-  try {
-    const equip = new Equipment(Weapons.ShortSpear);
-    return c.json(equip);
-  } catch (e) {
-    return c.json(e);
-  }
-});
-
 export default app;

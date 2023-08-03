@@ -1,5 +1,5 @@
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
-import { EVENT_TYPE, Unit } from "./Unit";
+import { EVENT_TYPE, Unit } from "./Unit/Unit";
 
 import Races from "./data/races";
 import Classes from "./data/classes";
@@ -9,7 +9,6 @@ import Heads from "./data/heads";
 
 import { WeaponData } from "./Weapon";
 import { ArmorData } from "./Armor";
-import { UnitNew } from "./Unit/UnitNew";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 export class Game {
@@ -20,11 +19,11 @@ export class Game {
   constructor() {
     this.boardManager = new BoardManager();
 
-    const unitTest = new UnitNew(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+    const unitTest = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
     unitTest.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-    this.boardManager.addToBoard(
+    /* this.boardManager.addToBoard(
       new Unit(
         this.boardManager,
         OWNER.TEAM_ONE,
@@ -37,84 +36,7 @@ export class Game {
           head: Heads.LeatherHat as ArmorData,
         }
       )
-    );
-
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.BOT_BACK,
-        Races.Dwarf,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Dagger as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.ClothHat as ArmorData,
-        }
-      )
-    );
-
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.BOT_MID,
-        Races.Elf,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
     ); */
-
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_FRONT,
-        Races.Dwarf,
-        Classes.Knight,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
-    ); */
-
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_BACK,
-        Races.Elf,
-        Classes.Cleric,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
-    );
-
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_MID,
-        Races.Dwarf,
-        Classes.Knight,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.ClothHat as ArmorData,
-        }
-      )
-    );
-
-    // this.boardManager.printBoard();
   }
 
   /* 
@@ -198,15 +120,8 @@ export class Game {
       currentStep++;
     } while (!this.hasGameEnded());
 
-    const unit1 = this.boardManager.getAllUnits()[0];
-    const unit2 = this.boardManager.getAllUnits()[1];
-
-    this.boardManager.getAllUnits().forEach((unit) => {
-      console.log(unit.getName(), unit.TEST_attacksCounter);
-    });
-
     // @ts-ignore
-    console.table([
+    /* console.table([
       {
         name: unit1?.getName(),
         hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
@@ -239,7 +154,7 @@ export class Game {
         int: unit2.stats.int,
         attacks: unit2.TEST_attacksCounter,
       },
-    ]);
+    ]); */
   }
 
   hasGameEnded() {

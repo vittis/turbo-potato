@@ -4,11 +4,11 @@
     "MAIN_HAND",
     "OFF_HAND"
   ],
-  "implicits": [
+  "mods": [
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Thrust"
+        "name": "Slash"
       }
     }
   ]

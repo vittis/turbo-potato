@@ -3,7 +3,7 @@
   "allowedSlots": [
     "MAIN_HAND"
   ],
-  "implicits": [
+  "mods": [
     {
       "type": "GRANT_ABILITY",
       "payload": {

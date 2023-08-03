@@ -1,6 +1,6 @@
 {
     "name": "Blacksmith",
-    "implicits": [
+    "base": [
         {
             "type": "GRANT_ABILITY",
             "payload": {
@@ -34,17 +34,21 @@
             "description": "BATTLE START: Trigger Reinforce Allies"
         },
         {
-            "type": "ABILITY_MODIFIER",
-            "payload": {
-                "name": "Reinforce Allies",
-                "modifiers": {
-                    "trigger": [
-                        {
-                            "name": "DEATH"  
+            "mods": [
+                {
+                    "type": "ABILITY_MODIFIER",
+                    "payload": {
+                        "name": "Reinforce Allies",
+                        "modifiers": {
+                            "trigger": [
+                                {
+                                    "name": "DEATH"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
-            },
+            ],
             "description": "DEATH: Trigger Reinforce Allies"
         }
     ],

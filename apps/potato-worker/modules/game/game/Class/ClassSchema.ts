@@ -3,12 +3,12 @@ import {
   UNIT_STATS,
   STATUS_EFFECTS,
   ABILITY_TARGET,
-  TALENT_CATEGORY,
   AbilityModifier,
   ClassNode,
   TalentNode,
   ClassData,
 } from "./ClassTypes";
+import { PossibleModsSchema } from "../Equipment/EquipmentSchema";
 
 export const AbilityModifierSchema = z.object({
   trigger: z
@@ -50,14 +50,7 @@ export const AbilityModifierSchema = z.object({
 }) satisfies z.ZodType<AbilityModifier>;
 
 export const ClassNodeSchema = z.object({
-  type: z.nativeEnum(TALENT_CATEGORY),
-  payload: z.object({
-    name: z.string(),
-    tier: z.number().optional(),
-    nodeName: z.string().optional(),
-    unique: z.boolean().optional(),
-    modifiers: AbilityModifierSchema.optional(),
-  }),
+  mods: PossibleModsSchema,
   description: z.string(),
 }) satisfies z.ZodType<ClassNode>;
 
@@ -68,7 +61,7 @@ export const TalentNodeSchema = ClassNodeSchema.extend({
 
 export const ClassDataSchema = z.object({
   name: z.string(),
-  implicits: z.array(ClassNodeSchema),
+  base: z.array(ClassNodeSchema),
   utility: z.array(ClassNodeSchema),
   tree: z.array(
     z.object({

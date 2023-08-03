@@ -1,3 +1,5 @@
+import { PossibleMods } from "../Equipment/EquipmentTypes";
+
 export enum UNIT_STATS {
   HEALTH = "HEALTH",
 }
@@ -19,12 +21,6 @@ export enum ABILITY_TARGET {
   ADJACENT_UNITS = "ADJACENT_UNITS",
   FRONT_UNIT = "FRONT_UNIT",
   SELF = "SELF",
-}
-
-export enum TALENT_CATEGORY {
-  GRANT_ABILITY = "GRANT_ABILITY",
-  GRANT_PERK = "GRANT_PERK",
-  ABILITY_MODIFIER = "ABILITY_MODIFIER",
 }
 
 export interface AbilityModifier {
@@ -50,15 +46,19 @@ export interface AbilityModifier {
   }[];
 }
 
+export interface GrantAbilityModifierPayload {
+  name: string;
+  modifiers: AbilityModifier;
+}
+
+export interface GrantUniqueAbilityModifierPayload {
+  name: string;
+  nodeName: string;
+  unique: boolean;
+}
+
 export interface ClassNode {
-  type: TALENT_CATEGORY;
-  payload: {
-    name: string;
-    tier?: number; // if its a perk
-    nodeName?: string; // if its an unique ability modifier
-    unique?: boolean; // if its an unique ability modifier
-    modifiers?: AbilityModifier; // if its an ability modifier
-  };
+  mods: PossibleMods;
   description: string;
 }
 
@@ -70,10 +70,10 @@ export interface TalentNode extends ClassNode {
 // this represents the JSON of the class
 export interface ClassData {
   name: string;
-  implicits: ClassNode[];
+  base: ClassNode[];
   utility: ClassNode[];
   tree: {
     name: string;
-    talents: ClassNode[];
+    talents: TalentNode[];
   }[];
 }

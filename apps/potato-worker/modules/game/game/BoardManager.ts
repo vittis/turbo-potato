@@ -1,4 +1,5 @@
-import { Unit } from "./Unit";
+import { TARGET_TYPE } from "./Ability/TargetTypes";
+import { Unit } from "./Unit/Unit";
 
 export enum OWNER {
   TEAM_ONE = 0,
@@ -164,6 +165,15 @@ export class BoardManager {
     }
 
     return target as Unit;
+  }
+
+  getTarget(unit: Unit, target: TARGET_TYPE): Unit[] {
+    if (target === TARGET_TYPE.STANDARD) {
+      const t = this.getClosestAttackTarget(unit);
+      return t ? [t] : [];
+    }
+
+    return [];
   }
 
   // todo update

@@ -1,3 +1,5 @@
+import { TARGET_TYPE } from "./TargetTypes";
+
 export enum ABILITY_CATEGORY {
   ATTACK = "ATTACK",
   SPELL = "SPELL",
@@ -10,17 +12,12 @@ export enum ABILITY_TAG {
   BUFF = "BUFF",
 }
 
-export enum TARGET {
-  STANDARD = "STANDARD",
-  FURTHEST = "FURTHEST",
-}
-
 // this represents the JSON of the ability
 export interface AbilityData {
   name: string;
   type: ABILITY_CATEGORY;
   tags: ABILITY_TAG[];
-  target: TARGET;
+  target: TARGET_TYPE;
   baseDamage: number;
   cooldown: number;
 }

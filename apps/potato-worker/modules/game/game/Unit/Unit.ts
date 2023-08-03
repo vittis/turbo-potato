@@ -1,15 +1,12 @@
 import { Ability } from "../Ability/Ability";
-import { ArmorData } from "../Armor";
+import { AbilityManager } from "../Ability/AbilityManager";
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
+import { Class } from "../Class/Class";
+import { ClassManager } from "../Class/ClassManager";
 import { Multipliers } from "../data/config";
 import { Equipment } from "../Equipment/Equipment";
+import { EquipmentManager } from "../Equipment/EquipmentManager";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
-import { HeadCrush } from "../HeadCrush";
-import { HealingWord } from "../HealingWord";
-import { Powershot } from "../Powershot";
-import { Disable, DISABLE_TYPE, SKILL, StatusEffect } from "../Skill";
-import { ClassData, RaceData } from "../Unit";
-import { WeaponData } from "../Weapon";
 
 export enum EVENT_TYPE {
   ATTACK = "ATTACK",
@@ -44,30 +41,28 @@ interface StepEvent {
   subEvents?: SubStepEvent[];
 }
 
-interface EquippedItem {
-  slot: EQUIPMENT_SLOT;
-  equip: Equipment;
-}
-
-export class UnitNew {
+export class Unit {
   id: string;
   stats: UnitStats;
   owner: OWNER;
   position: POSITION;
-  // bm: BoardManager;
+  bm: BoardManager;
 
   isDead = false;
 
   currentStep = 0;
   stepEvents: StepEvent[] = [];
 
-  statusEffects: StatusEffect[] = [];
-  disables: Disable[] = [];
+  equipmentManager: EquipmentManager;
+  classManager: ClassManager;
+  abilityManager: AbilityManager;
 
-  equips: EquippedItem[] = [];
-  abilities: Ability[] = [];
+  constructor(owner: OWNER, position: POSITION, bm?: BoardManager) {
+    this.equipmentManager = new EquipmentManager();
+    this.classManager = new ClassManager();
+    this.abilityManager = new AbilityManager();
+    this.bm = bm as BoardManager;
 
-  constructor(owner: OWNER, position: POSITION) {
     this.id = `${owner}${position}`;
     this.owner = owner;
     this.position = position;
@@ -84,22 +79,15 @@ export class UnitNew {
   }
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
-    const isSlotOccupied = this.equips.find((e) => e.slot === slot);
-    if (isSlotOccupied) {
-      throw Error("ALREADY EQUIPPED THIS SLOT MAN");
-    }
-
-    this.equips.push({
-      slot,
-      equip,
-    });
-
-    const abilitiesGranted = equip.getAbilities();
-    this.abilities = [...this.abilities, ...abilitiesGranted];
+    this.equipmentManager.equip(equip, slot);
+    this.abilityManager.updateEquipmentAbilities(this.equipmentManager.equips);
   }
 
-  unequip(slot: EQUIPMENT_SLOT) {
-    this.equips = this.equips.filter((e) => e.slot !== slot);
+  setClass(unitClass: Class) {
+    this.classManager.setClass(unitClass);
+    this.abilityManager.updateClassAbilities(
+      this.classManager.getClassAbilities()
+    );
   }
 
   serialize() {
@@ -123,9 +111,14 @@ export class UnitNew {
   step(stepNumber: number) {
     this.currentStep = stepNumber;
 
-    this.decreaseDisables();
+    //this.decreaseDisables();
 
-    if (this.hasDisable(DISABLE_TYPE.STUN)) return;
+    this.abilityManager.getAbilities().forEach((ability) => {
+      ability.step();
+      if (ability.canActivate()) {
+        ability.use(this);
+      }
+    });
 
     // add step logic
   }
@@ -137,7 +130,7 @@ export class UnitNew {
     if (event.payload.modifiers?.shield) {
       this.stats.shield += event.payload.modifiers.shield;
     }
-    if (event.type === EVENT_TYPE.RECEIVED_DISABLE) {
+    /* if (event.type === EVENT_TYPE.RECEIVED_DISABLE) {
       if (event.payload.apply) {
         this.disables.push({
           type: event.payload.disableName,
@@ -150,7 +143,7 @@ export class UnitNew {
           }
         });
       }
-    }
+    } */
   }
 
   /* attack(target: Unit) {
@@ -260,7 +253,7 @@ export class UnitNew {
     return `Unit New`;
   }
 
-  receiveDisable(type: DISABLE_TYPE, duration: number) {
+  /* receiveDisable(type: DISABLE_TYPE, duration: number) {
     let newDuration = duration;
     let modifiedDuration = duration;
 
@@ -307,7 +300,7 @@ export class UnitNew {
 
   hasDisable(type: DISABLE_TYPE) {
     return !!this.disables.find((disable) => disable.type === type);
-  }
+  } */
 
   public toString = (): string => {
     return `unit new`;

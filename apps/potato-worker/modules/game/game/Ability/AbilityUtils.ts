@@ -1,4 +1,4 @@
-import { MOD_TYPE, Mod, PossibleMods } from "../Equipment/EquipmentTypes";
+import { MOD_TYPE, Mod, PossibleMods } from "../Mods/ModsTypes";
 import { Ability } from "./Ability";
 import { Slash } from "./Attacks/Slash";
 import { Thrust } from "./Attacks/Thrust";

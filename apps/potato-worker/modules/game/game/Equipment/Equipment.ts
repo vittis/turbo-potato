@@ -1,13 +1,7 @@
 import { Ability } from "../Ability/Ability";
-import {
-  AbilityClassMap,
-  getAbilitiesInstancesFromMods,
-} from "../Ability/AbilityUtils";
-import { Slash } from "../Ability/Attacks/Slash";
-import { Thrust } from "../Ability/Attacks/Thrust";
-import Attacks from "../data/attacks";
+import { getAbilitiesInstancesFromMods } from "../Ability/AbilityUtils";
 import { EquipmentDataSchema } from "./EquipmentSchema";
-import { EquipmentData, MOD_TYPE, Mod } from "./EquipmentTypes";
+import { EquipmentData } from "./EquipmentTypes";
 
 export class Equipment {
   data: EquipmentData;

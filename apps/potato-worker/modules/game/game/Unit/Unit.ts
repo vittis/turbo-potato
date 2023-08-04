@@ -7,6 +7,8 @@ import { Multipliers } from "../data/config";
 import { Equipment } from "../Equipment/Equipment";
 import { EquipmentManager } from "../Equipment/EquipmentManager";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
+import { StatsManager } from "../Stats/StatsManager";
+import { UnitStats } from "../Stats/StatsTypes";
 
 export enum EVENT_TYPE {
   ATTACK = "ATTACK",
@@ -25,17 +27,6 @@ export enum EVENT_TYPE {
   HAS_DIED = 3,
 } */
 
-export interface UnitStats {
-  hp: number;
-  maxHp: number;
-  shield: number;
-  attackDamageModifier: number;
-  attackCooldownModifier: number;
-  spellDamageModifier: number;
-  spellCooldownModifier: number;
-  damageReductionModifier: number;
-}
-
 type SubStepEvent = Omit<StepEvent, "step" | "subEvents">;
 
 interface StepEvent {
@@ -48,7 +39,6 @@ interface StepEvent {
 
 export class Unit {
   id: string;
-  stats: UnitStats;
   owner: OWNER;
   position: POSITION;
   bm: BoardManager;
@@ -58,11 +48,29 @@ export class Unit {
   currentStep = 0;
   stepEvents: StepEvent[] = [];
 
+  statsManager: StatsManager;
   equipmentManager: EquipmentManager;
   classManager: ClassManager;
   abilityManager: AbilityManager;
 
+  get stats() {
+    return this.statsManager.getStats();
+  }
+
+  set stats(stats: UnitStats) {
+    this.statsManager.setStats(stats);
+  }
+
+  get equipment() {
+    return this.equipmentManager.equips;
+  }
+
+  get abilities() {
+    return this.abilityManager.getAbilities();
+  }
+
   constructor(owner: OWNER, position: POSITION, bm?: BoardManager) {
+    this.statsManager = new StatsManager();
     this.equipmentManager = new EquipmentManager();
     this.classManager = new ClassManager();
     this.abilityManager = new AbilityManager();
@@ -76,7 +84,7 @@ export class Unit {
 
     const finalShield = 0;
 
-    this.stats = {
+    this.statsManager.initializeStats({
       hp: finalHp,
       maxHp: finalHp,
       shield: finalShield,
@@ -85,7 +93,7 @@ export class Unit {
       spellCooldownModifier: 0,
       spellDamageModifier: 0,
       damageReductionModifier: 0,
-    };
+    });
   }
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
@@ -121,7 +129,7 @@ export class Unit {
 
     //this.decreaseDisables();
 
-    this.abilityManager.getAbilities().forEach((ability) => {
+    this.abilities.forEach((ability) => {
       ability.step();
       if (ability.canActivate()) {
         ability.use(this);

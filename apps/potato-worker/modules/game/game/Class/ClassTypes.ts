@@ -1,8 +1,5 @@
-import { PossibleMods } from "../Equipment/EquipmentTypes";
-
-export enum UNIT_STATS {
-  HEALTH = "HEALTH",
-}
+import { PossibleMods } from "../Mods/ModsTypes";
+import { STAT } from "../Stats/StatsTypes";
 
 export enum STATUS_EFFECTS {
   FAST = "FAST",
@@ -23,6 +20,7 @@ export enum ABILITY_TARGET {
   SELF = "SELF",
 }
 
+// todo better type for this
 export interface AbilityModifier {
   trigger?: {
     name: string;
@@ -39,22 +37,11 @@ export interface AbilityModifier {
     remove?: boolean;
   }[];
   stats?: {
-    name: UNIT_STATS;
+    name: STAT;
     target: ABILITY_TARGET;
     value: number;
     remove?: boolean;
   }[];
-}
-
-export interface GrantAbilityModifierPayload {
-  name: string;
-  modifiers: AbilityModifier;
-}
-
-export interface GrantUniqueAbilityModifierPayload {
-  name: string;
-  nodeName: string;
-  unique: boolean;
 }
 
 export interface ClassNode {

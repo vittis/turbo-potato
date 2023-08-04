@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  UNIT_STATS,
   STATUS_EFFECTS,
   ABILITY_TARGET,
   AbilityModifier,
@@ -8,8 +7,10 @@ import {
   TalentNode,
   ClassData,
 } from "./ClassTypes";
-import { PossibleModsSchema } from "../Equipment/EquipmentSchema";
+import { PossibleModsSchema } from "../Mods/ModsSchema";
+import { STAT } from "../Stats/StatsTypes";
 
+// todo better type
 export const AbilityModifierSchema = z.object({
   trigger: z
     .array(
@@ -40,7 +41,7 @@ export const AbilityModifierSchema = z.object({
   stats: z
     .array(
       z.object({
-        name: z.nativeEnum(UNIT_STATS),
+        name: z.nativeEnum(STAT),
         target: z.nativeEnum(ABILITY_TARGET),
         value: z.number(),
         remove: z.boolean().optional(),

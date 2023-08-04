@@ -1,8 +1,8 @@
 import { Ability } from "../Ability/Ability";
 import {
   AbilityClassMap,
-  getAbilityInstanceClass,
-} from "../Ability/AbilityMap";
+  getAbilitiesInstancesFromMods,
+} from "../Ability/AbilityUtils";
 import { Slash } from "../Ability/Attacks/Slash";
 import { Thrust } from "../Ability/Attacks/Thrust";
 import Attacks from "../data/attacks";
@@ -17,18 +17,7 @@ export class Equipment {
     this.data = parsedData;
   }
 
-  getEquipmentAbilities(): Ability[] {
-    const abilityMods = this.data.mods.filter(
-      (mods) => mods.type === MOD_TYPE.GRANT_ABILITY
-    ) as Mod<MOD_TYPE.GRANT_ABILITY>[];
-
-    if (abilityMods.length === 0) {
-      return [];
-    }
-
-    return abilityMods.map((mods) => {
-      const AbilityClass = getAbilityInstanceClass(mods.payload.name);
-      return new AbilityClass();
-    });
+  getGrantedAbilities(): Ability[] {
+    return getAbilitiesInstancesFromMods(this.data.mods);
   }
 }

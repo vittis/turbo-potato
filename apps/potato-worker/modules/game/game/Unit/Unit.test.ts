@@ -2,7 +2,6 @@ import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import Weapons from "../data/weapons";
-import { Ability } from "../Ability/Ability";
 import { Unit } from "./Unit";
 
 describe("Unit", () => {

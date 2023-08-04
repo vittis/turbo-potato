@@ -1,3 +1,4 @@
+import { Ability } from "../Ability/Ability";
 import { Equipment } from "./Equipment";
 import { EQUIPMENT_SLOT } from "./EquipmentTypes";
 
@@ -25,5 +26,12 @@ export class EquipmentManager {
 
   unequip(slot: EQUIPMENT_SLOT) {
     this.equips = this.equips.filter((e) => e.slot !== slot);
+  }
+
+  getAllAbilitiesFromEquips() {
+    return this.equips.reduce(
+      (acc, cur) => [...acc, ...cur.equip.getGrantedAbilities()],
+      [] as Ability[]
+    );
   }
 }

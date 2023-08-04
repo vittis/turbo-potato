@@ -29,6 +29,11 @@ export interface UnitStats {
   hp: number;
   maxHp: number;
   shield: number;
+  attackDamageModifier: number;
+  attackCooldownModifier: number;
+  spellDamageModifier: number;
+  spellCooldownModifier: number;
+  damageReductionModifier: number;
 }
 
 type SubStepEvent = Omit<StepEvent, "step" | "subEvents">;
@@ -75,19 +80,22 @@ export class Unit {
       hp: finalHp,
       maxHp: finalHp,
       shield: finalShield,
+      attackCooldownModifier: 0,
+      attackDamageModifier: 0,
+      spellCooldownModifier: 0,
+      spellDamageModifier: 0,
+      damageReductionModifier: 0,
     };
   }
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
     this.equipmentManager.equip(equip, slot);
-    this.abilityManager.updateEquipmentAbilities(this.equipmentManager.equips);
+    this.abilityManager.addAbilities(equip.getGrantedAbilities());
   }
 
   setClass(unitClass: Class) {
     this.classManager.setClass(unitClass);
-    this.abilityManager.updateClassAbilities(
-      this.classManager.getClassAbilities()
-    );
+    this.abilityManager.addAbilities(this.classManager.getClassAbilities());
   }
 
   serialize() {

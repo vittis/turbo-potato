@@ -1,7 +1,7 @@
 import { ClassData } from "./ClassTypes";
 import { ClassDataSchema } from "./ClassSchema";
-import { MOD_TYPE, Mod } from "../Equipment/EquipmentTypes";
-import { getAbilityInstanceClass } from "../Ability/AbilityMap";
+import { getAbilitiesInstancesFromMods } from "../Ability/AbilityUtils";
+import { Ability } from "../Ability/Ability";
 
 export class Class {
   data: ClassData;
@@ -12,21 +12,10 @@ export class Class {
   }
 
   getClassBaseAbilities() {
-    const baseAbilityMods = this.data.base.reduce((acc, node) => {
-      const abilitiesOfNode = node.mods.filter(
-        (mods) => mods.type === MOD_TYPE.GRANT_ABILITY
-      ) as Mod<MOD_TYPE.GRANT_ABILITY>[];
+    return this.data.base.reduce((acc, node) => {
+      const abilitiesOfNode = getAbilitiesInstancesFromMods(node.mods);
 
       return [...acc, ...abilitiesOfNode];
-    }, [] as Mod<MOD_TYPE.GRANT_ABILITY>[]);
-
-    if (baseAbilityMods.length === 0) {
-      return [];
-    }
-
-    return baseAbilityMods.map((mods) => {
-      const AbilityClass = getAbilityInstanceClass(mods.payload.name);
-      return new AbilityClass();
-    });
+    }, [] as Ability[]);
   }
 }

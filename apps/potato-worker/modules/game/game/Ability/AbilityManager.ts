@@ -6,16 +6,16 @@ export class AbilityManager {
 
   constructor() {}
 
-  updateEquipmentAbilities(equips: EquippedItem[]) {
-    const abilitiesGranted = equips.reduce((acc, cur) => {
-      return [...acc, ...cur.equip.getEquipmentAbilities()];
-    }, [] as Ability[]);
-
-    this.abilities = abilitiesGranted;
+  removeAllAbiliiites() {
+    this.abilities = [];
   }
 
-  updateClassAbilities(abilities: Ability[]) {
-    this.abilities = [...this.abilities, ...abilities];
+  addAbilities(abilities: Ability | Ability[]) {
+    if (Array.isArray(abilities)) {
+      this.abilities = [...this.abilities, ...abilities];
+    } else {
+      this.abilities = [...this.abilities, abilities];
+    }
   }
 
   getAbilities() {

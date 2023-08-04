@@ -1,0 +1,26 @@
+{
+  "name": "Shortbow",
+  "allowedSlots": ["MAIN_HAND"],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Disarming Shot"
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_COOLDOWN_MODIFIER",
+        "value": 15
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "SPELL_COOLDOWN_MODIFIER",
+        "value": 15
+      }
+    }
+  ]
+}

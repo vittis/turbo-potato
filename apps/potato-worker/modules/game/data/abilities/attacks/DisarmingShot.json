@@ -1,0 +1,19 @@
+{
+  "name": "Disarming Shot",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "VULNERABLE",
+          "quantity": 5
+        }
+      ]
+    }
+  ]
+}

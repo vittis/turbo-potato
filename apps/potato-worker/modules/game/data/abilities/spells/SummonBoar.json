@@ -1,0 +1,20 @@
+{
+  "name": "Summon Boar",
+  "type": "SPELL",
+  "tags": ["SUMMON"],
+  "target": "STANDARD",
+  "baseDamage": 30,
+  "cooldown": 80,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "STUN",
+          "quantity": 10
+        }
+      ]
+    }
+  ]
+}

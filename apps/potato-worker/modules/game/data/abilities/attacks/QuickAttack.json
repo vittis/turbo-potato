@@ -1,0 +1,8 @@
+{
+  "name": "Quick Attack",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 15,
+  "cooldown": 20
+}

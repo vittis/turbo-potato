@@ -1,0 +1,19 @@
+{
+  "name": "Summon Rabbit",
+  "type": "SPELL",
+  "tags": ["SUMMON"],
+  "target": "ADJACENT_ALLIES",
+  "cooldown": 80,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "FAST",
+          "quantity": 10
+        }
+      ]
+    }
+  ]
+}

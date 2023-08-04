@@ -1,0 +1,19 @@
+{
+  "name": "Reinforce Allies",
+  "type": "SPELL",
+  "tags": [],
+  "target": "ADJACENT_ALLIES",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "SHIELD",
+          "quantity": 20
+        }
+      ]
+    }
+  ]
+}

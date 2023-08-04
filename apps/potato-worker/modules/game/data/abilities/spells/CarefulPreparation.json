@@ -1,0 +1,19 @@
+{
+  "name": "Careful Preparation",
+  "type": "SPELL",
+  "tags": [],
+  "target": "SELF",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "MULTISTRIKE",
+          "quantity": 3
+        }
+      ]
+    }
+  ]
+}

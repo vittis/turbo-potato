@@ -1,0 +1,7 @@
+{
+  "name": "Powershot",
+  "type": "ATTACK",
+  "tags": ["USE_WEAPON_ABILITY"],
+  "target": "ROW",
+  "cooldown": 100
+}

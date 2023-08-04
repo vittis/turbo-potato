@@ -1,0 +1,8 @@
+{
+  "name": "Long Shot",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 50,
+  "cooldown": 50
+}

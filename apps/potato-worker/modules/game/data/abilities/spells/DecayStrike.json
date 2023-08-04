@@ -1,0 +1,19 @@
+{
+  "name": "Decay Strike",
+  "type": "SPELL",
+  "tags": [],
+  "target": "STANDARD",
+  "cooldown": 30,
+  "effects": [
+    {
+      "type": "APPLY_STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "statusEffectsApplied": [
+        {
+          "name": "POISON",
+          "quantity": 3
+        }
+      ]
+    }
+  ]
+}

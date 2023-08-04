@@ -18,7 +18,7 @@ export interface GrantPerkPayload {
 }
 
 export interface GrantBaseStatPayload {
-  stat: STAT; // todo use a enum
+  stat: STAT;
   value: number;
 }
 

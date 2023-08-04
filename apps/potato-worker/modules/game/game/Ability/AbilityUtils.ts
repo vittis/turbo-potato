@@ -1,4 +1,5 @@
 import { MOD_TYPE, Mod, PossibleMods } from "../Mods/ModsTypes";
+import { filterModsByType } from "../Mods/ModsUtils";
 import { Ability } from "./Ability";
 import { Slash } from "./Attacks/Slash";
 import { Thrust } from "./Attacks/Thrust";
@@ -18,18 +19,12 @@ function getAbilityInstanceClass(name: string) {
   }
 }
 
-function filterAbilityMods(mods: PossibleMods) {
-  return mods.filter(
-    (mod) => mod.type === MOD_TYPE.GRANT_ABILITY
-  ) as Mod<MOD_TYPE.GRANT_ABILITY>[];
+function filterAbilityMods(mods: PossibleMods): Mod<MOD_TYPE.GRANT_ABILITY>[] {
+  return filterModsByType(mods, MOD_TYPE.GRANT_ABILITY);
 }
 
 export function getAbilitiesInstancesFromMods(mods: PossibleMods) {
   const abilityMods = filterAbilityMods(mods);
-
-  if (abilityMods.length === 0) {
-    return [];
-  }
 
   return abilityMods.map((mod) => {
     const AbilityClass = getAbilityInstanceClass(mod.payload.name);

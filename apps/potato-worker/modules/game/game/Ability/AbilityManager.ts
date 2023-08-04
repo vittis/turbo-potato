@@ -2,23 +2,45 @@ import { EquippedItem } from "../Equipment/EquipmentManager";
 import { Ability } from "./Ability";
 
 export class AbilityManager {
-  private abilities: Ability[] = [];
+  private abilitiesFromEquips: Ability[] = [];
+  private abilitiesFromClass: Ability[] = [];
 
   constructor() {}
 
-  removeAllAbiliiites() {
-    this.abilities = [];
+  get abilities() {
+    return this.getAbilities();
   }
 
-  addAbilities(abilities: Ability | Ability[]) {
+  removeAllAbiliiites() {
+    this.abilitiesFromEquips = [];
+    this.abilitiesFromClass = [];
+  }
+
+  removeAllAbilitiesFromEquips() {
+    this.abilitiesFromEquips = [];
+  }
+
+  removeAllAbilitiesFromClass() {
+    this.abilitiesFromClass = [];
+  }
+
+  addAbilitiesFromEquips(abilities: Ability[]) {
+    this.abilitiesFromEquips = [...this.abilitiesFromEquips, ...abilities];
+  }
+
+  addAbilitiesFromClass(abilities: Ability[]) {
+    this.abilitiesFromClass = [...this.abilitiesFromClass, ...abilities];
+  }
+
+  /* addAbilities(abilities: Ability | Ability[]) {
     if (Array.isArray(abilities)) {
       this.abilities = [...this.abilities, ...abilities];
     } else {
       this.abilities = [...this.abilities, abilities];
     }
-  }
+  } */
 
   getAbilities() {
-    return this.abilities;
+    return [...this.abilitiesFromEquips, ...this.abilitiesFromClass];
   }
 }

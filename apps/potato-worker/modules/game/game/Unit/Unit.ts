@@ -48,13 +48,17 @@ export class Unit {
   currentStep = 0;
   stepEvents: StepEvent[] = [];
 
-  statsManager: StatsManager;
-  equipmentManager: EquipmentManager;
-  classManager: ClassManager;
-  abilityManager: AbilityManager;
+  private statsManager: StatsManager;
+  private equipmentManager: EquipmentManager;
+  private classManager: ClassManager;
+  private abilityManager: AbilityManager;
 
   get stats() {
     return this.statsManager.getStats();
+  }
+
+  get equips() {
+    return this.equipmentManager.equips;
   }
 
   set stats(stats: UnitStats) {
@@ -98,12 +102,31 @@ export class Unit {
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
     this.equipmentManager.equip(equip, slot);
-    this.abilityManager.addAbilities(equip.getGrantedAbilities());
+    this.abilityManager.removeAllAbilitiesFromEquips();
+
+    this.abilityManager.addAbilitiesFromEquips(
+      this.equipmentManager.getAllAbilitiesFromEquips()
+    );
+
+    // todo continue from here
+    // this.statsManager.applyStatsMods(equip.getStatsMods());
+  }
+
+  unequip(slot: EQUIPMENT_SLOT) {
+    const equip = this.equipmentManager.unequip(slot);
+    this.abilityManager.removeAllAbilitiesFromEquips();
+    this.abilityManager.addAbilitiesFromEquips(
+      this.equipmentManager.getAllAbilitiesFromEquips()
+    );
+    // this.statsManager.removeStatsMods(equip.getStatsMods());
   }
 
   setClass(unitClass: Class) {
     this.classManager.setClass(unitClass);
-    this.abilityManager.addAbilities(this.classManager.getClassAbilities());
+    this.abilityManager.removeAllAbilitiesFromClass();
+    this.abilityManager.addAbilitiesFromClass(
+      this.classManager.getClassAbilities()
+    );
   }
 
   serialize() {

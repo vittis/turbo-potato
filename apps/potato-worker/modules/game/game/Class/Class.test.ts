@@ -12,6 +12,6 @@ describe("Class", () => {
   test("should grant base class abilities", () => {
     const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
     unit.setClass(new Class(Classes.Ranger));
-    expect(unit.abilityManager.getAbilities().length).toBe(1);
+    expect(unit.abilities.length).toBe(1);
   });
 });

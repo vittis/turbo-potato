@@ -11,15 +11,11 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      expect(unit.equipmentManager.equips).toHaveLength(1);
+      expect(unit.equips).toHaveLength(1);
 
-      expect(unit.equipmentManager.equips[0].slot).toBe(
-        EQUIPMENT_SLOT.MAIN_HAND
-      );
-      expect(unit.equipmentManager.equips[0].equip).toBeInstanceOf(Equipment);
-      expect(unit.equipmentManager.equips[0].equip.data).toEqual(
-        Weapons.ShortSpear
-      );
+      expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
+      expect(unit.equips[0].equip).toBeInstanceOf(Equipment);
+      expect(unit.equips[0].equip.data).toEqual(Weapons.ShortSpear);
     });
 
     test("check if equip is on valid slot", () => {});
@@ -29,10 +25,10 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      expect(unit.equipmentManager.equips).toHaveLength(1);
+      expect(unit.equips).toHaveLength(1);
 
       unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.OFF_HAND);
-      expect(unit.equipmentManager.equips).toHaveLength(2);
+      expect(unit.equips).toHaveLength(2);
     });
 
     test("should not be able to equip in same slot", () => {
@@ -43,7 +39,7 @@ describe("Unit", () => {
         unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
       } catch (e: any) {
         expect(e.message).toBeDefined();
-        expect(unit.equipmentManager.equips).toHaveLength(1);
+        expect(unit.equips).toHaveLength(1);
       }
     });
 
@@ -51,13 +47,13 @@ describe("Unit", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.equipmentManager.equips).toHaveLength(1);
+      expect(unit.equips).toHaveLength(1);
 
-      unit.equipmentManager.unequip(EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.equipmentManager.equips).toHaveLength(0);
+      unit.unequip(EQUIPMENT_SLOT.MAIN_HAND);
+      expect(unit.equips).toHaveLength(0);
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.equipmentManager.equips).toHaveLength(1);
+      expect(unit.equips).toHaveLength(1);
     });
   });
 
@@ -67,10 +63,8 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      expect(unit.equipmentManager.equips[0].slot).toBe(
-        EQUIPMENT_SLOT.MAIN_HAND
-      );
-      expect(unit.abilityManager.getAbilities()).toHaveLength(1);
+      expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
+      expect(unit.abilities).toHaveLength(1);
     });
 
     test("equipping two weapons should give two abilities", () => {
@@ -79,7 +73,7 @@ describe("Unit", () => {
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
       unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.OFF_HAND);
 
-      expect(unit.abilityManager.getAbilities()).toHaveLength(2);
+      expect(unit.abilities).toHaveLength(2);
     });
 
     test("throws error when invalid target", () => {
@@ -88,7 +82,7 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      const ability = unit.abilityManager.getAbilities()[0];
+      const ability = unit.abilities[0];
 
       try {
         for (let i = 0; i < ability.data.cooldown; i++) {
@@ -111,7 +105,7 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      const ability = unit.abilityManager.getAbilities()[0];
+      const ability = unit.abilities[0];
       expect(ability.data.name).toBe("Thrust");
 
       for (let i = 0; i < ability.data.cooldown; i++) {
@@ -132,7 +126,7 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 
-      const ability = unit.abilityManager.getAbilities()[0];
+      const ability = unit.abilities[0];
       expect(ability.data.name).toBe("Slash");
 
       for (let i = 0; i < ability.data.cooldown; i++) {

@@ -13,7 +13,7 @@
     {
       "type": "GRANT_PERK",
       "payload": {
-        "name": "Penetrating Attacks",
+        "name": "Focused Mind",
         "tier": 1
       }
     },

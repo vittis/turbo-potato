@@ -1,6 +1,7 @@
 import { AbilityData } from "./AbilityTypes";
 import { AbilityDataSchema } from "./AbilitySchema";
 import { Unit } from "../Unit/Unit";
+import { Event } from "../Event/EventTypes";
 
 export class Ability {
   data: AbilityData;
@@ -19,7 +20,8 @@ export class Ability {
     return this.progress >= this.data.cooldown;
   }
 
-  use(unit: Unit) {
+  //@ts-expect-error
+  use(unit: Unit): Event {
     this.progress = 0;
   }
 }

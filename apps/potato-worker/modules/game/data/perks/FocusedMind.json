@@ -1,0 +1,29 @@
+{
+  "name": "Focused Mind",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "VULNERABLE",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "GRANT_STATUS_EFFECT",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "payload": [
+        {
+          "name": "VULNERABLE",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

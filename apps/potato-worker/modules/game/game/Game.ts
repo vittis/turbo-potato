@@ -1,5 +1,5 @@
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
-import { EVENT_TYPE, Unit } from "./Unit/Unit";
+import { Unit } from "./Unit/Unit";
 
 import Races from "./data/races";
 import Classes from "./data/classes";
@@ -7,10 +7,9 @@ import Weapons from "./data/weapons";
 import Chests from "./data/chests";
 import Heads from "./data/heads";
 
-import { WeaponData } from "./Weapon";
-import { ArmorData } from "./Armor";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
+import { EVENT_TYPE } from "./Event/EventTypes";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
@@ -19,61 +18,27 @@ export class Game {
   constructor() {
     this.boardManager = new BoardManager();
 
-    const unitTest = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+    const unit = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    const unit2 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    this.boardManager.addToBoard(unit);
+    this.boardManager.addToBoard(unit2);
 
-    unitTest.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.TOP_FRONT,
-        Races.Human,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
-          head: Heads.LeatherHat as ArmorData,
-        }
-      )
-    ); */
+    unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
   }
 
   /* 
     Function to sort events by type in order CAST_SKILL -> ATTACK
     Maybe add other criterias in the future, for example should unit x cast skill before unit y?
   */
-  sortEventsByType(events: any[]) {
-    events.sort(function (a, b) {
-      if (a.type === "CAST_SKILL" && b.type === "ATTACK") {
-        return -1;
-      } else if (a.type === "ATTACK" && b.type === "CAST_SKILL") {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-
-    return events;
-  }
-
-  executeStepEvents(events: any[]) {
-    events.forEach((event) => {
-      this.boardManager
-        .getUnitById(event.actorId)
-        .applyStatsModifiersAfterEvent(event);
-
-      if (event.subEvents) {
-        event.subEvents.forEach((subEvent: any) => {
-          this.boardManager
-            .getUnitById(subEvent.actorId)
-            .applyStatsModifiersAfterEvent(subEvent);
-        });
-      }
-    });
-
-    return events;
-  }
 
   async startGame() {
     const serializedUnits = this.boardManager
@@ -93,9 +58,9 @@ export class Game {
         stepEvents.push(...unit.serializeEvents());
       });
 
-      const orderedEvents = this.sortEventsByType(stepEvents);
+      const orderedEvents = sortEventsByType(stepEvents);
 
-      this.executeStepEvents(orderedEvents);
+      executeStepEvents(this.boardManager, orderedEvents);
 
       orderedEvents.forEach((event) => {
         this.eventHistory.push(event);
@@ -106,7 +71,7 @@ export class Game {
           unit.markAsDead();
           this.eventHistory.push({
             actorId: unit.id,
-            type: EVENT_TYPE.HAS_DIED,
+            type: EVENT_TYPE.FAINT,
             step: currentStep,
           });
         }
@@ -167,6 +132,31 @@ export class Game {
         .every((unit) => unit.isDead)
     );
   }
+}
+
+export function sortEventsByType(events: any[]) {
+  events.sort(function (a, b) {
+    if (a.type === EVENT_TYPE.USE_ABILITY && b.type === EVENT_TYPE.FAINT) {
+      return -1;
+    } else if (
+      a.type === EVENT_TYPE.FAINT &&
+      b.type === EVENT_TYPE.USE_ABILITY
+    ) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  return events;
+}
+
+export function executeStepEvents(bm: BoardManager, events: any[]) {
+  events.forEach((event) => {
+    bm.getUnitById(event.actorId).applyEvent(event);
+  });
+
+  return events;
 }
 
 /* 

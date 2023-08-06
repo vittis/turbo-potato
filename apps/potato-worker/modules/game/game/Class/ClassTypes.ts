@@ -1,16 +1,6 @@
 import { PossibleMods } from "../Mods/ModsTypes";
 import { STAT } from "../Stats/StatsTypes";
-
-export enum STATUS_EFFECTS {
-  FAST = "FAST",
-  SHIELD = "SHIELD",
-  STURDY = "STURDY",
-  THORN = "THORN",
-  MULTISTRIKE = "MULTISTRIKE",
-  POISON = "POISON",
-  DAMAGE = "DAMAGE",
-  TAUNT = "TAUNT",
-}
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 export enum ABILITY_TARGET {
   STANDARD = "STANDARD",
@@ -31,7 +21,7 @@ export interface AbilityModifier {
     remove?: boolean;
   }[];
   status_effect?: {
-    name: STATUS_EFFECTS;
+    name: STATUS_EFFECT;
     target: ABILITY_TARGET;
     value: number;
     remove?: boolean;

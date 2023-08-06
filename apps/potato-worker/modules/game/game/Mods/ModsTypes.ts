@@ -22,7 +22,7 @@ export interface GrantBaseStatPayload {
   value: number;
 }
 
-export interface GrantAbilityModifierPayload {
+export interface GrantDefaultAbilityModifierPayload {
   name: string;
   modifiers: AbilityModifier;
 }
@@ -33,13 +33,15 @@ export interface GrantUniqueAbilityModifierPayload {
   unique: boolean;
 }
 
+export type GrantAbilityModifierPayload =
+  | GrantDefaultAbilityModifierPayload
+  | GrantUniqueAbilityModifierPayload;
+
 export type ModPayloadMap = {
   [MOD_TYPE.GRANT_ABILITY]: GrantAbilityPayload;
   [MOD_TYPE.GRANT_PERK]: GrantPerkPayload;
   [MOD_TYPE.GRANT_BASE_STAT]: GrantBaseStatPayload;
-  [MOD_TYPE.GRANT_ABILITY_MODIFIER]:
-    | GrantAbilityModifierPayload
-    | GrantUniqueAbilityModifierPayload;
+  [MOD_TYPE.GRANT_ABILITY_MODIFIER]: GrantAbilityModifierPayload;
 };
 
 export interface Mod<T extends MOD_TYPE> {

@@ -1,0 +1,3 @@
+export enum TRIGGER {
+  BATTLE_START = "BATTLE_START",
+}

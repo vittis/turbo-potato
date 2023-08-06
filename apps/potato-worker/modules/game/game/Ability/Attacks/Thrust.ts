@@ -1,4 +1,11 @@
 import { BoardManager } from "../../BoardManager";
+import {
+  EVENT_TYPE,
+  Event,
+  INSTANT_EFFECT_TYPE,
+  SUBEVENT_TYPE,
+  UseAbilityEvent,
+} from "../../Event/EventTypes";
 import { Unit } from "../../Unit/Unit";
 import Attacks from "../../data/attacks";
 import { Ability } from "../Ability";
@@ -9,9 +16,37 @@ export class Thrust extends Ability {
     super(Attacks.Thrust);
   }
 
-  use(unit: Unit): void {
+  use(unit: Unit): Event {
     super.use(unit);
-    const targets = this.getTargets(unit);
+    const target = this.getTargets(unit);
+
+    // TODO: apply real damage using stats modifier for damage
+
+    const damageEvent: UseAbilityEvent<
+      SUBEVENT_TYPE.INSTANT_EFFECT,
+      INSTANT_EFFECT_TYPE.DAMAGE
+    > = {
+      type: EVENT_TYPE.USE_ABILITY,
+      actorId: unit.id,
+      step: unit.currentStep,
+      payload: {
+        name: this.data.name,
+        subEvents: [
+          {
+            type: SUBEVENT_TYPE.INSTANT_EFFECT,
+            payload: {
+              type: INSTANT_EFFECT_TYPE.DAMAGE,
+              targetId: [target.id],
+              payload: {
+                value: this.data.baseDamage,
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    return damageEvent;
   }
 
   getTargets(unit: Unit) {
@@ -20,8 +55,6 @@ export class Thrust extends Ability {
       throw Error("COULDN'T FIND TARGET FOR THRUST");
     }
 
-    const target = targets[0];
-
-    target.receiveDamage(this.data.baseDamage);
+    return targets[0];
   }
 }

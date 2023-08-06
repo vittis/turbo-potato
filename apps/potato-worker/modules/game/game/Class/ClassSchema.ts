@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  STATUS_EFFECTS,
   ABILITY_TARGET,
   AbilityModifier,
   ClassNode,
@@ -9,6 +8,7 @@ import {
 } from "./ClassTypes";
 import { PossibleModsSchema } from "../Mods/ModsSchema";
 import { STAT } from "../Stats/StatsTypes";
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 // todo better type
 export const AbilityModifierSchema = z.object({
@@ -31,7 +31,7 @@ export const AbilityModifierSchema = z.object({
   status_effect: z
     .array(
       z.object({
-        name: z.nativeEnum(STATUS_EFFECTS),
+        name: z.nativeEnum(STATUS_EFFECT),
         target: z.nativeEnum(ABILITY_TARGET),
         value: z.number(),
         remove: z.boolean().optional(),

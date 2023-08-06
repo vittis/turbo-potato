@@ -10,7 +10,8 @@
     {
       "type": "APPLY_STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "statusEffectsApplied": [
+      "target": "ATTACK_TARGET",
+      "payload": [
         {
           "name": "SLOW",
           "quantity": 10

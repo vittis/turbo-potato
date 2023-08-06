@@ -7,17 +7,16 @@ import { Multipliers } from "../data/config";
 import { Equipment } from "../Equipment/Equipment";
 import { EquipmentManager } from "../Equipment/EquipmentManager";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
+import {
+  Event,
+  EVENT_TYPE,
+  INSTANT_EFFECT_TYPE,
+  SUBEVENT_TYPE,
+  UseAbilityEvent,
+} from "../Event/EventTypes";
+import { PerkManager } from "../Perk/PerkManager";
 import { StatsManager } from "../Stats/StatsManager";
 import { UnitStats } from "../Stats/StatsTypes";
-
-export enum EVENT_TYPE {
-  ATTACK = "ATTACK",
-  RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
-  HAS_DIED = "HAS_DIED",
-  CAST_SKILL = "CAST_SKILL",
-  RECEIVED_HEAL = "RECEIVED_HEAL",
-  RECEIVED_DISABLE = "RECEIVED_DISABLE",
-}
 
 // use for better perfomance
 /* export enum EVENT_TYPE {
@@ -52,6 +51,7 @@ export class Unit {
   private equipmentManager: EquipmentManager;
   private classManager: ClassManager;
   private abilityManager: AbilityManager;
+  private perkManager: PerkManager;
 
   get stats() {
     return this.statsManager.getStats();
@@ -75,7 +75,11 @@ export class Unit {
   }
 
   get abilities() {
-    return this.abilityManager.getAbilities();
+    return this.abilityManager.abilities;
+  }
+
+  get perks() {
+    return this.perkManager.perks;
   }
 
   constructor(owner: OWNER, position: POSITION, bm?: BoardManager) {
@@ -83,6 +87,7 @@ export class Unit {
     this.equipmentManager = new EquipmentManager();
     this.classManager = new ClassManager();
     this.abilityManager = new AbilityManager();
+    this.perkManager = new PerkManager();
     this.bm = bm as BoardManager;
 
     this.id = `${owner}${position}`;
@@ -114,12 +119,15 @@ export class Unit {
     );
 
     this.statsManager.addMods(equip.getStatsMods());
+
+    this.perkManager.addPerksFromSource(equip.getGrantedPerks(), item);
   }
 
   unequip(slot: EQUIPMENT_SLOT) {
     const equippedItem = this.equipmentManager.unequip(slot);
     this.abilityManager.removeAbilitiesFromSource(equippedItem);
     this.statsManager.removeMods(equippedItem.equip.getStatsMods());
+    this.perkManager.removePerksFromSource(equippedItem);
   }
 
   setClass(unitClass: Class) {
@@ -156,34 +164,39 @@ export class Unit {
     this.abilities.forEach((ability) => {
       ability.step();
       if (ability.canActivate()) {
-        ability.use(this);
+        const event = ability.use(this);
+        if (event) {
+          this.stepEvents.push(event);
+        }
       }
     });
 
     // add step logic
   }
 
-  applyStatsModifiersAfterEvent(event: any) {
-    if (event.payload.modifiers?.hp) {
-      this.stats.hp += event.payload.modifiers.hp;
+  applyEvent(event: Event) {
+    if (event.type === EVENT_TYPE.USE_ABILITY) {
+      this.applyUseAbilityEvent(
+        event as UseAbilityEvent<
+          SUBEVENT_TYPE.INSTANT_EFFECT,
+          INSTANT_EFFECT_TYPE.DAMAGE
+        >
+      );
     }
-    if (event.payload.modifiers?.shield) {
-      this.stats.shield += event.payload.modifiers.shield;
+  }
+
+  applyUseAbilityEvent(
+    event: UseAbilityEvent<
+      SUBEVENT_TYPE.INSTANT_EFFECT,
+      INSTANT_EFFECT_TYPE.DAMAGE
+    >
+  ) {
+    if (event.payload.subEvents) {
+      event.payload.subEvents.forEach((subEvent) => {
+        const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
+        target.receiveDamage(subEvent.payload.payload.value);
+      });
     }
-    /* if (event.type === EVENT_TYPE.RECEIVED_DISABLE) {
-      if (event.payload.apply) {
-        this.disables.push({
-          type: event.payload.disableName,
-          duration: event.payload.stats.duration,
-        });
-      } else {
-        this.disables.forEach((disable) => {
-          if (disable.type === event.payload.disableName) {
-            disable.duration += event.payload.modifiers.duration;
-          }
-        });
-      }
-    } */
   }
 
   /* attack(target: Unit) {
@@ -232,6 +245,26 @@ export class Unit {
       newHp -= Math.round(finalDamage);
     }
 
+    this.stats = { ...this.stats, hp: newHp, shield: newShield };
+  }
+
+  /* receiveDamage(damage: number) {
+    let newHp = this.stats.hp;
+    let newShield = this.stats.shield;
+
+    const finalDamage = Math.round(damage);
+
+    if (newShield > 0) {
+      newShield -= finalDamage;
+      if (newShield < 0) {
+        // If the armor is now depleted, apply any remaining damage to the unit's HP
+        newHp += newShield;
+        newShield = 0;
+      }
+    } else {
+      newHp -= Math.round(finalDamage);
+    }
+
     const receiveDamageEvent: SubStepEvent = {
       actorId: this.id,
       type: EVENT_TYPE.RECEIVED_DAMAGE,
@@ -248,9 +281,9 @@ export class Unit {
     };
 
     return receiveDamageEvent;
-  }
+  } */
 
-  receiveHeal(healValue: number) {
+  /* receiveHeal(healValue: number) {
     let newHp = this.stats.hp;
 
     const hpAfterHeal = Math.min(this.stats.hp + healValue, this.stats.maxHp);
@@ -272,7 +305,7 @@ export class Unit {
     };
 
     return receiveHealEvent;
-  }
+  } */
 
   markAsDead() {
     if (this.isDead) {

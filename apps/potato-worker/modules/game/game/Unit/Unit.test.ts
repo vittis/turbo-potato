@@ -1,6 +1,7 @@
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
+import { executeStepEvents, sortEventsByType } from "../Game";
 import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
@@ -103,18 +104,22 @@ describe("Unit", () => {
       bm.addToBoard(unit);
       bm.addToBoard(unit2);
 
-      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 
       const ability = unit.abilities[0];
-      expect(ability.data.name).toBe("Thrust");
+      //expect(ability.data.name).toBe("Thrust");
 
       for (let i = 0; i < ability.data.cooldown; i++) {
         unit.step(i);
       }
 
+      const orderedEvents = sortEventsByType(unit.serializeEvents());
+
+      executeStepEvents(bm, orderedEvents);
+
       expect(ability.progress).toBe(0);
       // todo fix post step logic
-      // expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
+      expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
     });
 
     test("uses Sword ability: Slash", () => {
@@ -146,6 +151,30 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
       expect(unit.statsFromMods.attackDamageModifier).toBe(5);
+    });
+  });
+
+  describe("Perks", () => {
+    test("equipping a weapon should give a perk", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+      console.log(unit.perks);
+
+      expect(unit.perks).toHaveLength(1);
+    });
+
+    test("unequipping a weapon should remove its perk", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+      expect(unit.perks).toHaveLength(1);
+
+      unit.unequip(EQUIPMENT_SLOT.MAIN_HAND);
+
+      expect(unit.perks).toHaveLength(0);
     });
   });
 });

@@ -139,9 +139,13 @@ describe("Unit", () => {
     });
   });
 
-  /* describe("kek", () => {
-    test.only("w", () => {
-      const kkkk = new Equipment(Weapons.ShortSpear);
+  // todo better stats tests
+  describe("Stats", () => {
+    test("equipping weapon grants stats", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+      expect(unit.statsFromMods.attackDamageModifier).toBe(5);
     });
-  }); */
+  });
 });

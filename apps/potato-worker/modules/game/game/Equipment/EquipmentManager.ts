@@ -18,30 +18,23 @@ export class EquipmentManager {
     if (isSlotOccupied) {
       throw Error("ALREADY EQUIPPED THIS SLOT MAN");
     }
-    this.equips.push({
+    const item = {
       slot,
       equip,
-    });
+    } as EquippedItem;
+    this.equips.push(item);
+
+    return item;
   }
 
-  unequip(slot: EQUIPMENT_SLOT) {
-    const equip = this.equips.find((e) => e.slot === slot);
+  unequip(slot: EQUIPMENT_SLOT): EquippedItem {
+    const equippedItem = this.equips.find((e) => e.slot === slot);
+    if (!equippedItem) {
+      throw Error("NO EQUIP IN THIS SLOT MAN");
+    }
+
     this.equips = this.equips.filter((e) => e.slot !== slot);
 
-    return equip;
-  }
-
-  getAllAbilitiesFromEquips() {
-    return this.equips.reduce(
-      (acc, cur) => [...acc, ...cur.equip.getGrantedAbilities()],
-      [] as Ability[]
-    );
-  }
-
-  getAllStatsModsFromEquips() {
-    return this.equips.reduce(
-      (acc, cur) => [...acc, ...cur.equip.getStatsMods()],
-      [] as Mod<MOD_TYPE.GRANT_BASE_STAT>[]
-    );
+    return equippedItem;
   }
 }

@@ -1,16 +1,22 @@
 import { MOD_TYPE, Mod } from "../Mods/ModsTypes";
 import { STAT, UnitStats } from "./StatsTypes";
 
-export class StatsManager {
-  stats!: UnitStats;
-  activeMods: Mod<MOD_TYPE.GRANT_BASE_STAT>[] = [];
+type StatsFromMods = Omit<UnitStats, "hp">;
 
-  constructor() {}
+export class StatsManager {
+  private stats!: UnitStats;
+  private statsFromMods!: StatsFromMods;
+  private activeMods: Mod<MOD_TYPE.GRANT_BASE_STAT>[] = [];
+
+  constructor() {
+    this.resetStatsFromMods();
+  }
 
   initializeStats(stats: UnitStats) {
     this.stats = stats;
   }
 
+  // todo better stats management
   getStats() {
     return this.stats;
   }
@@ -19,34 +25,68 @@ export class StatsManager {
     return (this.stats = newStats);
   }
 
-  applyStatsMods(mods: Mod<MOD_TYPE.GRANT_BASE_STAT>[]) {
+  getStatsFromMods() {
+    return this.statsFromMods;
+  }
+
+  getActiveMods() {
+    return this.activeMods;
+  }
+
+  resetStatsFromMods() {
+    this.statsFromMods = {
+      maxHp: 0,
+      attackCooldownModifier: 0,
+      attackDamageModifier: 0,
+      spellCooldownModifier: 0,
+      spellDamageModifier: 0,
+      damageReductionModifier: 0,
+      shield: 0,
+    };
+  }
+
+  addMods(mods: Mod<MOD_TYPE.GRANT_BASE_STAT>[]) {
+    this.activeMods = [...this.activeMods, ...mods];
+    this.applyModsToStats(mods);
+  }
+
+  removeMods(mods: Mod<MOD_TYPE.GRANT_BASE_STAT>[]) {
+    this.activeMods = this.activeMods.filter(
+      (activeMod) => !mods.includes(activeMod)
+    );
+
+    // remove the bonuses applied to statsFromMods
+    this.applyModsToStats(
+      mods.map((mod) => ({
+        ...mod,
+        payload: { ...mod.payload, value: -mod.payload.value },
+      }))
+    );
+  }
+
+  applyModsToStats(mods: Mod<MOD_TYPE.GRANT_BASE_STAT>[]) {
     mods.forEach((mod) => {
       const { stat, value } = mod.payload;
       switch (stat) {
         case STAT.HEALTH:
-          this.stats.maxHp += value;
-          this.stats.hp = this.stats.maxHp;
+          this.statsFromMods.maxHp += value;
           break;
         case STAT.ATTACK_COOLDOWN:
-          this.stats.attackCooldownModifier += value;
+          this.statsFromMods.attackCooldownModifier += value;
           break;
         case STAT.ATTACK_DAMAGE:
-          this.stats.attackDamageModifier += value;
+          this.statsFromMods.attackDamageModifier += value;
           break;
         case STAT.SPELL_COOLDOWN:
-          this.stats.spellCooldownModifier += value;
+          this.statsFromMods.spellCooldownModifier += value;
           break;
         case STAT.SPELL_DAMAGE:
-          this.stats.spellDamageModifier += value;
+          this.statsFromMods.spellDamageModifier += value;
+          break;
+        case STAT.DAMAGE_REDUCTION:
+          this.statsFromMods.damageReductionModifier += value;
           break;
       }
     });
   }
-
-  // todo is this needed
-  /*
-  setHp(hp: number) {
-    this.stats.hp = hp;
-  }
-  */
 }

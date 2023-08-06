@@ -1,10 +1,8 @@
 import { AbilityData } from "./AbilityTypes";
 import { AbilityDataSchema } from "./AbilitySchema";
-import { BoardManager } from "../BoardManager";
 import { Unit } from "../Unit/Unit";
-import { Thrust } from "./Attacks/Thrust";
 
-export /* abstract */ class Ability {
+export class Ability {
   data: AbilityData;
   progress = 0;
 

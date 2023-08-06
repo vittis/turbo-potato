@@ -1,9 +1,16 @@
+import { Class } from "../Class/Class";
 import { EquippedItem } from "../Equipment/EquipmentManager";
 import { Ability } from "./Ability";
 
+type AbilitySource = EquippedItem | Class;
+
+interface ActiveAbility {
+  ability: Ability;
+  source: AbilitySource;
+}
+
 export class AbilityManager {
-  private abilitiesFromEquips: Ability[] = [];
-  private abilitiesFromClass: Ability[] = [];
+  private activeAbilities: ActiveAbility[] = [];
 
   constructor() {}
 
@@ -12,35 +19,22 @@ export class AbilityManager {
   }
 
   removeAllAbiliiites() {
-    this.abilitiesFromEquips = [];
-    this.abilitiesFromClass = [];
+    this.activeAbilities = [];
   }
 
-  removeAllAbilitiesFromEquips() {
-    this.abilitiesFromEquips = [];
+  addAbilitiesFromSource(abilities: Ability[], source: AbilitySource) {
+    abilities.forEach((ability) => {
+      this.activeAbilities.push({ ability, source });
+    });
   }
 
-  removeAllAbilitiesFromClass() {
-    this.abilitiesFromClass = [];
+  removeAbilitiesFromSource(source: AbilitySource) {
+    this.activeAbilities = this.activeAbilities.filter(
+      (ability) => ability.source !== source
+    );
   }
-
-  addAbilitiesFromEquips(abilities: Ability[]) {
-    this.abilitiesFromEquips = [...this.abilitiesFromEquips, ...abilities];
-  }
-
-  addAbilitiesFromClass(abilities: Ability[]) {
-    this.abilitiesFromClass = [...this.abilitiesFromClass, ...abilities];
-  }
-
-  /* addAbilities(abilities: Ability | Ability[]) {
-    if (Array.isArray(abilities)) {
-      this.abilities = [...this.abilities, ...abilities];
-    } else {
-      this.abilities = [...this.abilities, abilities];
-    }
-  } */
 
   getAbilities() {
-    return [...this.abilitiesFromEquips, ...this.abilitiesFromClass];
+    return this.activeAbilities.map((ability) => ability.ability);
   }
 }

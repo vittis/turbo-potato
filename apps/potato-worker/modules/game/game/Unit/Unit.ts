@@ -57,6 +57,11 @@ export class Unit {
     return this.statsManager.getStats();
   }
 
+  // todo better stats merge
+  get statsFromMods() {
+    return this.statsManager.getStatsFromMods();
+  }
+
   get equips() {
     return this.equipmentManager.equips;
   }
@@ -101,31 +106,27 @@ export class Unit {
   }
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
-    this.equipmentManager.equip(equip, slot);
-    this.abilityManager.removeAllAbilitiesFromEquips();
+    const item = this.equipmentManager.equip(equip, slot);
 
-    this.abilityManager.addAbilitiesFromEquips(
-      this.equipmentManager.getAllAbilitiesFromEquips()
+    this.abilityManager.addAbilitiesFromSource(
+      equip.getGrantedAbilities(),
+      item
     );
 
-    // todo continue from here
-    // this.statsManager.applyStatsMods(equip.getStatsMods());
+    this.statsManager.addMods(equip.getStatsMods());
   }
 
   unequip(slot: EQUIPMENT_SLOT) {
-    const equip = this.equipmentManager.unequip(slot);
-    this.abilityManager.removeAllAbilitiesFromEquips();
-    this.abilityManager.addAbilitiesFromEquips(
-      this.equipmentManager.getAllAbilitiesFromEquips()
-    );
-    // this.statsManager.removeStatsMods(equip.getStatsMods());
+    const equippedItem = this.equipmentManager.unequip(slot);
+    this.abilityManager.removeAbilitiesFromSource(equippedItem);
+    this.statsManager.removeMods(equippedItem.equip.getStatsMods());
   }
 
   setClass(unitClass: Class) {
     this.classManager.setClass(unitClass);
-    this.abilityManager.removeAllAbilitiesFromClass();
-    this.abilityManager.addAbilitiesFromClass(
-      this.classManager.getClassAbilities()
+    this.abilityManager.addAbilitiesFromSource(
+      this.classManager.getClassAbilities(),
+      unitClass
     );
   }
 

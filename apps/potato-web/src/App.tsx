@@ -2,7 +2,20 @@ import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
 import { GAME_LOOP_SPEED, fetchBattleSetup } from "./game/scenes/battle/BattleScene";
+import { DemoUI } from "./DemoUI";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
+
+
+/* SHAD TODO: CLEAN UNNECESSARY SHAD STUFF and daisy conflicts */
 function App() {
   const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();
 
@@ -29,7 +42,36 @@ function App() {
 
   return (
     <>
-      <div className="mt-10 flex justify-center">
+      <DemoUI />
+
+
+
+
+      {/* zuera de select */}
+      {/* <div className="mt-10 flex flex-col items-center justify-center justify-center gap-8">
+        <select className="select select-bordered w-full max-w-xs">
+          <option disabled selected>Who shot first?</option>
+          <option>Han Solo</option>
+          <option>Greedo</option>
+        </select>
+        <Select>
+          <SelectTrigger className="max-w-[200px]">
+            <SelectValue placeholder="Select a fruit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Fruits</SelectLabel>
+              <SelectItem value="apple">Apple</SelectItem>
+              <SelectItem value="banana">Banana</SelectItem>
+              <SelectItem value="blueberry">Blueberry</SelectItem>
+              <SelectItem value="grapes">Grapes</SelectItem>
+              <SelectItem value="pineapple">Pineapple</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div> */}
+
+      {/* <div className="mt-10 flex justify-center">
         <button
           onClick={() => {
             setIsGamePaused(!isGamePaused);
@@ -38,7 +80,8 @@ function App() {
         >
           {!isGamePaused ? "Stop" : "Start"}
         </button>
-      </div>
+      </div> */}
+
 
       {firstState && (
         <div className="w-fit flex justify-center inset-x-0 bg-stone-800 shadow-md p-4 fixed bottom-8 rounded-lg mx-auto">
@@ -81,11 +124,10 @@ function App() {
                         }
                       }}
                       tabIndex={0}
-                      className={`border-none hover:brightness-125 cursor-pointer transition-all ${
-                        selectedEntity === `${unit.owner}${unit.position}`
-                          ? "bg-amber-400 text-zinc-900"
-                          : `${unit.owner === 0 ? "bg-amber-950" : "bg-slate-800"}`
-                      }`}
+                      className={`border-none hover:brightness-125 cursor-pointer transition-all ${selectedEntity === `${unit.owner}${unit.position}`
+                        ? "bg-amber-400 text-zinc-900"
+                        : `${unit.owner === 0 ? "bg-amber-950" : "bg-slate-800"}`
+                        }`}
                       key={`${unit.owner}${unit.position}`}
                     >
                       <td>{unit.name}</td>
@@ -160,7 +202,7 @@ function App() {
           </div>
         </div>
       </main> */}
-      {/* <DemoUI /> */}
+
       {/* Online players count */}
       <div className="fixed bottom-5 right-5 stats shadow">
         <div className="stat py-2 px-5">

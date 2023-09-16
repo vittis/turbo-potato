@@ -8,11 +8,11 @@ import { Battle } from "./game/scenes/battle/BattleScene";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./services/api/queryClient";
 
-const game = new Phaser.Game(
+/* const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
     scene: [Battle],
   })
-);
+); */
 
 /* function onReady() {
    const canvas = document.querySelector("canvas");

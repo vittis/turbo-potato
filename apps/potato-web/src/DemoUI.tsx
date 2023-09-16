@@ -18,7 +18,7 @@ export function DemoUI() {
         <div className="navbar bg-base-100 p-0">
           <div className="navbar-start">
             <a href="/" className="text-3xl prose text-primary font-normal">
-              🥦
+              🥔
             </a>
           </div>
           <div className="navbar-center"></div>
@@ -96,7 +96,7 @@ export function DemoUI() {
           <div className="divider">OR</div>
           <button
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            onClick={() => {}}
+            onClick={() => { }}
             className="btn btn-outline btn-wide shadow-sm"
           >
             Create room

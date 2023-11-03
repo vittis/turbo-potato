@@ -12,3 +12,8 @@ export enum STATUS_EFFECT {
   THORNS = "THORNS",
   VULNERABLE = "VULNERABLE",
 }
+
+export interface ActiveStatusEffect {
+  name: STATUS_EFFECT;
+  quantity: number;
+}

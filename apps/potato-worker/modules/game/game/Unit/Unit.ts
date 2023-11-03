@@ -17,6 +17,7 @@ import {
 import { PerkManager } from "../Perk/PerkManager";
 import { StatsManager } from "../Stats/StatsManager";
 import { UnitStats } from "../Stats/StatsTypes";
+import { StatusEffectManager } from "../StatusEffect/StatusEffectManager";
 
 // use for better perfomance
 /* export enum EVENT_TYPE {
@@ -52,9 +53,13 @@ export class Unit {
   private classManager: ClassManager;
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
+  private statusEffectManager: StatusEffectManager;
 
   get stats() {
     return this.statsManager.getStats();
+  }
+  set stats(stats: UnitStats) {
+    this.statsManager.setStats(stats);
   }
 
   // todo better stats merge
@@ -64,10 +69,6 @@ export class Unit {
 
   get equips() {
     return this.equipmentManager.equips;
-  }
-
-  set stats(stats: UnitStats) {
-    this.statsManager.setStats(stats);
   }
 
   get equipment() {
@@ -82,12 +83,17 @@ export class Unit {
     return this.perkManager.perks;
   }
 
+  get statusEffects() {
+    return this.statusEffectManager.activeStatusEffects;
+  }
+
   constructor(owner: OWNER, position: POSITION, bm?: BoardManager) {
     this.statsManager = new StatsManager();
     this.equipmentManager = new EquipmentManager();
     this.classManager = new ClassManager();
     this.abilityManager = new AbilityManager();
     this.perkManager = new PerkManager();
+    this.statusEffectManager = new StatusEffectManager();
     this.bm = bm as BoardManager;
 
     this.id = `${owner}${position}`;
@@ -176,6 +182,7 @@ export class Unit {
 
   applyEvent(event: Event) {
     if (event.type === EVENT_TYPE.USE_ABILITY) {
+      console.log(event);
       this.applyUseAbilityEvent(
         event as UseAbilityEvent<
           SUBEVENT_TYPE.INSTANT_EFFECT,
@@ -188,13 +195,25 @@ export class Unit {
   applyUseAbilityEvent(
     event: UseAbilityEvent<
       SUBEVENT_TYPE.INSTANT_EFFECT,
-      INSTANT_EFFECT_TYPE.DAMAGE
+      // todo fix union
+      INSTANT_EFFECT_TYPE.DAMAGE | INSTANT_EFFECT_TYPE.STATUS_EFFECT
     >
   ) {
+    console.log(event);
     if (event.payload.subEvents) {
       event.payload.subEvents.forEach((subEvent) => {
-        const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
-        target.receiveDamage(subEvent.payload.payload.value);
+        if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
+          const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
+          // @ts-expect-error
+          target.receiveDamage(subEvent.payload.payload.value);
+        }
+        if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
+          const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
+          target.statusEffectManager.applyStatusEffect(
+            // @ts-expect-error
+            subEvent.payload.payload
+          );
+        }
       });
     }
   }

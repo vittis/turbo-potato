@@ -3,7 +3,7 @@
   "type": "TIER_SCALE",
   "tiers": [
     {
-      "name": "VULNERABLE",
+      "name": "FOCUS",
       "values": [
         5,
         10,
@@ -20,7 +20,7 @@
       "target": "SELF",
       "payload": [
         {
-          "name": "VULNERABLE",
+          "name": "FOCUS",
           "quantity": "DYNAMIC"
         }
       ]

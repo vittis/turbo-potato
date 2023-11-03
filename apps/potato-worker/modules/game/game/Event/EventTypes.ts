@@ -91,27 +91,24 @@ export interface StatusEffectPayload {
   quantity: number;
 }
 
-/* const fireball: UseAbilityEvent<
-  SUBEVENT_TYPE.INSTANT_EFFECT,
-  INSTANT_EFFECT_TYPE.DISABLE
-> = {
+/* const fireball: UseAbilityEvent<SUBEVENT_TYPE.INSTANT_EFFECT> = {
   type: EVENT_TYPE.USE_ABILITY,
   actorId: "player123",
-  step: 50,
   payload: {
     name: "Fireball",
     subEvents: [
       {
         type: SUBEVENT_TYPE.INSTANT_EFFECT,
         payload: {
-          type: INSTANT_EFFECT_TYPE.DISABLE,
+          type: INSTANT_EFFECT_TYPE.DAMAGE,
           targetId: ["enemy456"],
           payload: {
-            name: "asd",
-            duration: 5,
-          },
+            // I would like that the type of this payload is DamagePayload, because the type of the subevent is INSTANT_EFFECT_TYPE.DAMAGE
+            value: 50,
+          } as DamagePayload, // I dont want to have to write this here
         },
       },
     ],
   },
-}; */
+};
+ */

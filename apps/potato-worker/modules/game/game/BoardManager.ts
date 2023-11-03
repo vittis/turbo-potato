@@ -230,7 +230,10 @@ export class BoardManager {
     return target as Unit;
   }
 
-  getTarget(unit: Unit, targetType: TARGET_TYPE): Unit[] {
+  getTarget(
+    unit: Unit,
+    targetType: TARGET_TYPE = TARGET_TYPE.STANDARD
+  ): Unit[] {
     const targetFunction = getTargetFunction(targetType);
 
     const target = targetFunction(this, unit);

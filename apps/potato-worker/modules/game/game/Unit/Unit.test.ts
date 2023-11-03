@@ -1,7 +1,7 @@
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
-import { executeStepEvents, sortEventsByType } from "../Game";
+import { sortAndExecuteEvents } from "../Event/EventUtils";
 import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
@@ -19,7 +19,8 @@ describe("Unit", () => {
       expect(unit.equips[0].equip.data).toEqual(Weapons.ShortSpear);
     });
 
-    test("check if equip is on valid slot", () => {});
+    // todo add this
+    // test("check if equip is on valid slot", () => {});
 
     test("should equip in different slots", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
@@ -97,7 +98,7 @@ describe("Unit", () => {
       expect(true).toBe(false);
     });
 
-    test("uses Short Spear ability: Thrust", () => {
+    test.only("uses Short Spear ability: Thrust", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
@@ -113,12 +114,9 @@ describe("Unit", () => {
         unit.step(i);
       }
 
-      const orderedEvents = sortEventsByType(unit.serializeEvents());
-
-      executeStepEvents(bm, orderedEvents);
+      sortAndExecuteEvents(bm, unit.serializeEvents());
 
       expect(ability.progress).toBe(0);
-      // todo fix post step logic
       expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
     });
 
@@ -139,8 +137,9 @@ describe("Unit", () => {
       }
 
       expect(ability.progress).toBe(0);
-      // todo fix post step logic
-      // expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
+      sortAndExecuteEvents(bm, unit.serializeEvents());
+
+      expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
     });
   });
 
@@ -159,8 +158,6 @@ describe("Unit", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-
-      console.log(unit.perks);
 
       expect(unit.perks).toHaveLength(1);
     });

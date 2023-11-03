@@ -52,7 +52,7 @@ export class Thrust extends Ability {
   getTargets(unit: Unit) {
     const targets = unit.bm.getTarget(unit, this.data.target);
     if (targets.length === 0) {
-      throw Error("COULDN'T FIND TARGET FOR THRUST");
+      throw Error(`Couldnt find target for ${this.data.name}`);
     }
 
     return targets[0];

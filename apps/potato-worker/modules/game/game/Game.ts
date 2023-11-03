@@ -10,6 +10,7 @@ import Heads from "./data/heads";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 import { EVENT_TYPE } from "./Event/EventTypes";
+import { sortAndExecuteEvents } from "./Event/EventUtils";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
@@ -58,9 +59,7 @@ export class Game {
         stepEvents.push(...unit.serializeEvents());
       });
 
-      const orderedEvents = sortEventsByType(stepEvents);
-
-      executeStepEvents(this.boardManager, orderedEvents);
+      const orderedEvents = sortAndExecuteEvents(this.boardManager, stepEvents);
 
       orderedEvents.forEach((event) => {
         this.eventHistory.push(event);
@@ -132,31 +131,6 @@ export class Game {
         .every((unit) => unit.isDead)
     );
   }
-}
-
-export function sortEventsByType(events: any[]) {
-  events.sort(function (a, b) {
-    if (a.type === EVENT_TYPE.USE_ABILITY && b.type === EVENT_TYPE.FAINT) {
-      return -1;
-    } else if (
-      a.type === EVENT_TYPE.FAINT &&
-      b.type === EVENT_TYPE.USE_ABILITY
-    ) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
-
-  return events;
-}
-
-export function executeStepEvents(bm: BoardManager, events: any[]) {
-  events.forEach((event) => {
-    bm.getUnitById(event.actorId).applyEvent(event);
-  });
-
-  return events;
 }
 
 /* 

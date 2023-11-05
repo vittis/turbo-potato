@@ -6,7 +6,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler publish",
     "test": "jest",
-    "test:watch": "jest --watch modules/game/game/Unit/Test.test.ts"
+    "test:watch": "jest --watch modules/game/game --verbose"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.9",

@@ -16,16 +16,13 @@ export class Thrust extends Ability {
     super(Attacks.Thrust);
   }
 
-  use(unit: Unit): Event {
+  use(unit: Unit): UseAbilityEvent {
     super.use(unit);
     const target = this.getTargets(unit);
 
     // TODO: apply real damage using stats modifier for damage
 
-    const damageEvent: UseAbilityEvent<
-      SUBEVENT_TYPE.INSTANT_EFFECT,
-      INSTANT_EFFECT_TYPE.DAMAGE
-    > = {
+    const damageEvent: UseAbilityEvent = {
       type: EVENT_TYPE.USE_ABILITY,
       actorId: unit.id,
       step: unit.currentStep,

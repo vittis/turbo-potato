@@ -126,7 +126,7 @@ describe("StatusEffect", () => {
   });
 
   describe("In battle", () => {
-    test.only("should apply status effect on hit", () => {
+    test("should apply status effect on hit", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);

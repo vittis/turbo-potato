@@ -181,36 +181,23 @@ export class Unit {
   }
 
   applyEvent(event: Event) {
+    // console.log(event);
     if (event.type === EVENT_TYPE.USE_ABILITY) {
-      console.log(event);
-      this.applyUseAbilityEvent(
-        event as UseAbilityEvent<
-          SUBEVENT_TYPE.INSTANT_EFFECT,
-          INSTANT_EFFECT_TYPE.DAMAGE
-        >
-      );
+      this.applyUseAbilitySubEvents(event as UseAbilityEvent);
     }
   }
 
-  applyUseAbilityEvent(
-    event: UseAbilityEvent<
-      SUBEVENT_TYPE.INSTANT_EFFECT,
-      // todo fix union
-      INSTANT_EFFECT_TYPE.DAMAGE | INSTANT_EFFECT_TYPE.STATUS_EFFECT
-    >
-  ) {
-    console.log(event);
+  applyUseAbilitySubEvents(event: UseAbilityEvent) {
     if (event.payload.subEvents) {
       event.payload.subEvents.forEach((subEvent) => {
         if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
           const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
-          // @ts-expect-error
           target.receiveDamage(subEvent.payload.payload.value);
         }
+
         if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
           const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
           target.statusEffectManager.applyStatusEffect(
-            // @ts-expect-error
             subEvent.payload.payload
           );
         }

@@ -1,6 +1,5 @@
 import {
   EVENT_TYPE,
-  Event,
   INSTANT_EFFECT_TYPE,
   SUBEVENT_TYPE,
   UseAbilityEvent,
@@ -11,32 +10,14 @@ import { TRIGGER } from "../../Trigger/TriggerTypes";
 import { Unit } from "../../Unit/Unit";
 import Attacks from "../../data/attacks";
 import { Ability } from "../Ability";
-import { TARGET_TYPE } from "../TargetTypes";
 
-/* switch (effect.trigger) {
-        case TRIGGER.ON_HIT:
-          return {
-            type: SUBEVENT_TYPE.INSTANT_EFFECT,
-            payload: {
-              type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-              targetId: [target.id],
-              payload: {
-                name: effect.payload[0].name,
-                quantity: effect.payload[0].quantity,
-              },
-            },
-          };
-        default:
-          throw Error(`Unknown trigger effect type ${effect.type}`); */
-
-// todo do we really need one file for every attack?
+// todo do we really need one file for every attack/ability?
 export class DisarmingShot extends Ability {
   constructor() {
     super(Attacks.DisarmingShot);
   }
 
-  use(unit: Unit): Event {
-    // todo UseAbilityEvent
+  use(unit: Unit): UseAbilityEvent {
     super.use(unit);
     const target = this.getTargets(unit);
 
@@ -48,28 +29,23 @@ export class DisarmingShot extends Ability {
         effect.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT
     );
 
-    const statusSubEvents: UseAbilitySubEvent<
-      SUBEVENT_TYPE.INSTANT_EFFECT,
-      INSTANT_EFFECT_TYPE.STATUS_EFFECT
-    >[] = onHitGrantStatusEffects.map((effect) => {
-      return {
-        type: SUBEVENT_TYPE.INSTANT_EFFECT,
-        payload: {
-          type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-          targetId: [unit.bm.getTarget(unit, effect.target)[0].id], // todo move effect target logic somewhere else
+    const statusSubEvents: UseAbilitySubEvent[] = onHitGrantStatusEffects.map(
+      (effect) => {
+        return {
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
           payload: {
-            name: effect.payload[0].name,
-            quantity: effect.payload[0].quantity as number,
+            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+            targetId: [unit.bm.getTarget(unit, effect.target)[0].id], // todo move effect target logic somewhere else
+            payload: {
+              name: effect.payload[0].name,
+              quantity: effect.payload[0].quantity as number,
+            },
           },
-        },
-      };
-    });
+        };
+      }
+    );
 
-    const damageEvent: UseAbilityEvent<
-      SUBEVENT_TYPE.INSTANT_EFFECT,
-      // todo fix this union
-      INSTANT_EFFECT_TYPE.DAMAGE | INSTANT_EFFECT_TYPE.STATUS_EFFECT
-    > = {
+    const damageEvent: UseAbilityEvent = {
       type: EVENT_TYPE.USE_ABILITY,
       actorId: unit.id,
       step: unit.currentStep,

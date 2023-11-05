@@ -1,3 +1,5 @@
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+
 export enum EVENT_TYPE {
   USE_ABILITY = "USE_ABILITY",
   FAINT = "FAINT",
@@ -21,39 +23,32 @@ export interface Event {
   step: number;
 }
 
-export interface UseAbilityEvent<
-  T extends SUBEVENT_TYPE,
-  U extends INSTANT_EFFECT_TYPE
-> extends Event {
+export interface FaintEvent extends Event {
+  actorId: string;
+}
+
+export interface UseAbilityEvent extends Event {
   type: EVENT_TYPE.USE_ABILITY;
   actorId: string;
-  payload: UseAbilityEventPayload<T, U>;
+  payload: UseAbilityEventPayload;
 }
 
-export interface FaintEvent extends Event {
-  type: EVENT_TYPE.FAINT;
-  actorId: string;
-}
-
-export interface UseAbilityEventPayload<
-  T extends SUBEVENT_TYPE,
-  U extends INSTANT_EFFECT_TYPE
-> {
+export interface UseAbilityEventPayload {
   name: string;
-  subEvents: UseAbilitySubEvent<T, U>[];
+  subEvents: UseAbilitySubEvent[];
 }
 
-export interface UseAbilitySubEvent<
-  T extends SUBEVENT_TYPE,
-  U extends INSTANT_EFFECT_TYPE
-> {
-  type: T;
-  payload: UseAbilitySubEventMap<U>[T];
+export interface UseAbilitySubEvent {
+  type: SUBEVENT_TYPE;
+  payload: InstantEffectPossiblePayload;
 }
 
-export type UseAbilitySubEventMap<U extends INSTANT_EFFECT_TYPE> = {
-  [SUBEVENT_TYPE.INSTANT_EFFECT]: InstantEffectPayload<U>;
-};
+type InstantEffectPossiblePayload =
+  | InstantEffectPayload<INSTANT_EFFECT_TYPE.DAMAGE>
+  | InstantEffectPayload<INSTANT_EFFECT_TYPE.HEAL>
+  | InstantEffectPayload<INSTANT_EFFECT_TYPE.SHIELD>
+  | InstantEffectPayload<INSTANT_EFFECT_TYPE.DISABLE>
+  | InstantEffectPayload<INSTANT_EFFECT_TYPE.STATUS_EFFECT>;
 
 export interface InstantEffectPayload<T extends INSTANT_EFFECT_TYPE> {
   type: T;
@@ -82,33 +77,38 @@ export interface ShieldPayload {
 }
 
 export interface DisablePayload {
-  name: string;
+  name: string; // todo enum
   duration: number;
 }
 
 export interface StatusEffectPayload {
-  name: string;
+  name: STATUS_EFFECT;
   quantity: number;
 }
 
-/* const fireball: UseAbilityEvent<SUBEVENT_TYPE.INSTANT_EFFECT> = {
-  type: EVENT_TYPE.USE_ABILITY,
-  actorId: "player123",
+/* const exampleEvent = {
+  type: "USE_ABILITY",
+  actorId: "00",
+  step: 99,
   payload: {
-    name: "Fireball",
+    name: "Disarming Shot",
     subEvents: [
       {
-        type: SUBEVENT_TYPE.INSTANT_EFFECT,
+        type: "INSTANT_EFFECT",
         payload: {
-          type: INSTANT_EFFECT_TYPE.DAMAGE,
-          targetId: ["enemy456"],
-          payload: {
-            // I would like that the type of this payload is DamagePayload, because the type of the subevent is INSTANT_EFFECT_TYPE.DAMAGE
-            value: 50,
-          } as DamagePayload, // I dont want to have to write this here
+          type: "DAMAGE",
+          targetId: ["10"],
+          payload: { value: 40 },
+        },
+      },
+      {
+        type: "INSTANT_EFFECT",
+        payload: {
+          type: "STATUS_EFFECT",
+          targetId: ["10"],
+          payload: { name: "VULNERABLE", quantity: 5 },
         },
       },
     ],
   },
-};
- */
+}; */

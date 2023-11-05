@@ -98,7 +98,7 @@ describe("Unit", () => {
       expect(true).toBe(false);
     });
 
-    test.only("uses Short Spear ability: Thrust", () => {
+    test("uses Short Spear ability: Thrust", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);

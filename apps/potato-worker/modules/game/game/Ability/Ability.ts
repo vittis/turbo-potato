@@ -1,7 +1,7 @@
 import { AbilityData } from "./AbilityTypes";
 import { AbilityDataSchema } from "./AbilitySchema";
 import { Unit } from "../Unit/Unit";
-import { Event } from "../Event/EventTypes";
+import { UseAbilityEvent } from "../Event/EventTypes";
 
 export class Ability {
   data: AbilityData;
@@ -21,7 +21,7 @@ export class Ability {
   }
 
   //@ts-expect-error
-  use(unit: Unit): Event {
+  use(unit: Unit): UseAbilityEvent {
     this.progress = 0;
   }
 }

@@ -1,3 +1,4 @@
+import { PossibleTriggerEffects } from "../Perk/PerkTypes";
 import { TARGET_TYPE } from "./TargetTypes";
 
 export enum ABILITY_CATEGORY {
@@ -20,4 +21,5 @@ export interface AbilityData {
   target: TARGET_TYPE;
   baseDamage: number;
   cooldown: number;
+  effects: PossibleTriggerEffects;
 }

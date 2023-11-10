@@ -9,7 +9,7 @@ const PerkTierScaleSchema = z.object({
   values: z.array(z.number()),
 });
 
-const PossibleTriggerEffectsSchema = z.array(
+export const PossibleTriggerEffectsSchema = z.array(
   z.object({
     type: z.literal(TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT),
     trigger: z.nativeEnum(TRIGGER),

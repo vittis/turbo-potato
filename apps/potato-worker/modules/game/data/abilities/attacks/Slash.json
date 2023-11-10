@@ -1,8 +1,11 @@
 {
   "name": "Slash",
   "type": "ATTACK",
-  "tags": [],
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
   "target": "STANDARD",
   "baseDamage": 30,
-  "cooldown": 80
+  "cooldown": 80,
+  "effects": []
 }

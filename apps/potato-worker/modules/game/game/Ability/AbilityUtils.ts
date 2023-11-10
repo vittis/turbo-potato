@@ -1,3 +1,4 @@
+import { DisarmingShot } from "./Attacks/DisarmingShot";
 import { MOD_TYPE, Mod, PossibleMods } from "../Mods/ModsTypes";
 import { filterModsByType } from "../Mods/ModsUtils";
 import { Ability } from "./Ability";
@@ -8,10 +9,12 @@ import { Thrust } from "./Attacks/Thrust";
 export const AbilityClassMap: { [key: string]: typeof Ability } = {
   Thrust: Thrust,
   Slash: Slash,
+  DisarmingShot: DisarmingShot,
 };
 
 function getAbilityInstanceClass(name: string) {
-  const AbilityClass = AbilityClassMap[name];
+  const nameWithoutSpaces = name.replace(/\s/g, "");
+  const AbilityClass = AbilityClassMap[nameWithoutSpaces];
   if (AbilityClass) {
     return AbilityClass;
   } else {

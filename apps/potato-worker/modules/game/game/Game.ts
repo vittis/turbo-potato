@@ -10,6 +10,7 @@ import Heads from "./data/heads";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 import { EVENT_TYPE } from "./Event/EventTypes";
+import { sortAndExecuteEvents } from "./Event/EventUtils";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
@@ -31,7 +32,7 @@ export class Game {
     this.boardManager.addToBoard(unit);
     this.boardManager.addToBoard(unit2);
 
-    unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
     unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
   }
 
@@ -41,122 +42,69 @@ export class Game {
   */
 
   async startGame() {
-    const serializedUnits = this.boardManager
+    const { history, eventHistory } = runGame(this.boardManager);
+
+    this.history = history;
+    this.eventHistory = eventHistory;
+  }
+}
+
+function hasGameEnded(boardManager: BoardManager) {
+  return (
+    boardManager
+      .getAllUnitsOfOwner(OWNER.TEAM_ONE)
+      .every((unit) => unit.isDead) ||
+    boardManager.getAllUnitsOfOwner(OWNER.TEAM_TWO).every((unit) => unit.isDead)
+  );
+}
+
+export function runGame(boardManager: BoardManager) {
+  const history: any = [];
+  const eventHistory: any[] = [];
+
+  const serializedUnits = boardManager
+    .getAllUnits()
+    .map((unit) => unit.serialize());
+  history.push({ units: serializedUnits });
+
+  let currentStep = 1;
+  do {
+    boardManager.getAllAliveUnits().forEach((unit) => {
+      unit.step(currentStep);
+    });
+
+    const stepEvents: any[] = [];
+
+    boardManager.getAllAliveUnits().forEach((unit) => {
+      stepEvents.push(...unit.serializeEvents());
+    });
+
+    const orderedEvents = sortAndExecuteEvents(boardManager, stepEvents);
+
+    orderedEvents.forEach((event) => {
+      eventHistory.push(event);
+    });
+
+    boardManager.getAllAliveUnits().forEach((unit) => {
+      if (!unit.isDead && unit.hasDied()) {
+        unit.markAsDead();
+        eventHistory.push({
+          actorId: unit.id,
+          type: EVENT_TYPE.FAINT,
+          step: currentStep,
+        });
+      }
+    });
+
+    const serializedUnits = boardManager
       .getAllUnits()
       .map((unit) => unit.serialize());
-    this.history.push({ units: serializedUnits });
 
-    let currentStep = 1;
-    do {
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        unit.step(currentStep);
-      });
+    history.push({ units: serializedUnits });
+    currentStep++;
+  } while (!hasGameEnded(boardManager));
 
-      const stepEvents: any[] = [];
-
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        stepEvents.push(...unit.serializeEvents());
-      });
-
-      const orderedEvents = sortEventsByType(stepEvents);
-
-      executeStepEvents(this.boardManager, orderedEvents);
-
-      orderedEvents.forEach((event) => {
-        this.eventHistory.push(event);
-      });
-
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        if (!unit.isDead && unit.hasDied()) {
-          unit.markAsDead();
-          this.eventHistory.push({
-            actorId: unit.id,
-            type: EVENT_TYPE.FAINT,
-            step: currentStep,
-          });
-        }
-      });
-
-      const serializedUnits = this.boardManager
-        .getAllUnits()
-        .map((unit) => unit.serialize());
-
-      this.history.push({ units: serializedUnits });
-      currentStep++;
-    } while (!this.hasGameEnded());
-
-    // @ts-ignore
-    /* console.table([
-      {
-        name: unit1?.getName(),
-        hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
-        shield: unit1.stats.shield,
-        def: unit1.stats.def,
-        ap: unit1.stats.ap,
-        attackSpeed: unit1.stats.attackSpeed,
-        weapon: unit1.equipment.mainHandWeapon.name,
-        attackDamage: unit1.stats.attackDamage,
-        sp: unit1.stats.sp,
-        skillRegen: unit1.stats.skillRegen,
-        str: unit1.stats.str,
-        dex: unit1.stats.dex,
-        int: unit1.stats.int,
-        attacks: unit1.TEST_attacksCounter,
-      },
-      {
-        name: unit2?.getName(),
-        hp: unit2.stats.hp + "/" + unit2.stats.maxHp,
-        shield: unit2.stats.shield,
-        def: unit2.stats.def,
-        ap: unit2.stats.ap,
-        attackSpeed: unit2.stats.attackSpeed,
-        weapon: unit2.equipment.mainHandWeapon.name,
-        attackDamage: unit2.stats.attackDamage,
-        sp: unit2.stats.sp,
-        skillRegen: unit2.stats.skillRegen,
-        str: unit2.stats.str,
-        dex: unit2.stats.dex,
-        int: unit2.stats.int,
-        attacks: unit2.TEST_attacksCounter,
-      },
-    ]); */
-  }
-
-  hasGameEnded() {
-    return (
-      this.boardManager
-        .getAllUnitsOfOwner(OWNER.TEAM_ONE)
-        .every((unit) => unit.isDead) ||
-      this.boardManager
-        .getAllUnitsOfOwner(OWNER.TEAM_TWO)
-        .every((unit) => unit.isDead)
-    );
-  }
-}
-
-export function sortEventsByType(events: any[]) {
-  events.sort(function (a, b) {
-    if (a.type === EVENT_TYPE.USE_ABILITY && b.type === EVENT_TYPE.FAINT) {
-      return -1;
-    } else if (
-      a.type === EVENT_TYPE.FAINT &&
-      b.type === EVENT_TYPE.USE_ABILITY
-    ) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
-
-  return events;
-}
-
-export function executeStepEvents(bm: BoardManager, events: any[]) {
-  events.forEach((event) => {
-    bm.getUnitById(event.actorId).applyEvent(event);
-  });
-
-  return events;
+  return { history, eventHistory };
 }
 
 /* 

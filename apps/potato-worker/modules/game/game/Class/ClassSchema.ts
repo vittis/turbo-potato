@@ -50,12 +50,12 @@ export const AbilityModifierSchema = z.object({
     .optional(),
 }) satisfies z.ZodType<AbilityModifier>;
 
-export const ClassNodeSchema = z.object({
+const ClassNodeSchema = z.object({
   mods: PossibleModsSchema,
   description: z.string(),
 }) satisfies z.ZodType<ClassNode>;
 
-export const TalentNodeSchema = ClassNodeSchema.extend({
+const TalentNodeSchema = ClassNodeSchema.extend({
   tier: z.number(),
   req: z.number(),
 }) satisfies z.ZodType<TalentNode>;

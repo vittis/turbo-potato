@@ -1,7 +1,8 @@
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
-import { executeStepEvents, sortEventsByType } from "../Game";
+import { sortAndExecuteEvents } from "../Event/EventUtils";
+import { runGame } from "../Game";
 import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
@@ -19,7 +20,8 @@ describe("Unit", () => {
       expect(unit.equips[0].equip.data).toEqual(Weapons.ShortSpear);
     });
 
-    test("check if equip is on valid slot", () => {});
+    // todo add this
+    // test("check if equip is on valid slot", () => {});
 
     test("should equip in different slots", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
@@ -113,12 +115,9 @@ describe("Unit", () => {
         unit.step(i);
       }
 
-      const orderedEvents = sortEventsByType(unit.serializeEvents());
-
-      executeStepEvents(bm, orderedEvents);
+      sortAndExecuteEvents(bm, unit.serializeEvents());
 
       expect(ability.progress).toBe(0);
-      // todo fix post step logic
       expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
     });
 
@@ -139,8 +138,9 @@ describe("Unit", () => {
       }
 
       expect(ability.progress).toBe(0);
-      // todo fix post step logic
-      // expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
+      sortAndExecuteEvents(bm, unit.serializeEvents());
+
+      expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
     });
   });
 
@@ -160,8 +160,6 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      console.log(unit.perks);
-
       expect(unit.perks).toHaveLength(1);
     });
 
@@ -175,6 +173,24 @@ describe("Unit", () => {
       unit.unequip(EQUIPMENT_SLOT.MAIN_HAND);
 
       expect(unit.perks).toHaveLength(0);
+    });
+  });
+
+  // todo should this be here?
+  describe.skip("Battle", () => {
+    test("battle works", () => {
+      const bm = new BoardManager();
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      bm.addToBoard(unit);
+      bm.addToBoard(unit2);
+
+      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+      unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+      const { eventHistory, history } = runGame(bm);
+
+      expect(eventHistory).toHaveLength(1);
     });
   });
 });

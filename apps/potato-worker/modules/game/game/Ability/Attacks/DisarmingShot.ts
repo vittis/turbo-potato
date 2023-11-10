@@ -1,17 +1,20 @@
 import {
   EVENT_TYPE,
-  Event,
   INSTANT_EFFECT_TYPE,
   SUBEVENT_TYPE,
   UseAbilityEvent,
+  UseAbilitySubEvent,
 } from "../../Event/EventTypes";
+import { TRIGGER_EFFECT_TYPE } from "../../Perk/PerkTypes";
+import { TRIGGER } from "../../Trigger/TriggerTypes";
 import { Unit } from "../../Unit/Unit";
 import Attacks from "../../data/attacks";
 import { Ability } from "../Ability";
 
-export class Slash extends Ability {
+// todo do we really need one file for every attack/ability?
+export class DisarmingShot extends Ability {
   constructor() {
-    super(Attacks.Slash);
+    super(Attacks.DisarmingShot);
   }
 
   use(unit: Unit): UseAbilityEvent {
@@ -19,6 +22,28 @@ export class Slash extends Ability {
     const target = this.getTargets(unit);
 
     // TODO: apply real damage using stats modifier for damage
+
+    const onHitGrantStatusEffects = this.data.effects.filter(
+      (effect) =>
+        effect.trigger === TRIGGER.ON_HIT &&
+        effect.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT
+    );
+
+    const statusSubEvents: UseAbilitySubEvent[] = onHitGrantStatusEffects.map(
+      (effect) => {
+        return {
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+            targetId: [unit.bm.getTarget(unit, effect.target)[0].id], // todo move effect target logic somewhere else
+            payload: {
+              name: effect.payload[0].name,
+              quantity: effect.payload[0].quantity as number,
+            },
+          },
+        };
+      }
+    );
 
     const damageEvent: UseAbilityEvent = {
       type: EVENT_TYPE.USE_ABILITY,
@@ -37,6 +62,7 @@ export class Slash extends Ability {
               },
             },
           },
+          ...statusSubEvents,
         ],
       },
     };

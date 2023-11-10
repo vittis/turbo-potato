@@ -1,6 +1,8 @@
 {
   "name": "Shortbow",
-  "allowedSlots": ["MAIN_HAND"],
+  "allowedSlots": [
+    "MAIN_HAND"
+  ],
   "mods": [
     {
       "type": "GRANT_ABILITY",
@@ -11,14 +13,14 @@
     {
       "type": "GRANT_BASE_STAT",
       "payload": {
-        "stat": "ATTACK_COOLDOWN_MODIFIER",
+        "stat": "ATTACK_COOLDOWN",
         "value": 15
       }
     },
     {
       "type": "GRANT_BASE_STAT",
       "payload": {
-        "stat": "SPELL_COOLDOWN_MODIFIER",
+        "stat": "SPELL_COOLDOWN",
         "value": 15
       }
     }

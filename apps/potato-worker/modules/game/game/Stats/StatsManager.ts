@@ -16,9 +16,9 @@ export class StatsManager {
     this.stats = stats;
   }
 
-  // todo better stats management
+  // todo better stats management. better merge from all sources
   getStats() {
-    return this.stats;
+    return { ...this.stats, ...this.statsFromMods };
   }
 
   setStats(newStats: UnitStats) {

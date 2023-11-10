@@ -56,14 +56,11 @@ app.get("/chat/global", async (c) => {
 
 app.get("/game/battle/setup", async (c) => {
   const game = new Game();
-  game.startGame();
-
-  const history = game.history;
-  const eventHistory = game.eventHistory;
+  const { totalSteps, eventHistory, firstStep } = game.startGame();
 
   return c.json({
-    firstStep: history[0],
-    totalSteps: history.length - 1, // todo dont need to have all history, can be only first step and then number of steps
+    firstStep,
+    totalSteps,
     eventHistory,
   });
 });

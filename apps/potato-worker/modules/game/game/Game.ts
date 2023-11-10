@@ -14,8 +14,6 @@ import { sortAndExecuteEvents } from "./Event/EventUtils";
 import { Class } from "./Class/Class";
 export class Game {
   boardManager: BoardManager;
-  history: any[] = [];
-  eventHistory: any[] = [];
 
   constructor() {
     this.boardManager = new BoardManager();
@@ -39,11 +37,10 @@ export class Game {
     this.boardManager.addToBoard(unit2);
   }
 
-  async startGame() {
-    const { history, eventHistory } = runGame(this.boardManager);
+  startGame() {
+    const { totalSteps, eventHistory, firstStep } = runGame(this.boardManager);
 
-    this.history = history;
-    this.eventHistory = eventHistory;
+    return { totalSteps, eventHistory, firstStep };
   }
 }
 
@@ -57,13 +54,13 @@ function hasGameEnded(boardManager: BoardManager) {
 }
 
 export function runGame(boardManager: BoardManager) {
-  const history: any = [];
+  let firstStep: any;
   const eventHistory: any[] = [];
 
   const serializedUnits = boardManager
     .getAllUnits()
     .map((unit) => unit.serialize());
-  history.push({ units: serializedUnits });
+  firstStep = { units: serializedUnits };
 
   let currentStep = 1;
   do {
@@ -98,11 +95,10 @@ export function runGame(boardManager: BoardManager) {
       .getAllUnits()
       .map((unit) => unit.serialize());
 
-    history.push({ units: serializedUnits });
     currentStep++;
   } while (!hasGameEnded(boardManager));
 
-  return { history, eventHistory };
+  return { totalSteps: currentStep - 1, eventHistory, firstStep };
 }
 
 /* 

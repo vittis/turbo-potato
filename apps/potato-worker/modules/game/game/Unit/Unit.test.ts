@@ -1,8 +1,10 @@
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
+import { Class } from "../Class/Class";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
 import { runGame } from "../Game";
+import classes from "../data/classes";
 import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
@@ -181,16 +183,20 @@ describe("Unit", () => {
     test("battle works", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit.setClass(new Class(classes.Ranger));
+      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
       bm.addToBoard(unit);
       bm.addToBoard(unit2);
-
-      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
       unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      const { eventHistory, history } = runGame(bm);
+      const { eventHistory } = runGame(bm);
 
-      expect(eventHistory).toHaveLength(1);
+      expect(eventHistory[eventHistory.length - 1]).toHaveProperty(
+        "type",
+        "FAINT"
+      );
     });
   });
 });

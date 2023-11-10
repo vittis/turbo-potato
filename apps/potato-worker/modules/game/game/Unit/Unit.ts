@@ -329,7 +329,7 @@ export class Unit {
   }
 
   getName() {
-    return `Unit New`;
+    return `${this.owner}${this.position} ${this.classManager?.class?.data?.name}`;
   }
 
   /* receiveDisable(type: DISABLE_TYPE, duration: number) {
@@ -382,6 +382,6 @@ export class Unit {
   } */
 
   public toString = (): string => {
-    return `unit new`;
+    return `${this.owner}${this.position} ${this.classManager?.class?.data?.name}`;
   };
 }

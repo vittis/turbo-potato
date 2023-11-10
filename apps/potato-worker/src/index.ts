@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { getGameEventHistory, getGameHistory } from "../modules/game";
 import { cors } from "hono/cors";
+import { Game } from "../modules/game/game/Game";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -54,17 +54,16 @@ app.get("/chat/global", async (c) => {
   return resp;
 });
 
-app.get("/game/karpov", async (c) => {
-  const history = getGameHistory();
-  return c.json(history);
-});
-
 app.get("/game/battle/setup", async (c) => {
-  const history = getGameHistory();
-  const eventHistory = getGameEventHistory();
+  const game = new Game();
+  game.startGame();
+
+  const history = game.history;
+  const eventHistory = game.eventHistory;
+
   return c.json({
     firstStep: history[0],
-    totalSteps: history.length - 1,
+    totalSteps: history.length - 1, // todo dont need to have all history, can be only first step and then number of steps
     eventHistory,
   });
 });

@@ -7,8 +7,49 @@ import {
   MOD_TYPE,
   PossibleMods,
 } from "./ModsTypes";
-import { AbilityModifierSchema } from "../Class/ClassSchema";
 import { STAT } from "../Stats/StatsTypes";
+import { ABILITY_TARGET, AbilityModifier } from "../Class/ClassTypes";
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+
+// todo better type
+const AbilityModifierSchema = z.object({
+  trigger: z
+    .array(
+      z.object({
+        name: z.string(),
+        remove: z.boolean().optional(),
+      })
+    )
+    .optional(),
+  target: z
+    .array(
+      z.object({
+        name: z.string(),
+        remove: z.boolean().optional(),
+      })
+    )
+    .optional(),
+  status_effect: z
+    .array(
+      z.object({
+        name: z.nativeEnum(STATUS_EFFECT),
+        target: z.nativeEnum(ABILITY_TARGET),
+        value: z.number(),
+        remove: z.boolean().optional(),
+      })
+    )
+    .optional(),
+  stats: z
+    .array(
+      z.object({
+        name: z.nativeEnum(STAT),
+        target: z.nativeEnum(ABILITY_TARGET),
+        value: z.number(),
+        remove: z.boolean().optional(),
+      })
+    )
+    .optional(),
+}) satisfies z.ZodType<AbilityModifier>;
 
 const GrantAbilityPayloadSchema = z.object({
   name: z.string(),

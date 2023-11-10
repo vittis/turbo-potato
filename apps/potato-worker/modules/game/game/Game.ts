@@ -11,6 +11,7 @@ import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 import { EVENT_TYPE } from "./Event/EventTypes";
 import { sortAndExecuteEvents } from "./Event/EventUtils";
+import { Class } from "./Class/Class";
 export class Game {
   boardManager: BoardManager;
   history: any[] = [];
@@ -19,27 +20,24 @@ export class Game {
   constructor() {
     this.boardManager = new BoardManager();
 
-    const unit = new Unit(
+    const unit1 = new Unit(
       OWNER.TEAM_ONE,
       POSITION.TOP_FRONT,
       this.boardManager
     );
+    unit1.setClass(new Class(Classes.Ranger));
+    unit1.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+
     const unit2 = new Unit(
       OWNER.TEAM_TWO,
       POSITION.TOP_FRONT,
       this.boardManager
     );
-    this.boardManager.addToBoard(unit);
-    this.boardManager.addToBoard(unit2);
-
-    unit.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
     unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-  }
 
-  /* 
-    Function to sort events by type in order CAST_SKILL -> ATTACK
-    Maybe add other criterias in the future, for example should unit x cast skill before unit y?
-  */
+    this.boardManager.addToBoard(unit1);
+    this.boardManager.addToBoard(unit2);
+  }
 
   async startGame() {
     const { history, eventHistory } = runGame(this.boardManager);

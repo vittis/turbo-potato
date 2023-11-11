@@ -1,7 +1,7 @@
 import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
-import { GAME_LOOP_SPEED, fetchBattleSetup } from "./game/scenes/battle/BattleScene";
+import { fetchBattleSetup } from "./game/scenes/battle/BattleScene";
 
 function App() {
   const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();
@@ -45,31 +45,19 @@ function App() {
           <div className="overflow-x-auto">
             <table className="table table-xs">
               <thead>
-                <tr className="text-zinc-100 italic text-md">
+                <tr className="text-zinc-100 italic text-md uppercase">
                   <th>Name</th>
                   <th>Hp</th>
                   <th>Shield</th>
-                  <th>Str</th>
-                  <th>Dex</th>
-                  <th>Int</th>
-                  <th>Def</th>
-                  <th>Weapon</th>
-                  <th>A. Speed</th>
-                  <th>A. Damage</th>
-                  <th>S. Regen</th>
-                  <th>Chest</th>
-                  <th>Head</th>
-                  <th>Skill</th>
+                  <th>Atk Cd</th>
+                  <th>Atk Damage</th>
+                  <th>Spell Cd</th>
+                  <th>Spell Damage</th>
+                  <th>Damage Reduction</th>
                 </tr>
               </thead>
               <tbody className="text-zinc-100">
                 {allUnits.map((unit: any) => {
-                  const stepsToAttack = Math.ceil(1000 / unit.stats.attackSpeed);
-                  const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
-
-                  const stepsInAttackAnimation = Math.ceil(unit.stats.attackDelay / (10 + unit.stats.attackSpeed / 10));
-                  const timeInAttackAnimation = stepsInAttackAnimation * GAME_LOOP_SPEED;
-
                   return (
                     <tr
                       // @todo add an ID
@@ -91,19 +79,11 @@ function App() {
                       <td>{unit.name}</td>
                       <td>{unit.stats.hp}</td>
                       <td>{unit.stats.shield}</td>
-                      <td>{unit.stats.str}</td>
-                      <td>{unit.stats.dex}</td>
-                      <td>{unit.stats.int}</td>
-                      <td>{unit.stats.def}</td>
-                      <td>{unit.equipment.mainHandWeapon.name}</td>
-                      <td>
-                        {unit.stats.attackSpeed} ({stepsToAttack}) ({timeToAttack / 1000}s)
-                      </td>
-                      <td>{unit.stats.attackDamage}</td>
-                      <td>{unit.stats.skillRegen}</td>
-                      <td>{unit.equipment.chest.name}</td>
-                      <td>{unit.equipment.head.name}</td>
-                      <td>{unit.skill.name}</td>
+                      <td>{unit.stats.attackCooldownModifier * -1}%</td>
+                      <td>{unit.stats.attackDamageModifier}%</td>
+                      <td>{unit.stats.spellCooldownModifier * -1}%</td>
+                      <td>{unit.stats.spellDamageModifier}%</td>
+                      <td>{unit.stats.damageReductionModifier}%</td>
                     </tr>
                   );
                 })}

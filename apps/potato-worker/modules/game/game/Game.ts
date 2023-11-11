@@ -23,8 +23,11 @@ export class Game {
       POSITION.TOP_FRONT,
       this.boardManager
     );
-    unit1.setClass(new Class(Classes.Ranger));
-    unit1.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    // unit1.setClass(new Class(Classes.Ranger));
+    unit1.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
+
+    unit1.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit1.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit2 = new Unit(
       OWNER.TEAM_TWO,
@@ -32,6 +35,9 @@ export class Game {
       this.boardManager
     );
     unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+    unit2.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit2.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);

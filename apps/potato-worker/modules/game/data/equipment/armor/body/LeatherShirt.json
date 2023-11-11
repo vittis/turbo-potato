@@ -1,0 +1,15 @@
+{
+  "name": "Leather Shirt",
+  "allowedSlots": [
+    "CHEST"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "DAMAGE_REDUCTION",
+        "value": 20
+      }
+    }
+  ]
+}

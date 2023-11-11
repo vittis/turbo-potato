@@ -100,7 +100,7 @@ export class Unit {
     this.owner = owner;
     this.position = position;
 
-    const finalHp = 200;
+    const finalHp = 20;
 
     const finalShield = 0;
 
@@ -152,6 +152,8 @@ export class Unit {
       stats: {
         ...this.stats,
       },
+      abilities: this.abilities,
+      equipment: this.equipment,
       position: this.position,
     };
   }

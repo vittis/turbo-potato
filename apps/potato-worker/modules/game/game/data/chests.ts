@@ -1,5 +1,4 @@
-import ClothRobe from "../../data/equipment/armor/chest/clothRobe.json";
-import LeatherShirt from "../../data/equipment/armor/chest/leatherShirt.json";
-import PlateMail from "../../data/equipment/armor/chest/plateMail.json";
+import { EquipmentData } from "../Equipment/EquipmentTypes";
+import * as LeatherShirt from "../../data/equipment/armor/body/LeatherShirt.json";
 
-export default { ClothRobe, LeatherShirt, PlateMail };
+export default { LeatherShirt: LeatherShirt as EquipmentData };

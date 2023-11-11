@@ -97,7 +97,7 @@ export function addEquipWeaponSprite(scene: Phaser.Scene, x: number, y: number, 
   else if (keyword === "plagueStaff") sprite.setFrame(2);
   else if (keyword === "staff") sprite.setFrame(3);
   else if (keyword === "hammer") sprite.setFrame(4);
-  else if (keyword === "pike") sprite.setFrame(5);
+  else if (keyword === "shortSpear") sprite.setFrame(5);
   else if (keyword === "trident") sprite.setFrame(6);
   else if (keyword === "pouch") sprite.setFrame(7);
   else if (keyword === "sword") sprite.setFrame(8);
@@ -108,7 +108,7 @@ export function addEquipWeaponSprite(scene: Phaser.Scene, x: number, y: number, 
   else if (keyword === "sickle") sprite.setFrame(12);
   else if (keyword === "pitchfork") sprite.setFrame(13);
   else if (keyword === "axe") sprite.setFrame(15);
-  else if (keyword === "bow") sprite.setFrame(16);
+  else if (keyword === "shortbow") sprite.setFrame(16);
   else if (keyword === "dagger") sprite.setFrame(17);
   else if (keyword === "club") sprite.setFrame(18);
   else throw Error(`addEquipWeaponSprite: ${keyword} not found`);

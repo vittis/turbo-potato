@@ -140,15 +140,15 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
   }
 
   showHead(dataUnit) {
-    return showHead(dataUnit.equipment.head.name);
+    return showHead(dataUnit.equipment.find((equip) => equip.slot === "HEAD").equip.data.name);
   }
 
   showNeck(dataUnit) {
-    return showNeck(dataUnit.equipment.chest.name);
+    return showNeck(dataUnit.equipment.find((equip) => equip.slot === "CHEST").equip.data.name);
   }
 
   showArms(dataUnit) {
-    return showArms(dataUnit.equipment.chest.name);
+    return showArms(dataUnit.equipment.find((equip) => equip.slot === "CHEST").equip.data.name);
   }
 
   getEquipBack(dataUnit) {
@@ -161,15 +161,15 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
 
   getEquips(dataUnit) {
     return {
-      weapon: dataUnit.equipment?.mainHandWeapon?.name,
-      offhand: dataUnit.equipment?.offHandWeapon?.name,
-      helmet: dataUnit.equipment?.head?.name,
-      chest: dataUnit.equipment?.chest?.name,
+      weapon: dataUnit.equipment.find((equip) => equip.slot === "MAIN_HAND").equip.data.name,
+      offhand: dataUnit.equipment.find((equip) => equip.slot === "OFF_HAND")?.equip?.data?.name,
+      helmet: dataUnit.equipment.find((equip) => equip.slot === "HEAD").equip.data.name,
+      chest: dataUnit.equipment.find((equip) => equip.slot === "CHEST").equip.data.name,
     };
   }
 
   getRace(dataUnit) {
-    return dataUnit.race.name;
+    return dataUnit?.race?.name || "Human"; // todo theres no race for now
   }
 
   getRaceColor(dataUnit) {

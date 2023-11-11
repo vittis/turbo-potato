@@ -4,7 +4,7 @@
   "tags": [],
   "target": "STANDARD",
   "baseDamage": 40,
-  "cooldown": 100,
+  "cooldown": 120,
   "effects": [
     {
       "type": "GRANT_STATUS_EFFECT",

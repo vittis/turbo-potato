@@ -54,7 +54,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.dataUnit = dataUnit;
     this.unitName = dataUnit.name;
     this.stats = dataUnit.stats;
-    this.equipment = dataUnit.equipment;
+    // this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
     this.battleUnitSprite = new BattleUnitSprite(scene, x, y, dataUnit);

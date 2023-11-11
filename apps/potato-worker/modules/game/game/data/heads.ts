@@ -1,5 +1,4 @@
-import ClothHat from "../../data/equipment/armor/head/clothHat.json";
-import LeatherHat from "../../data/equipment/armor/head/leatherHat.json";
-import PlateHelmet from "../../data/equipment/armor/head/plateHelmet.json";
+import { EquipmentData } from "../Equipment/EquipmentTypes";
+import * as LeatherHat from "../../data/equipment/armor/head/LeatherHat.json";
 
-export default { ClothHat, LeatherHat, PlateHelmet };
+export default { LeatherHat: LeatherHat as EquipmentData };

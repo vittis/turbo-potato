@@ -7,7 +7,7 @@ export function preloadBattle(scene: Phaser.Scene) {
 
 export function setupBattle(scene: Phaser.Scene) {
   const boardImage = scene.add.image(0, 0, "board");
-  const castle = scene.add.image(0, -215, "castle");
+  const castle = scene.add.image(0, -230, "castle");
 
   const trees = addTrees(scene);
 
@@ -31,10 +31,14 @@ export function setupBattle(scene: Phaser.Scene) {
 }
 
 function addTrees(scene: Phaser.Scene) {
-  const tree = scene.add.sprite(295, -200, "tree");
-  const tree2 = scene.add.sprite(350, -180, "tree");
-  const tree3 = scene.add.sprite(-295, -200, "tree");
-  const tree4 = scene.add.sprite(-350, -180, "tree");
+  const tree = scene.add.sprite(295, -220, "tree");
+  const tree2 = scene.add.sprite(350, -200, "tree");
+  const tree3 = scene.add.sprite(-295, -220, "tree");
+  const tree4 = scene.add.sprite(-350, -200, "tree");
+  tree.setScale(1.25);
+  tree2.setScale(1.25);
+  tree3.setScale(1.25);
+  tree4.setScale(1.25);
 
   scene.anims.create({
     key: "tree_idle",

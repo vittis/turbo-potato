@@ -69,7 +69,6 @@ export class Battle extends Phaser.Scene {
 
     const { board } = setupBattle(this);
     this.board = board;
-    console.log(board.x, board.y);
     // board.add(this.text);
 
     queryClient
@@ -214,6 +213,7 @@ export class Battle extends Phaser.Scene {
     this.units = [];
 
     firstFrame.units.forEach((dataUnit: any) => {
+      console.log(dataUnit);
       const unit = new BattleUnit(this, dataUnit);
       this.units.push(unit);
       this.board.add(unit);

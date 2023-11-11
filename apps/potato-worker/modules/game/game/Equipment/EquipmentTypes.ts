@@ -4,6 +4,8 @@ export enum EQUIPMENT_SLOT {
   MAIN_HAND = "MAIN_HAND",
   OFF_HAND = "OFF_HAND",
   TWO_HANDED = "TWO_HANDED",
+  HEAD = "HEAD",
+  CHEST = "CHEST",
 }
 
 // this represents the JSON of the equipment

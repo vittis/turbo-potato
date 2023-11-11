@@ -4,7 +4,9 @@ import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
 import { runGame } from "../Game";
+import Chests from "../data/chests";
 import classes from "../data/classes";
+import Heads from "../data/heads";
 import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
@@ -153,6 +155,16 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
       expect(unit.statsFromMods.attackDamageModifier).toBe(5);
+    });
+
+    test("Equipping two items should accumulate stat", () => {
+      const bm = new BoardManager();
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+
+      unit.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+      unit.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
+      expect(unit.stats.damageReductionModifier).toBe(32); // todo dont hardcode
     });
   });
 

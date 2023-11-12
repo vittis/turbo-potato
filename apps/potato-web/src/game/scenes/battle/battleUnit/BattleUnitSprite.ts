@@ -191,6 +191,8 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
 
     this.textureName = `unitTexture${dataUnit.id}`;
 
-    texture.saveTexture(this.textureName);
+    if (!this.scene.textures.exists(this.textureName)) {
+      texture.saveTexture(this.textureName);
+    }
   }
 }

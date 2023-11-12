@@ -35,6 +35,7 @@ export interface UseAbilityEvent extends Event {
 
 export interface UseAbilityEventPayload {
   name: string;
+  targetsId: string[];
   subEvents: UseAbilitySubEvent[];
 }
 
@@ -52,7 +53,7 @@ type InstantEffectPossiblePayload =
 
 export interface InstantEffectPayload<T extends INSTANT_EFFECT_TYPE> {
   type: T;
-  targetId: string[];
+  targetsId: string[];
   payload: InstantEffectPayloadMap[T];
 }
 

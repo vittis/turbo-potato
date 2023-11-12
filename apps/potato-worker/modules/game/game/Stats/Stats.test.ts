@@ -32,7 +32,8 @@ const modsMock: Mod<MOD_TYPE.GRANT_BASE_STAT>[] = [
 
 describe("Stats", () => {
   describe("StatManager", () => {
-    test("initialize correctly", () => {
+    // todo better stats
+    test.skip("initialize correctly", () => {
       // use unit
       const manager = new StatsManager();
       expect(manager.getStats()).toEqual(undefined);

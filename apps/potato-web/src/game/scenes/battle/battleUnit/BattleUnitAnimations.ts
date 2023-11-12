@@ -23,10 +23,10 @@ export function createDeathAnimation({ unit, onFinishAnimation }: { unit: Battle
     scaleY: 0,
     angle: 180,
     duration: 1400,
-    delay: 150 * animationSpeed,
+    delay: 75 * animationSpeed,
     ease: "Sine.easeInOut",
     onComplete: () => {
-      unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
+      unit.scene.time.delayedCall(75 * animationSpeed, onFinishAnimation);
     },
   });
 

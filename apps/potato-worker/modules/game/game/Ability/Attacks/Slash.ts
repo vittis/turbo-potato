@@ -16,7 +16,7 @@ export class Slash extends Ability {
 
   use(unit: Unit): UseAbilityEvent {
     super.use(unit);
-    const target = this.getTargets(unit);
+    const targets = this.getTargets(unit).map((t) => t?.id);
 
     // TODO: apply real damage using stats modifier for damage
 
@@ -26,12 +26,13 @@ export class Slash extends Ability {
       step: unit.currentStep,
       payload: {
         name: this.data.name,
+        targetsId: targets,
         subEvents: [
           {
             type: SUBEVENT_TYPE.INSTANT_EFFECT,
             payload: {
               type: INSTANT_EFFECT_TYPE.DAMAGE,
-              targetId: [target.id],
+              targetsId: targets,
               payload: {
                 value: this.data.baseDamage,
               },
@@ -50,6 +51,6 @@ export class Slash extends Ability {
       throw Error(`Couldnt find target for ${this.data.name}`);
     }
 
-    return targets[0];
+    return targets;
   }
 }

@@ -39,10 +39,25 @@ export function getTargetFunction(targetType: TARGET_TYPE) {
 }
 
 function getStandardTarget(bm: BoardManager, unit: Unit): Unit[] {
+  const frontEnemies = bm.getAllAliveUnitsInColumn(
+    bm.getEnemyOwner(unit.owner),
+    COLUMN.FRONT
+  );
+  const midEnemies = bm.getAllAliveUnitsInColumn(
+    bm.getEnemyOwner(unit.owner),
+    COLUMN.MID
+  );
+
+  const backEnemies = bm.getAllAliveUnitsInColumn(
+    bm.getEnemyOwner(unit.owner),
+    COLUMN.BACK
+  );
+
+  // todo any cleaner way to do this?
   const enemyUnitsInClosestColumn =
-    bm.getAllAliveUnitsInColumn(bm.getEnemyOwner(unit.owner), COLUMN.FRONT) ||
-    bm.getAllAliveUnitsInColumn(bm.getEnemyOwner(unit.owner), COLUMN.MID) ||
-    bm.getAllAliveUnitsInColumn(bm.getEnemyOwner(unit.owner), COLUMN.BACK);
+    (frontEnemies.length > 0 ? frontEnemies : undefined) ||
+    (midEnemies.length > 0 ? midEnemies : undefined) ||
+    backEnemies;
 
   const target =
     enemyUnitsInClosestColumn.find(

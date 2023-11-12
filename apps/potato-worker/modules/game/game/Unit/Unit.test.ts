@@ -106,14 +106,14 @@ describe("Unit", () => {
     test("uses Short Spear ability: Thrust", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
-      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.BOT_MID, bm);
       bm.addToBoard(unit);
       bm.addToBoard(unit2);
 
-      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
       const ability = unit.abilities[0];
-      //expect(ability.data.name).toBe("Thrust");
+      expect(ability.data.name).toBe("Thrust");
 
       for (let i = 0; i < ability.data.cooldown; i++) {
         unit.step(i);
@@ -194,7 +194,7 @@ describe("Unit", () => {
   describe.skip("Battle", () => {
     test("battle works", () => {
       const bm = new BoardManager();
-      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.BOT_BACK, bm);
       unit.setClass(new Class(classes.Ranger));
       unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 

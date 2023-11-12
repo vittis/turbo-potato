@@ -18,8 +18,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public sprite!: Phaser.GameObjects.Image;
   public hpBar: Phaser.GameObjects.Rectangle;
   public shieldBar: Phaser.GameObjects.Rectangle;
-  public apBar: Phaser.GameObjects.Rectangle;
-  public spBar: Phaser.GameObjects.Rectangle;
+  /* public apBar: Phaser.GameObjects.Rectangle;
+  public spBar: Phaser.GameObjects.Rectangle; */
   public boardPosition: number;
   public owner: number;
   public hpText: Phaser.GameObjects.Text;
@@ -82,11 +82,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     setupUnitPointerEvents(this);
 
-    const { hpBar, shieldBar, apBar, spBar } = createBars(this);
+    const { hpBar, shieldBar } = createBars(this);
     this.hpBar = hpBar;
     this.shieldBar = shieldBar;
-    this.apBar = apBar;
-    this.spBar = spBar;
+    /* this.apBar = apBar;
+    this.spBar = spBar; */
 
     const { hpText, shieldText } = createTexts(this, hpBar.x, hpBar.y);
     this.hpText = hpText;
@@ -124,7 +124,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     onEnd?: Function;
     onAttack?: Function;
   }) {
-    if (event.type === "HAS_DIED") {
+    if (event.type === "FAINT") {
       const onFinishAnimation = () => {
         this.setVisible(false);
         this.isDead = true;
@@ -139,7 +139,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.currentAnimation = deathTween;
     }
 
-    if (event.type === "ATTACK") {
+    if (event.type === "USE_ABILITY") {
       const target = targets?.[0];
 
       if (!target) {
@@ -147,13 +147,17 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }
 
       const onFinishAnimation = () => {
-        this.fillApBar(event.payload.stats.ap);
+        // this.fillApBar(event.payload.stats.ap);
         if (onEnd) onEnd();
       };
       const onImpactPoint = () => {
-        const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
-        this.fillSpBar(event.payload.stats.sp);
-        target.playEvent({ event: receiveDamageEvent });
+        const receiveDamageEvent = event.payload.subEvents?.find(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+        ) as StepEvent;
+        // this.fillSpBar(event.payload.stats.sp);
+        if (receiveDamageEvent) {
+          target.playEvent({ event: receiveDamageEvent });
+        }
       };
 
       const { attackTweenChain } = createAttackAnimation({
@@ -166,11 +170,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.currentAnimation = attackTweenChain;
     }
 
-    if (event.type === "RECEIVED_DAMAGE") {
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "DAMAGE") {
       onReceiveDamage(this, event);
       // temporary
 
-      this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
+      // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
     }
 
     if (event.type === "CAST_SKILL") {
@@ -338,7 +342,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   }
 
   public fillApBar(currentAp: number, fromResume?: boolean) {
-    const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
+    /*const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
 
     const willNeedOneLessStep = (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >= 1000;
 
@@ -347,28 +351,27 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
 
     const duration = timeToAttack;
-    /* if (fromResume) {
+     if (fromResume) {
       if (this.apBarTween) {
         duration = this.apBarTween.duration - this.apBarTween.elapsed;
       }
     } else {
       duration = timeToAttack;
     } */
-
-    this.apBarTween = this.scene.tweens.add({
+    /* this.apBarTween = this.scene.tweens.add({
       targets: this.apBar,
       width: { from: 0, to: BAR_WIDTH },
       duration: duration,
       ease: "Linear",
-    });
+    }); */
   }
 
   public fillSpBar(currentSp: number) {
-    const newSpBarWidth = Math.min((currentSp * BAR_WIDTH) / 1000, BAR_WIDTH);
+    /*const newSpBarWidth = Math.min((currentSp * BAR_WIDTH) / 1000, BAR_WIDTH);
 
     this.spBar.width = newSpBarWidth;
 
-    /* this.spBarTween = this.scene.tweens.add({
+     this.spBarTween = this.scene.tweens.add({
       targets: this.spBar,
       width: newSpBarWidth,
       duration: 50,

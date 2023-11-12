@@ -18,7 +18,12 @@ export class StatsManager {
 
   // todo better stats management. better merge from all sources
   getStats() {
-    return { ...this.stats, ...this.statsFromMods };
+    return {
+      ...this.stats,
+      ...this.statsFromMods,
+      maxHp: this.stats.maxHp,
+      hp: this.stats.hp,
+    };
   }
 
   setStats(newStats: UnitStats) {

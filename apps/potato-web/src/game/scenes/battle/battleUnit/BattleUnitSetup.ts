@@ -104,10 +104,10 @@ export function createBars(unit: BattleUnit) {
   unit.add(hpBarBorder);
   unit.add(hpBar);
   unit.add(shieldBar);
-  unit.add(spRectBorder);
+  /* unit.add(spRectBorder);
   unit.add(spBar);
   unit.add(apRectBorder);
-  unit.add(apBar);
+  unit.add(apBar); */
 
   return { hpBar, shieldBar, spBar, apBar };
 }

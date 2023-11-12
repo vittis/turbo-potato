@@ -2,8 +2,10 @@ import { BattleUnit } from "./BattleUnit";
 import { BAR_WIDTH } from "./BattleUnitSetup";
 
 export function onReceiveDamage(unit: BattleUnit, event: any) {
-  const newHp = Math.max(0, event.payload.stats.hp);
-  const newShield = Math.max(0, event.payload.stats.shield);
+  const damageReceived = event.payload.payload.value;
+
+  const newHp = Math.max(0, unit.stats.hp - damageReceived);
+  const newShield = Math.max(0, 0);
 
   const hasTakenHpDamage = newHp < unit.stats.hp;
   const hasTakenShieldDamage = newShield < unit.stats.shield;
@@ -26,8 +28,6 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     unit.hpText.alpha = 0;
     unit.hpBar.alpha = 0;
     unit.shieldBar.alpha = 0;
-    unit.spBar.alpha = 0;
-    unit.apBar.alpha = 0;
   }
 
   // hp and armor text POP animation
@@ -45,7 +45,7 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
   const minFontSize = 25;
   const maxFontSize = 70;
 
-  const damage = (event.payload.modifiers.hp + event.payload.modifiers.shield) * -1;
+  const damage = damageReceived;
   const fontSize = ((damage - minDamage) / (maxDamage - minDamage)) * (maxFontSize - minFontSize) + minFontSize;
   const fontSizePx = `${fontSize.toFixed(0)}px`;
 
@@ -97,4 +97,6 @@ export function onReceiveDamage(unit: BattleUnit, event: any) {
     duration: 80,
     ease: "Linear",
   });
+
+  unit.stats = { ...unit.stats, hp: newHp }; //todo better stat tracking
 }

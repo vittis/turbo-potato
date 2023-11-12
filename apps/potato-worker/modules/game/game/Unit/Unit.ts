@@ -100,7 +100,7 @@ export class Unit {
     this.owner = owner;
     this.position = position;
 
-    const finalHp = 20;
+    const finalHp = 100;
 
     const finalShield = 0;
 
@@ -193,12 +193,12 @@ export class Unit {
     if (event.payload.subEvents) {
       event.payload.subEvents.forEach((subEvent) => {
         if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
-          const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
+          const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
           target.receiveDamage(subEvent.payload.payload.value);
         }
 
         if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
-          const target = this.bm.getUnitById(subEvent.payload.targetId[0]);
+          const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
           target.statusEffectManager.applyStatusEffect(
             subEvent.payload.payload
           );

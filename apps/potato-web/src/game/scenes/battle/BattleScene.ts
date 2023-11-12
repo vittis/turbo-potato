@@ -7,6 +7,9 @@ import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
 
 // todo: reuse from server
 enum EVENT_TYPE {
+  USE_ABILITY = "USE_ABILITY",
+  INSTANT_EFFECT = "INSTANT_EFFECT", // todo better event/subevent type organization
+  FAINT = "FAINT",
   ATTACK = "ATTACK",
   IS_PREPARING_ATTACK = "IS_PREPARING_ATTACK",
   RECEIVED_DAMAGE = "RECEIVED_DAMAGE",
@@ -147,10 +150,10 @@ export class Battle extends Phaser.Scene {
         throw Error(`couldnt find unit id: ${event.actorId}`);
       }
 
-      const targets = this.units.filter((unit) => event.payload?.targetsId.includes(unit.id));
+      const targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
 
       let onEnd;
-      if (event.type === "ATTACK") {
+      if (event.type === "USE_ABILITY") {
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
@@ -170,7 +173,8 @@ export class Battle extends Phaser.Scene {
         };
       }
 
-      if (event.type === "HAS_DIED") {
+      // todo is this necessary: test with more than one death
+      if (event.type === "FAINT") {
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
@@ -181,15 +185,12 @@ export class Battle extends Phaser.Scene {
       }
 
       eventPile.push({ unit, event, targets, onEnd });
-
-      // unit.playEvent({ event, targets, onEnd });
     });
 
-    const unit = eventPile[0].unit;
+    const unit: BattleUnit = eventPile[0].unit;
     unit.playEvent(eventPile[0]);
 
-    console.log(eventPile[0].event.step);
-
+    // todo do this after onEnd of last event
     const isLastStep = step === this.totalSteps;
     if (isLastStep) {
       this.time.addEvent({
@@ -213,7 +214,6 @@ export class Battle extends Phaser.Scene {
     this.units = [];
 
     firstFrame.units.forEach((dataUnit: any) => {
-      console.log(dataUnit);
       const unit = new BattleUnit(this, dataUnit);
       this.units.push(unit);
       this.board.add(unit);
@@ -252,7 +252,8 @@ export class Battle extends Phaser.Scene {
     const stepsThatHaveEvents = [...new Set(this.eventHistory.map((event) => event.step))];
 
     this.units.forEach((unit) => {
-      unit.onStart();
+      // todo initialize abilities?
+      // unit.onStart();
     });
 
     stepsThatHaveEvents.forEach((step) => {
@@ -270,7 +271,7 @@ export class Battle extends Phaser.Scene {
     });
   }
 
-  update(time: number, delta: number): void {
+  update(/* time: number, delta: number */): void {
     if (this.units.length === 0) return;
     const pointer = this.input.activePointer;
     this.text.setText([
@@ -280,11 +281,7 @@ export class Battle extends Phaser.Scene {
             "," +
             Math.ceil(this.warrior.parentContainer.y + this.warrior.y), */
       "board: " + Math.ceil(this.board.x) + "," + Math.ceil(this.board.y),
-      "ranger: " + Math.ceil(this.units[0].x) + "," + Math.ceil(this.units[0].y),
-      "ranger: " +
-        Math.ceil(this.units[0].parentContainer.x + this.units[0].x) +
-        "," +
-        Math.ceil(this.units[0].parentContainer.y + this.units[0].y),
+      "guy: " + Math.ceil(this.units[0].x) + "," + Math.ceil(this.units[0].y),
     ]);
   }
 }

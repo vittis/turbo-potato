@@ -26,6 +26,7 @@ app.get("/lobby/*", async (c) => {
 });
 
 app.get("/counter/*", async (c) => {
+  console.log("kaskd");
   const id = c.env.COUNTER.idFromName("A");
   const obj = c.env.COUNTER.get(id);
   const resp = await obj.fetch(c.req.url);

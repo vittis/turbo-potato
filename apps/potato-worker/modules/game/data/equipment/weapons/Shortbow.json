@@ -14,7 +14,21 @@
       "type": "GRANT_BASE_STAT",
       "payload": {
         "stat": "ATTACK_COOLDOWN",
-        "value": 15
+        "value": 90
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_DAMAGE",
+        "value": -95
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "SPELL_DAMAGE",
+        "value": 200
       }
     },
     {

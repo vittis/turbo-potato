@@ -33,7 +33,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 25;
+export const GAME_LOOP_SPEED = 75;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -91,7 +91,6 @@ export class Battle extends Phaser.Scene {
       (state) => state.selectedEntity,
       (selectedEntity) => {
         this.units.forEach((unit) => {
-          console.log(unit.id, selectedEntity);
           if (unit.id === selectedEntity) {
             unit.onSelected();
           } else {
@@ -108,6 +107,7 @@ export class Battle extends Phaser.Scene {
 
         if (isGamePaused) {
           if (this.isPlayingEventAnimation) {
+            console.log("kk?");
             this.pauseUnitsAnimations();
           } else {
             this.pauseTimeEvents();
@@ -141,6 +141,11 @@ export class Battle extends Phaser.Scene {
         eventPile[0].unit.playEvent(eventPile[0]);
       } else {
         this.resumeTimeEvents();
+
+        const isLastStep = step === this.totalSteps;
+        if (isLastStep) {
+          useGameStore.getState().setIsGamePaused(true);
+        }
       }
     };
 
@@ -186,20 +191,8 @@ export class Battle extends Phaser.Scene {
 
       eventPile.push({ unit, event, targets, onEnd });
     });
-
     const unit: BattleUnit = eventPile[0].unit;
     unit.playEvent(eventPile[0]);
-
-    // todo do this after onEnd of last event
-    const isLastStep = step === this.totalSteps;
-    if (isLastStep) {
-      this.time.addEvent({
-        delay: Math.min(GAME_LOOP_SPEED, 100),
-        callback: () => {
-          useGameStore.getState().setIsGamePaused(true);
-        },
-      });
-    }
   }
 
   shouldStartFromBeginning() {
@@ -221,11 +214,13 @@ export class Battle extends Phaser.Scene {
   }
 
   resumeUnitsAnimations() {
+    console.log("resumeUnitsAnimations");
     this.units.forEach((unit) => {
       unit.resumeAnimations();
     });
   }
   pauseUnitsAnimations() {
+    console.log("pauseUnitsAnimations");
     this.units.forEach((unit) => {
       unit.pauseAnimations();
     });
@@ -233,7 +228,7 @@ export class Battle extends Phaser.Scene {
   resumeTimeEvents() {
     this.isPlayingEventAnimation = false;
     this.units.forEach((unit) => {
-      unit.resumeApBar();
+      unit.resumeSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = false;
@@ -241,7 +236,7 @@ export class Battle extends Phaser.Scene {
   }
   pauseTimeEvents() {
     this.units.forEach((unit) => {
-      unit.pauseApBar();
+      unit.pauseSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = true;
@@ -253,7 +248,7 @@ export class Battle extends Phaser.Scene {
 
     this.units.forEach((unit) => {
       // todo initialize abilities?
-      // unit.onStart();
+      unit.onStart();
     });
 
     stepsThatHaveEvents.forEach((step) => {

@@ -3,6 +3,7 @@ import { getAbilitiesInstancesFromMods } from "../Ability/AbilityUtils";
 import { MOD_TYPE, Mod } from "../Mods/ModsTypes";
 import { Perk } from "../Perk/Perk";
 import { getPerksInstancesFromMods } from "../Perk/PerkUtils";
+import { STAT } from "../Stats/StatsTypes";
 import { filterStatsMods } from "../Stats/StatsUtils";
 import { EquipmentDataSchema } from "./EquipmentSchema";
 import { EquipmentData } from "./EquipmentTypes";
@@ -21,6 +22,14 @@ export class Equipment {
 
   getStatsMods(): Mod<MOD_TYPE.GRANT_BASE_STAT>[] {
     return filterStatsMods(this.data.mods);
+  }
+
+  getCooldownModifierStatsMods(): Mod<MOD_TYPE.GRANT_BASE_STAT>[] {
+    return filterStatsMods(this.data.mods).filter(
+      (mod) =>
+        mod.payload.stat === STAT.ATTACK_COOLDOWN ||
+        mod.payload.stat === STAT.SPELL_COOLDOWN
+    );
   }
 
   getGrantedPerks(): Perk[] {

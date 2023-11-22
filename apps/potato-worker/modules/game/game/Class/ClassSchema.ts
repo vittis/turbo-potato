@@ -14,6 +14,7 @@ const TalentNodeSchema = ClassNodeSchema.extend({
 
 export const ClassDataSchema = z.object({
   name: z.string(),
+  hp: z.number(),
   base: z.array(ClassNodeSchema),
   utility: z.array(ClassNodeSchema),
   tree: z.array(

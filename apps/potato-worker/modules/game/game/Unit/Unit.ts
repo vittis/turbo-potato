@@ -124,6 +124,10 @@ export class Unit {
       item
     );
 
+    this.abilityManager.applyCooldownModifierFromMods(
+      equip.getCooldownModifierStatsMods()
+    );
+
     this.statsManager.addMods(equip.getStatsMods());
 
     this.perkManager.addPerksFromSource(equip.getGrantedPerks(), item);
@@ -137,6 +141,9 @@ export class Unit {
   }
 
   setClass(unitClass: Class) {
+    this.statsManager.setBaseHp(unitClass.getBaseHp());
+    this.statsManager.addMods(unitClass.getStatsMods());
+
     this.classManager.setClass(unitClass);
     this.abilityManager.addAbilitiesFromSource(
       this.classManager.getClassAbilities(),
@@ -240,7 +247,7 @@ export class Unit {
     let newHp = this.stats.hp;
     let newShield = this.stats.shield;
 
-    const finalDamage = Math.round(damage);
+    const finalDamage = damage;
 
     if (newShield > 0) {
       newShield -= finalDamage;

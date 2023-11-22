@@ -1,27 +1,124 @@
-import { AbilityData } from "./AbilityTypes";
+import { ABILITY_CATEGORY, AbilityData } from "./AbilityTypes";
 import { AbilityDataSchema } from "./AbilitySchema";
 import { Unit } from "../Unit/Unit";
-import { UseAbilityEvent } from "../Event/EventTypes";
+import {
+  EVENT_TYPE,
+  INSTANT_EFFECT_TYPE,
+  SUBEVENT_TYPE,
+  UseAbilityEvent,
+  UseAbilitySubEvent,
+} from "../Event/EventTypes";
+import { TRIGGER_EFFECT_TYPE } from "../Perk/PerkTypes";
+import { TRIGGER } from "../Trigger/TriggerTypes";
 
 export class Ability {
   data: AbilityData;
   progress = 0;
+  cooldown = 0;
 
   constructor(data?: AbilityData) {
     const parsedData = AbilityDataSchema.parse(data);
     this.data = parsedData;
+    this.cooldown = parsedData.cooldown;
   }
 
   step() {
     this.progress += 1;
   }
 
-  canActivate() {
-    return this.progress >= this.data.cooldown;
+  modifyCooldown(value: number) {
+    this.cooldown = this.cooldown - this.cooldown * (value / 100);
   }
 
-  //@ts-expect-error
+  canActivate() {
+    return this.progress >= this.cooldown;
+  }
+
   use(unit: Unit): UseAbilityEvent {
+    const targets = this.getTargets(unit);
+
+    const onHitGrantStatusEffects = this.data.effects.filter(
+      (effect) =>
+        effect.trigger === TRIGGER.ON_HIT &&
+        effect.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT
+    );
+
+    const statusSubEvents: UseAbilitySubEvent[] = onHitGrantStatusEffects.map(
+      (effect) => {
+        return {
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+            targetsId: [unit.bm.getTarget(unit, effect.target)[0].id], // todo move effect target logic somewhere else
+            payload: {
+              name: effect.payload[0].name,
+              quantity: effect.payload[0].quantity as number,
+            },
+          },
+        };
+      }
+    );
+
+    const damage =
+      this.data.baseDamage +
+      (this.data.baseDamage * this.getDamageModifier(unit)) / 100;
+
+    const finalDamage = Math.max(
+      1,
+      Math.round(
+        damage - (damage * targets[0].stats.damageReductionModifier) / 100
+      )
+    );
+
+    const useAbilityEvent: UseAbilityEvent = {
+      type: EVENT_TYPE.USE_ABILITY,
+      actorId: unit.id,
+      step: unit.currentStep,
+      payload: {
+        name: this.data.name,
+        targetsId: targets.map((t) => t?.id),
+        subEvents: [
+          {
+            type: SUBEVENT_TYPE.INSTANT_EFFECT,
+            payload: {
+              type: INSTANT_EFFECT_TYPE.DAMAGE,
+              targetsId: targets.map((t) => t?.id),
+              payload: {
+                value: finalDamage,
+              },
+            },
+          },
+          ...statusSubEvents,
+        ],
+      },
+    };
+
     this.progress = 0;
+    return useAbilityEvent;
+  }
+
+  isAttack() {
+    return this.data.type === ABILITY_CATEGORY.ATTACK;
+  }
+
+  isSpell() {
+    return this.data.type === ABILITY_CATEGORY.SPELL;
+  }
+
+  getDamageModifier(unit: Unit) {
+    if (this.isAttack()) {
+      return unit.stats.attackDamageModifier;
+    } else {
+      return unit.stats.spellDamageModifier;
+    }
+  }
+
+  getTargets(unit: Unit) {
+    const targets = unit.bm.getTarget(unit, this.data.target);
+    if (targets.length === 0 || targets[0] === undefined) {
+      throw Error(`Couldnt find target for ${this.data.name}`);
+    }
+
+    return targets;
   }
 }

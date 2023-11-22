@@ -1,5 +1,6 @@
 {
   "name": "Ranger",
+  "hp": 80,
   "base": [
     {
       "mods": [

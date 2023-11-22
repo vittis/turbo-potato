@@ -22,6 +22,10 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
 }
 
 export function loadAssets(scene: Phaser.Scene) {
+  scene.load.image("thrust", "assets/abilities/thrust.png");
+  scene.load.image("disarming_shot", "assets/abilities/disarming_shot.png");
+  scene.load.image("slash", "assets/abilities/slash.png");
+
   // Unit
   scene.load.spritesheet("unit", "assets/unit.png", {
     frameWidth: 180,

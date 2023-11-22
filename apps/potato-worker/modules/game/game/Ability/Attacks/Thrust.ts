@@ -18,9 +18,12 @@ export class Thrust extends Ability {
 
   use(unit: Unit): UseAbilityEvent {
     super.use(unit);
-    const targets = this.getTargets(unit).map((t) => t?.id);
+    const targets = this.getTargets(unit);
 
-    // TODO: apply real damage using stats modifier for damage
+    const damage = this.data.baseDamage;
+    const finalDamage = Math.round(
+      damage - (damage * targets[0].stats.damageReductionModifier) / 100
+    );
 
     const useAbilityEvent: UseAbilityEvent = {
       type: EVENT_TYPE.USE_ABILITY,
@@ -28,15 +31,15 @@ export class Thrust extends Ability {
       step: unit.currentStep,
       payload: {
         name: this.data.name,
-        targetsId: targets,
+        targetsId: targets.map((t) => t?.id),
         subEvents: [
           {
             type: SUBEVENT_TYPE.INSTANT_EFFECT,
             payload: {
               type: INSTANT_EFFECT_TYPE.DAMAGE,
-              targetsId: targets,
+              targetsId: targets.map((t) => t?.id),
               payload: {
-                value: this.data.baseDamage,
+                value: finalDamage,
               },
             },
           },

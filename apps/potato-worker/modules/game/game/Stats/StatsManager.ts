@@ -16,6 +16,11 @@ export class StatsManager {
     this.stats = stats;
   }
 
+  setBaseHp(hp: number) {
+    this.stats.hp = hp;
+    this.stats.maxHp = hp;
+  }
+
   // todo better stats management. better merge from all sources
   getStats() {
     return {

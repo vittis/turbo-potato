@@ -1,0 +1,9 @@
+{
+  "name": "Reinforce Allies",
+  "type": "ATTACK",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 90,
+  "cooldown": 200,
+  "effects": []
+}

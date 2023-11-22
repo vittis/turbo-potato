@@ -47,6 +47,7 @@ export interface TalentNode extends ClassNode {
 // this represents the JSON of the class
 export interface ClassData {
   name: string;
+  hp: number;
   base: ClassNode[];
   utility: ClassNode[];
   tree: {

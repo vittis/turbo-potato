@@ -12,6 +12,12 @@ import {
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
 
+interface Ability {
+  icon: Phaser.GameObjects.Image;
+  iconOverlay: Phaser.GameObjects.Image;
+  iconTween: Phaser.Tweens.Tween;
+}
+
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public battleUnitSprite!: BattleUnitSprite;
@@ -32,8 +38,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public dataUnit: any;
 
   public isSelected = false;
-  public apBarTween!: Phaser.Tweens.Tween;
   public spBarTween!: Phaser.Tweens.Tween;
+
+  public abilities = [] as Ability[];
 
   public isDead = false;
   public startingX;
@@ -101,6 +108,42 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     createWiggleAnimation(this);
 
+    this.abilities = dataUnit.abilities.map((ability: any, index: number) => {
+      const icon = scene.add.image(0, 0, ability.data.name.toLowerCase().replace(/\s/g, "_"));
+      const abilityContainer = scene.add.container(0, 99);
+
+      // icon.setScale(0.5, 1);
+      abilityContainer.add(icon);
+
+      const background = scene.add.graphics();
+
+      background.fillStyle(0x1f1f1f, 1);
+      background.fillRect(0, 0, 32, 32);
+
+      background.generateTexture("ability_overlay", icon.width, icon.height);
+      background.destroy();
+
+      const overlay = scene.add
+        .image((icon.width / 2) * -1, icon.height / 2, "ability_overlay")
+        .setTint(0x000000)
+        .setAlpha(0.6);
+      overlay.setOrigin(0, 1);
+      // overlay.setScale(1, 0.5);
+
+      abilityContainer.add(overlay);
+
+      abilityContainer.setDepth(1);
+
+      abilityContainer.setPosition((icon.width + 4) * index, 99);
+
+      this.add(abilityContainer);
+
+      return {
+        icon,
+        iconOverlay: overlay,
+      };
+    });
+
     scene.add.existing(this);
   }
 
@@ -147,7 +190,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }
 
       const onFinishAnimation = () => {
-        // this.fillApBar(event.payload.stats.ap);
+        // this.createAbilityOverlayTween(event.payload.stats.ap);
         if (onEnd) onEnd();
       };
       const onImpactPoint = () => {
@@ -185,7 +228,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           if (onEnd) onEnd();
         };
         const onImpactPoint = () => {
-          this.fillSpBar(0);
           const receiveHealEvent = event.subEvents?.find((e) => e.type === "RECEIVED_HEAL") as StepEvent;
           target?.playEvent({ event: receiveHealEvent });
         };
@@ -210,7 +252,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           if (onEnd) onEnd();
         };
         const onImpactPoint = () => {
-          this.fillSpBar(0);
           const receiveDamageEvents = targets?.map(
             (target) =>
               event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE" && e.actorId === target.id) as StepEvent
@@ -245,7 +286,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           if (onEnd) onEnd();
         };
         const onImpactPoint = () => {
-          this.fillSpBar(0);
           const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
           target?.playEvent({ event: receiveDamageEvent });
         };
@@ -259,8 +299,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
         this.currentAnimation = headCrushAnimation;
       }
-
-      this.fillSpBar(0);
     }
 
     // todo: combine logic of receive damage and heal
@@ -341,49 +379,32 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
   }
 
-  public fillApBar(currentAp: number, fromResume?: boolean) {
-    /*const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
-
-    const willNeedOneLessStep = (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >= 1000;
-
-    const stepsToAttack = stepsToAttackFromZeroAP - (willNeedOneLessStep ? 1 : 0);
-
-    const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
-
-    const duration = timeToAttack;
-     if (fromResume) {
-      if (this.apBarTween) {
-        duration = this.apBarTween.duration - this.apBarTween.elapsed;
-      }
-    } else {
-      duration = timeToAttack;
-    } */
-    /* this.apBarTween = this.scene.tweens.add({
-      targets: this.apBar,
-      width: { from: 0, to: BAR_WIDTH },
-      duration: duration,
-      ease: "Linear",
-    }); */
-  }
-
-  public fillSpBar(currentSp: number) {
-    /*const newSpBarWidth = Math.min((currentSp * BAR_WIDTH) / 1000, BAR_WIDTH);
-
-    this.spBar.width = newSpBarWidth;
-
-     this.spBarTween = this.scene.tweens.add({
-      targets: this.spBar,
-      width: newSpBarWidth,
-      duration: 50,
-      ease: "Linear",
-      onComplete: () => {
-        this.spBarTween = null as any;
-      },
-    }); */
+  public createAbilityOverlayTween() {
+    this.abilities.forEach((ability: any, index: number) => {
+      ability.iconTween = this.scene.tweens.add({
+        targets: ability.iconOverlay,
+        scaleY: { from: 1, to: 0 },
+        duration: GAME_LOOP_SPEED * this.dataUnit.abilities[index].cooldown,
+        ease: "Linear",
+        repeat: -1,
+        /* onRepeat: () => {
+          ability.icon.preFX?.addShine(2);
+          this.scene.time.delayedCall(500, () => {
+            ability.icon.preFX?.destroy();
+          });
+          this.scene.tweens.add({
+            targets: ability.icon,
+            scale: 1.2,
+            yoyo: true,
+            duration: 200,
+          });
+        }, */
+      });
+    });
   }
 
   public onStart() {
-    this.fillApBar(0);
+    this.createAbilityOverlayTween();
   }
 
   public resumeAnimations() {
@@ -396,15 +417,19 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.currentAnimation.pause();
     }
   }
-  public resumeApBar() {
-    if (this.apBarTween && this.apBarTween.isPaused()) {
-      this.apBarTween.resume();
-    }
+  public resumeSkillCooldown() {
+    this.abilities.forEach((ability) => {
+      if (ability.iconTween && ability.iconTween.isPaused()) {
+        ability.iconTween.resume();
+      }
+    });
   }
 
-  public pauseApBar() {
-    if (this.apBarTween && this.apBarTween.isPlaying()) {
-      this.apBarTween.pause();
-    }
+  public pauseSkillCooldown() {
+    this.abilities.forEach((ability) => {
+      if (ability.iconTween && ability.iconTween.isPlaying()) {
+        ability.iconTween.pause();
+      }
+    });
   }
 }

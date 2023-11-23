@@ -212,23 +212,13 @@ export function setupUnitPointerEvents(unit: BattleUnit) {
   });
 }
 
-export function getUnitPos(position, owner) {
-  const UNIT_OFFSET = {
-    x: 75,
-    y: 60,
-    tile: 109,
-    yOffset: -35,
-  };
-  const getUnitPosX = () => {
-    let tileOffset;
-    if (position === 0 || position === 3) tileOffset = 0;
-    else if (position === 1 || position === 4) tileOffset = 1;
-    else tileOffset = 2;
-    return (UNIT_OFFSET.x + UNIT_OFFSET.tile * tileOffset) * (owner ? 1 : -1);
-  };
-  const getUnitPosY = () => {
-    const isTop = position === 0 || position === 1 || position === 2 ? true : false;
-    return UNIT_OFFSET.y * (isTop ? -1 : 1) + UNIT_OFFSET.yOffset;
-  };
-  return { x: getUnitPosX(), y: getUnitPosY() };
+export function getUnitPos(position, owner, tiles: Phaser.GameObjects.Sprite[]) {
+  const heightOffset = -35;
+
+  const tileId = position + 6 * owner;
+
+  const x = tiles[tileId].x;
+  const y = tiles[tileId].y + heightOffset;
+
+  return { x, y };
 }

@@ -50,7 +50,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public glow: Phaser.FX.Glow | undefined;
 
   constructor(scene: Phaser.Scene, dataUnit: any) {
-    const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
+    const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner, scene["tiles"]);
 
     super(scene, x, y);
     this.startingX = x;

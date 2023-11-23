@@ -1,5 +1,6 @@
 export function loadCurrentAssets(scene: Phaser.Scene) {
-  scene.load.image("board", "assets/board3.png");
+  scene.load.image("board", "assets/board/board4.png");
+  scene.load.image("floor", "assets/board/floor.png");
   scene.load.image("castle", "assets/castle.png");
 
   scene.load.spritesheet("warrior", "assets/Warrior.png", {

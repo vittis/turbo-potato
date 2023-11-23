@@ -40,6 +40,7 @@ export class Battle extends Phaser.Scene {
   firstStep: any;
   totalSteps = -1;
   board!: Phaser.GameObjects.Container;
+  tiles!: Phaser.GameObjects.Sprite[];
   units: BattleUnit[] = [];
   eventHistory: StepEvent[] = [];
   timeEventsHistory: Phaser.Time.TimerEvent[] = [];
@@ -70,8 +71,9 @@ export class Battle extends Phaser.Scene {
 
     setupUnitAnimations(this);
 
-    const { board } = setupBattle(this);
+    const { board, tiles } = setupBattle(this);
     this.board = board;
+    this.tiles = tiles;
     // board.add(this.text);
 
     queryClient

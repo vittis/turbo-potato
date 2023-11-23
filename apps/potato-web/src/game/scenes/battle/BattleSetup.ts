@@ -7,9 +7,12 @@ export function preloadBattle(scene: Phaser.Scene) {
 
 export function setupBattle(scene: Phaser.Scene) {
   const boardImage = scene.add.image(0, 0, "board");
-  const castle = scene.add.image(0, -230, "castle");
+  boardImage.setScale(1.4);
+  const castle = scene.add.image(0, -300, "castle");
+  castle.setScale(1.2);
 
   const trees = addTrees(scene);
+  const tiles = addTiles(scene);
 
   const board = scene.add.container(
     scene.cameras.main.centerX,
@@ -17,7 +20,7 @@ export function setupBattle(scene: Phaser.Scene) {
     -280
   );
 
-  board.add([boardImage, castle, ...trees]);
+  board.add([boardImage, castle, ...trees, ...tiles]);
   // scene.board = board;
 
   scene.tweens.add({
@@ -27,18 +30,18 @@ export function setupBattle(scene: Phaser.Scene) {
     ease: Phaser.Math.Easing.Cubic.Out,
   });
 
-  return { board };
+  return { board, tiles };
 }
 
 function addTrees(scene: Phaser.Scene) {
-  const tree = scene.add.sprite(295, -220, "tree");
-  const tree2 = scene.add.sprite(350, -200, "tree");
-  const tree3 = scene.add.sprite(-295, -220, "tree");
-  const tree4 = scene.add.sprite(-350, -200, "tree");
-  tree.setScale(1.25);
-  tree2.setScale(1.25);
-  tree3.setScale(1.25);
-  tree4.setScale(1.25);
+  const tree = scene.add.sprite(395, -330, "tree");
+  const tree2 = scene.add.sprite(450, -300, "tree");
+  const tree3 = scene.add.sprite(-395, -330, "tree");
+  const tree4 = scene.add.sprite(-450, -300, "tree");
+  tree.setScale(1.45);
+  tree2.setScale(1.45);
+  tree3.setScale(1.45);
+  tree4.setScale(1.45);
 
   scene.anims.create({
     key: "tree_idle",
@@ -60,4 +63,32 @@ function addTrees(scene: Phaser.Scene) {
   });
 
   return [tree, tree2, tree3, tree4];
+}
+
+function addTiles(scene: Phaser.Scene) {
+  const widthFromCenter = 130;
+  const heightFromCenter = -40;
+  const widthBetweenTiles = 60;
+  const heightBetweenTiles = 60;
+  const scale = 1.2;
+
+  function generateTiles(team: number) {
+    const tiles: Phaser.GameObjects.Sprite[] = [];
+
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 3; col++) {
+        const tile = scene.add.sprite(0, 0, "floor");
+        tile.x = (col * (widthBetweenTiles + tile.width) + widthFromCenter) * (team ? -1 : 1);
+        tile.y = row * (heightBetweenTiles + tile.height) + heightFromCenter;
+        tile.scale = scale;
+        tiles.push(tile);
+      }
+    }
+
+    return tiles;
+  }
+
+  const tileset: Phaser.GameObjects.Sprite[] = [...generateTiles(1), ...generateTiles(0)];
+
+  return tileset;
 }

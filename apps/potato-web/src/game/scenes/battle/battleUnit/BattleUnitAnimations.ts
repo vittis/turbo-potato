@@ -56,7 +56,7 @@ export function createAttackAnimation({
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 45 : -45;
 
   const attackTweenChain = unit.scene.tweens.chain({
-    delay: 45 * animationSpeed,
+    delay: 200 * animationSpeed,
     targets: unit,
     onComplete: () => {
       unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);

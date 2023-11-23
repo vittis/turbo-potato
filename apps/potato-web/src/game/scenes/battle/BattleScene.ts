@@ -33,7 +33,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 75;
+export const GAME_LOOP_SPEED = 50;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -160,13 +160,23 @@ export class Battle extends Phaser.Scene {
       const targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
 
       let onEnd;
+      let onStart;
       if (event.type === "USE_ABILITY") {
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
         this.pauseTimeEvents();
         onEnd = () => {
+          this.units.forEach((unit) => {
+            unit.restoreAbilities();
+          });
           onEndAnimation();
+        };
+        onStart = () => {
+          this.units.forEach((unit) => {
+            if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) return;
+            unit.unhighlightAbilities();
+          });
         };
       }
 
@@ -191,7 +201,7 @@ export class Battle extends Phaser.Scene {
         };
       }
 
-      eventPile.push({ unit, event, targets, onEnd });
+      eventPile.push({ unit, event, targets, onEnd, onStart });
     });
     const unit: BattleUnit = eventPile[0].unit;
     unit.playEvent(eventPile[0]);

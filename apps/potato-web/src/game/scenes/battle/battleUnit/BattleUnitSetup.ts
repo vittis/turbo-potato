@@ -113,7 +113,7 @@ export function createBars(unit: BattleUnit) {
 }
 
 export function createTexts(unit: BattleUnit, x: number, y: number) {
-  const hpText = unit.scene.add.text(x + 12, y + 48, "0", {
+  const hpText = unit.scene.add.text(x + 12, y + 55, "0", {
     fontSize: "18px",
     color: "#ff121d",
     fontFamily: "IM Fell DW Pica",
@@ -128,7 +128,7 @@ export function createTexts(unit: BattleUnit, x: number, y: number) {
       stroke: true,
     },
   });
-  const shieldText = unit.scene.add.text(x + 42, y + 48, "0", {
+  const shieldText = unit.scene.add.text(x + 42, y + 55, "0", {
     fontSize: "18px",
     color: "#a7a7a7",
     fontFamily: "IM Fell DW Pica",

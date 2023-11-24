@@ -46,7 +46,7 @@ export class Game {
       POSITION.TOP_BACK,
       this.boardManager
     );
-    unit3.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+    unit3.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
     unit3.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit3.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit3.setClass(new Class(Classes.Ranger));

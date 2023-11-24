@@ -49,26 +49,53 @@ export class Game {
     unit3.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
     unit3.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit3.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+    unit3.setClass(new Class(Classes.Ranger));
 
     const unit4 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
     unit4.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
     unit4.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit4.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
-    const unit5 = new Unit(
-      OWNER.TEAM_TWO,
-      POSITION.BOT_FRONT,
-      this.boardManager
-    );
+    const unit5 = new Unit(OWNER.TEAM_TWO, POSITION.BOT_MID, this.boardManager);
     unit5.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
     unit5.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit5.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
+    const unit6 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.BOT_FRONT,
+      this.boardManager
+    );
+    unit6.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit6.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit6.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
+    const unit7 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    unit7.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit7.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit7.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
+    const unit8 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.BOT_FRONT,
+      this.boardManager
+    );
+    unit8.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit8.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit8.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
     this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);
-    /* this.boardManager.addToBoard(unit3);
+    this.boardManager.addToBoard(unit3);
     this.boardManager.addToBoard(unit4);
-    this.boardManager.addToBoard(unit5); */
+    this.boardManager.addToBoard(unit5);
+    this.boardManager.addToBoard(unit6);
+    this.boardManager.addToBoard(unit7);
+    this.boardManager.addToBoard(unit8);
   }
 
   startGame() {

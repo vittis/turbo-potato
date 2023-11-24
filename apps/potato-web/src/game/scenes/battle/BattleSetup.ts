@@ -7,7 +7,7 @@ export function preloadBattle(scene: Phaser.Scene) {
 
 export function setupBattle(scene: Phaser.Scene) {
   const boardImage = scene.add.image(0, 0, "board");
-  boardImage.setScale(1.4);
+  boardImage.setScale(1.3);
   const castle = scene.add.image(0, -300, "castle");
   castle.setScale(1.2);
 
@@ -67,9 +67,9 @@ function addTrees(scene: Phaser.Scene) {
 
 function addTiles(scene: Phaser.Scene) {
   const widthFromCenter = 130;
-  const heightFromCenter = -40;
+  const heightFromCenter = -80;
   const widthBetweenTiles = 60;
-  const heightBetweenTiles = 60;
+  const heightBetweenTiles = 100;
   const scale = 1.2;
 
   function generateTiles(team: number) {

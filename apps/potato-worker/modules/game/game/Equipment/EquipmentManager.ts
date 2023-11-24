@@ -16,7 +16,7 @@ export class EquipmentManager {
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
     const isSlotOccupied = this.equips.find((e) => e.slot === slot);
     if (isSlotOccupied) {
-      throw Error("ALREADY EQUIPPED THIS SLOT MAN");
+      throw Error("ALREADY EQUIPPED THIS SLOT MAN: " + slot + equip.data.name);
     }
     const item = {
       slot,

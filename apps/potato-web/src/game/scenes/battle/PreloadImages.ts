@@ -23,6 +23,11 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
 }
 
 export function loadAssets(scene: Phaser.Scene) {
+  scene.load.image("vulnerable", "assets/status_effects/vulnerable.png");
+  scene.load.image("fast", "assets/status_effects/fast.png");
+  scene.load.image("focus", "assets/status_effects/focus.png");
+  scene.load.image("attack_power", "assets/status_effects/attack_power.png");
+
   scene.load.image("thrust", "assets/abilities/thrust.png");
   scene.load.image("disarming_shot", "assets/abilities/disarming_shot.png");
   scene.load.image("slash", "assets/abilities/slash.png");

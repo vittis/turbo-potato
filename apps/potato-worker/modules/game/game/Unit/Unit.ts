@@ -17,6 +17,7 @@ import { PerkManager } from "../Perk/PerkManager";
 import { StatsManager } from "../Stats/StatsManager";
 import { UnitStats } from "../Stats/StatsTypes";
 import { StatusEffectManager } from "../StatusEffect/StatusEffectManager";
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 // use for better perfomance
 /* export enum EVENT_TYPE {
@@ -52,7 +53,7 @@ export class Unit {
   private classManager: ClassManager;
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
-  private statusEffectManager: StatusEffectManager;
+  public statusEffectManager: StatusEffectManager;
 
   get stats() {
     return this.statsManager.getStats();
@@ -161,6 +162,7 @@ export class Unit {
       abilities: this.abilities,
       equipment: this.equipment,
       position: this.position,
+      statusEffects: [...this.statusEffects],
     };
   }
 
@@ -207,6 +209,10 @@ export class Unit {
           const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
           target.statusEffectManager.applyStatusEffect(
             subEvent.payload.payload
+          );
+
+          target.statsManager.recalculateStatsFromStatusEffects(
+            target.statusEffects
           );
         }
       });
@@ -260,6 +266,10 @@ export class Unit {
     }
 
     this.stats = { ...this.stats, hp: newHp, shield: newShield };
+
+    // this.statusEffectManager.removeStacks(STATUS_EFFECT.VULNERABLE, 5); // todo dont hardcode 5
+
+    this.statsManager.recalculateStatsFromStatusEffects(this.statusEffects);
   }
 
   /* receiveDamage(damage: number) {

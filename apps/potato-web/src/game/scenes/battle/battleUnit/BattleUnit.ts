@@ -22,6 +22,14 @@ interface Ability {
   shineFX: Phaser.FX.Shine | undefined;
 }
 
+interface StatusEffect {
+  name: string;
+  quantity: number;
+  container: Phaser.GameObjects.Container;
+  icon: Phaser.GameObjects.Image;
+  text: Phaser.GameObjects.Text;
+}
+
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public battleUnitSprite!: BattleUnitSprite;
@@ -45,6 +53,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public spBarTween!: Phaser.Tweens.Tween;
 
   public abilities = [] as Ability[];
+
+  public statusEffects = [] as StatusEffect[];
 
   public isDead = false;
   public startingX;
@@ -112,6 +122,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.add(this.sprite);
 
     createWiggleAnimation(this);
+
+    /* this.addStatusEffect({ name: "vulnerable", quantity: 10 });
+    this.removeStatusEffect({ name: "fast", quantity: 10 }); */
 
     this.abilities = dataUnit.abilities.map((ability: any, index: number) => {
       const abilityContainer = scene.add.container(0, 0);
@@ -229,6 +242,15 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         if (receiveDamageEvent) {
           target.playEvent({ event: receiveDamageEvent });
         }
+
+        const statusEffectEvents = event.payload.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+        ) as StepEvent[];
+        if (statusEffectEvents.length > 0) {
+          statusEffectEvents.forEach((statusEffectEvent) => {
+            target.playEvent({ event: statusEffectEvent });
+          });
+        }
       };
 
       onStartAnimation();
@@ -244,6 +266,13 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "DAMAGE") {
       onReceiveDamage(this, event);
+      // temporary
+
+      // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
+    }
+
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {
+      this.addStatusEffect({ name: event.payload.payload.name, quantity: event.payload.payload.quantity });
       // temporary
 
       // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
@@ -485,6 +514,77 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       if (ability.tween && ability.tween.isPlaying()) {
         ability.tween.pause();
       }
+    });
+  }
+
+  public addStatusEffect({ name, quantity }: any) {
+    const statusEffectAlreadyExists = this.statusEffects.find((statusEffect) => statusEffect.name === name);
+
+    if (statusEffectAlreadyExists) {
+      statusEffectAlreadyExists.quantity += quantity;
+      statusEffectAlreadyExists.text.setText(`${statusEffectAlreadyExists.quantity}`);
+      return;
+    }
+
+    const statusEffectContainer = this.scene.add.container(
+      this.dataUnit.owner === 0 ? -60 : 44,
+      -10 + this.statusEffects.length * 25
+    );
+
+    const statusEffect = this.scene.add.image(0, 0, name.toLowerCase().replace(/\s/g, "_"));
+
+    statusEffect.scale = 0.3;
+
+    statusEffectContainer.add(statusEffect);
+
+    const statusEffectText = this.scene.add.text(10, -13, quantity, {
+      fontSize: "18px",
+      color: "#fff",
+      fontFamily: "IM Fell DW Pica",
+      stroke: "#000000",
+      strokeThickness: 2,
+      fontStyle: "bold",
+      shadow: {
+        offsetX: 0,
+        offsetY: 1,
+        color: "#000",
+        blur: 0,
+        stroke: true,
+      },
+    });
+
+    statusEffectContainer.add(statusEffectText);
+
+    this.add(statusEffectContainer);
+
+    this.statusEffects.push({
+      name,
+      quantity,
+      container: statusEffectContainer,
+      icon: statusEffect,
+      text: statusEffectText,
+    });
+  }
+
+  public removeStatusEffect({ name, quantity }: any) {
+    const statusEffectToRemove = this.statusEffects.find((statusEffect) => statusEffect.name === name);
+
+    if (!statusEffectToRemove) return;
+
+    statusEffectToRemove.quantity -= quantity;
+
+    if (statusEffectToRemove.quantity <= 0) {
+      statusEffectToRemove.container.destroy();
+      this.statusEffects = this.statusEffects.filter((statusEffect) => statusEffect.name !== name);
+      this.repositionStatusEffect();
+    } else {
+      statusEffectToRemove.text.setText(`${statusEffectToRemove.quantity}`);
+    }
+  }
+
+  public repositionStatusEffect() {
+    this.statusEffects.forEach((statusEffect, index) => {
+      statusEffect.container.setPosition(this.dataUnit.owner === 0 ? -60 : 44, -10 + index * 25);
     });
   }
 }

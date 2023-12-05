@@ -12,12 +12,17 @@ export class StatusEffectManager {
   applyStatusEffect(statusEffect: ActiveStatusEffect) {
     const alreadyHasStatusEffect = this.hasStatusEffect(statusEffect.name);
     if (alreadyHasStatusEffect) {
-      const index = this._activeStatusEffects.findIndex(
-        (statusEffect) => statusEffect.name === statusEffect.name
-      );
-      this._activeStatusEffects[index].quantity += statusEffect.quantity;
+      this._activeStatusEffects = this._activeStatusEffects.map((effect) => {
+        if (effect.name === statusEffect.name) {
+          return {
+            ...effect,
+            quantity: effect.quantity + statusEffect.quantity,
+          };
+        }
+        return effect;
+      });
     } else {
-      this._activeStatusEffects.push(statusEffect);
+      this._activeStatusEffects = [...this._activeStatusEffects, statusEffect];
     }
   }
 
@@ -27,20 +32,22 @@ export class StatusEffectManager {
     );
   }
 
-  removeOneStack(name: STATUS_EFFECT) {
-    const index = this._activeStatusEffects.findIndex(
-      (statusEffect) => statusEffect.name === name
+  removeStacks(name: STATUS_EFFECT, quantity: number) {
+    this._activeStatusEffects = this._activeStatusEffects.reduce(
+      (acc, effect) => {
+        if (effect.name === name) {
+          return [
+            ...acc,
+            {
+              ...effect,
+              quantity: Math.max(0, effect.quantity - quantity),
+            },
+          ];
+        }
+        return [...acc, effect];
+      },
+      [] as ActiveStatusEffect[]
     );
-    if (index === -1) {
-      return;
-    }
-
-    const statusEffect = this._activeStatusEffects[index];
-    if (statusEffect.quantity === 1) {
-      this._activeStatusEffects.splice(index, 1);
-    } else {
-      this._activeStatusEffects[index].quantity -= 1;
-    }
   }
 
   removeAllStacks(name: STATUS_EFFECT) {

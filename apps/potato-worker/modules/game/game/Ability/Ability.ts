@@ -10,6 +10,7 @@ import {
 } from "../Event/EventTypes";
 import { TRIGGER_EFFECT_TYPE } from "../Perk/PerkTypes";
 import { TRIGGER } from "../Trigger/TriggerTypes";
+import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 export class Ability {
   data: AbilityData;
@@ -37,14 +38,39 @@ export class Ability {
   use(unit: Unit): UseAbilityEvent {
     const targets = this.getTargets(unit);
 
+    const statusSubEvents: UseAbilitySubEvent[] = [];
+
+    const targetHasVulnerable = targets[0].statusEffects.some(
+      (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+    );
+    if (targetHasVulnerable) {
+      const vulnerableLoss = 5;
+      targets[0].statusEffectManager.removeStacks(
+        STATUS_EFFECT.VULNERABLE,
+        vulnerableLoss
+      );
+
+      statusSubEvents.push({
+        type: SUBEVENT_TYPE.INSTANT_EFFECT,
+        payload: {
+          type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+          targetsId: [targets[0].id], // todo move effect target logic somewhere else
+          payload: {
+            name: STATUS_EFFECT.VULNERABLE,
+            quantity: -vulnerableLoss,
+          },
+        },
+      });
+    }
+
     const onHitGrantStatusEffects = this.data.effects.filter(
       (effect) =>
         effect.trigger === TRIGGER.ON_HIT &&
         effect.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT
     );
 
-    const statusSubEvents: UseAbilitySubEvent[] = onHitGrantStatusEffects.map(
-      (effect) => {
+    const onHitStatusSubEvents: UseAbilitySubEvent[] =
+      onHitGrantStatusEffects.map((effect) => {
         return {
           type: SUBEVENT_TYPE.INSTANT_EFFECT,
           payload: {
@@ -56,8 +82,7 @@ export class Ability {
             },
           },
         };
-      }
-    );
+      });
 
     const damage =
       this.data.baseDamage +
@@ -88,6 +113,7 @@ export class Ability {
               },
             },
           },
+          ...onHitStatusSubEvents,
           ...statusSubEvents,
         ],
       },

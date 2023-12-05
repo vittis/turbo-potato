@@ -21,7 +21,7 @@
       "type": "GRANT_BASE_STAT",
       "payload": {
         "stat": "ATTACK_DAMAGE",
-        "value": 10
+        "value": 0
       }
     },
     {

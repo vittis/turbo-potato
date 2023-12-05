@@ -1,15 +1,22 @@
 import { MOD_TYPE, Mod } from "../Mods/ModsTypes";
+import {
+  ActiveStatusEffect,
+  STATUS_EFFECT,
+} from "../StatusEffect/StatusEffectTypes";
 import { STAT, UnitStats } from "./StatsTypes";
 
 type StatsFromMods = Omit<UnitStats, "hp">;
+type StatsFromStatusEffects = Omit<UnitStats, "hp" | "shield" | "maxHp">;
 
 export class StatsManager {
   private stats!: UnitStats;
   private statsFromMods!: StatsFromMods;
   private activeMods: Mod<MOD_TYPE.GRANT_BASE_STAT>[] = [];
+  private statsFromStatusEffects!: StatsFromStatusEffects;
 
   constructor() {
     this.resetStatsFromMods();
+    this.resetStatsFromStatusEffects();
   }
 
   initializeStats(stats: UnitStats) {
@@ -22,12 +29,26 @@ export class StatsManager {
   }
 
   // todo better stats management. better merge from all sources
-  getStats() {
+  getStats(): UnitStats {
     return {
-      ...this.stats,
-      ...this.statsFromMods,
-      maxHp: this.stats.maxHp,
+      maxHp: this.stats.maxHp + this.statsFromMods.maxHp,
       hp: this.stats.hp,
+      shield: this.statsFromMods.shield,
+      attackDamageModifier:
+        this.statsFromMods.attackDamageModifier +
+        this.statsFromStatusEffects.attackDamageModifier,
+      attackCooldownModifier:
+        this.statsFromStatusEffects.attackCooldownModifier +
+        this.statsFromMods.attackCooldownModifier,
+      spellDamageModifier:
+        this.statsFromMods.spellDamageModifier +
+        this.statsFromStatusEffects.spellDamageModifier,
+      spellCooldownModifier:
+        this.statsFromMods.spellCooldownModifier +
+        this.statsFromStatusEffects.spellCooldownModifier,
+      damageReductionModifier:
+        this.statsFromMods.damageReductionModifier +
+        this.statsFromStatusEffects.damageReductionModifier,
     };
   }
 
@@ -39,8 +60,33 @@ export class StatsManager {
     return this.statsFromMods;
   }
 
+  getStatsFromStatusEffects() {
+    return this.statsFromStatusEffects;
+  }
+
+  recalculateStatsFromStatusEffects(activeStatusEffects: ActiveStatusEffect[]) {
+    activeStatusEffects.forEach((statusEffect) => {
+      switch (statusEffect.name) {
+        case STATUS_EFFECT.VULNERABLE:
+          this.statsFromStatusEffects.damageReductionModifier =
+            statusEffect.quantity * -1;
+          break;
+      }
+    });
+  }
+
   getActiveMods() {
     return this.activeMods;
+  }
+
+  resetStatsFromStatusEffects() {
+    this.statsFromStatusEffects = {
+      attackCooldownModifier: 0,
+      attackDamageModifier: 0,
+      spellCooldownModifier: 0,
+      spellDamageModifier: 0,
+      damageReductionModifier: 0,
+    };
   }
 
   resetStatsFromMods() {

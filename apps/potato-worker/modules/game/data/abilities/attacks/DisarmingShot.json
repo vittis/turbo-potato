@@ -3,8 +3,8 @@
   "type": "ATTACK",
   "tags": [],
   "target": "STANDARD",
-  "baseDamage": 40,
-  "cooldown": 120,
+  "baseDamage": 20,
+  "cooldown": 60,
   "effects": [
     {
       "type": "GRANT_STATUS_EFFECT",
@@ -13,7 +13,7 @@
       "payload": [
         {
           "name": "VULNERABLE",
-          "quantity": 5
+          "quantity": 15
         }
       ]
     }

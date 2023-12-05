@@ -1,6 +1,6 @@
 {
   "name": "Thrust",
-  "type": "SPELL",
+  "type": "ATTACK",
   "tags": [
     "WEAPON_ABILITY"
   ],

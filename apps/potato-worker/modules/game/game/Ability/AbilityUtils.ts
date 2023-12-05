@@ -1,7 +1,7 @@
 import { MOD_TYPE, Mod, PossibleMods } from "../Mods/ModsTypes";
 import { filterModsByType } from "../Mods/ModsUtils";
+import { Attacks } from "../data";
 import { Ability } from "./Ability";
-import Attacks from "../data/attacks";
 import { AbilityData } from "./AbilityTypes";
 
 export const AbilityDataMap: { [key: string]: AbilityData } = {
@@ -20,6 +20,11 @@ export function getAbilitiesInstancesFromMods(mods: PossibleMods) {
   return abilityMods.map((mod) => {
     const name = mod.payload.name;
     const nameWithoutSpaces = name.replace(/\s/g, "");
+    if (!AbilityDataMap[nameWithoutSpaces]) {
+      throw Error(
+        `Could not find ability ${name}. Make sure it's defined in AbilityDataMap. If running from a test make sure that it is mocked.`
+      );
+    }
     return new Ability(AbilityDataMap[nameWithoutSpaces]);
   });
 }

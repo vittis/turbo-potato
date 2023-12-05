@@ -3,7 +3,6 @@ import { AbilityManager } from "../Ability/AbilityManager";
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Class } from "../Class/Class";
 import { ClassManager } from "../Class/ClassManager";
-import { Multipliers } from "../data/config";
 import { Equipment } from "../Equipment/Equipment";
 import { EquipmentManager } from "../Equipment/EquipmentManager";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";

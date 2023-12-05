@@ -1,7 +1,7 @@
 import { Class } from "./Class";
-import Classes from "../data/classes";
 import { Unit } from "../Unit/Unit";
 import { OWNER, POSITION } from "../BoardManager";
+import { Classes } from "../data";
 
 describe("Class", () => {
   test("should create", () => {

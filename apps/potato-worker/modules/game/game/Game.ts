@@ -1,17 +1,12 @@
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Unit } from "./Unit/Unit";
-
-import Races from "./data/races";
-import Classes from "./data/classes";
-import Weapons from "./data/weapons";
-import Chests from "./data/chests";
-import Heads from "./data/heads";
-
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
 import { EVENT_TYPE } from "./Event/EventTypes";
 import { sortAndExecuteEvents } from "./Event/EventUtils";
 import { Class } from "./Class/Class";
+import { Classes, Weapons, Chests, Heads } from "./data";
+
 export class Game {
   boardManager: BoardManager;
 
@@ -413,7 +408,6 @@ BOWS T3:
 
 ITEMS:
     Gain X Ranged Proficiency
-
 
     Longsword TBlueprint
     Sem Mods

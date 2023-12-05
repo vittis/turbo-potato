@@ -6,7 +6,7 @@ import {
   UseAbilityEvent,
 } from "../../Event/EventTypes";
 import { Unit } from "../../Unit/Unit";
-import Attacks from "../../data/attacks";
+import { Attacks } from "../../data";
 import { Ability } from "../Ability";
 
 export class Slash extends Ability {

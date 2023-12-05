@@ -8,7 +8,7 @@ import {
 import { TRIGGER_EFFECT_TYPE } from "../../Perk/PerkTypes";
 import { TRIGGER } from "../../Trigger/TriggerTypes";
 import { Unit } from "../../Unit/Unit";
-import Attacks from "../../data/attacks";
+import { Attacks } from "../../data";
 import { Ability } from "../Ability";
 
 // todo do we really need one file for every attack/ability?

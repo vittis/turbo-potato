@@ -4,10 +4,8 @@ import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
 import { runGame } from "../Game";
-import Chests from "../data/chests";
+import { Weapons, Chests, Heads } from "../data";
 import classes from "../data/classes";
-import Heads from "../data/heads";
-import Weapons from "../data/weapons";
 import { Unit } from "./Unit";
 
 describe("Unit", () => {

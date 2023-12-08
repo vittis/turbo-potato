@@ -1,7 +1,9 @@
 {
   "name": "Disarming Shot",
   "type": "ATTACK",
-  "tags": [],
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
   "target": "STANDARD",
   "baseDamage": 20,
   "cooldown": 60,

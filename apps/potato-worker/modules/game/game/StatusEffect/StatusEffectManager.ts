@@ -36,11 +36,15 @@ export class StatusEffectManager {
     this._activeStatusEffects = this._activeStatusEffects.reduce(
       (acc, effect) => {
         if (effect.name === name) {
+          const finalQuantity = Math.max(0, effect.quantity - quantity);
+          if (finalQuantity === 0) {
+            return acc;
+          }
           return [
             ...acc,
             {
               ...effect,
-              quantity: Math.max(0, effect.quantity - quantity),
+              quantity: finalQuantity,
             },
           ];
         }

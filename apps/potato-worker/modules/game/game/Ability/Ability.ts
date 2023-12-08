@@ -12,6 +12,8 @@ import { TRIGGER_EFFECT_TYPE } from "../Perk/PerkTypes";
 import { TRIGGER } from "../Trigger/TriggerTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
+export const VULNERABLE_LOSS_PER_HIT = 5; // todo put in json? (data/config/statusEffects.json)
+
 export class Ability {
   data: AbilityData;
   progress = 0;
@@ -43,21 +45,20 @@ export class Ability {
     const targetHasVulnerable = targets[0].statusEffects.some(
       (effect) => effect.name === STATUS_EFFECT.VULNERABLE
     );
+
     if (targetHasVulnerable) {
-      const vulnerableLoss = 5;
-      targets[0].statusEffectManager.removeStacks(
-        STATUS_EFFECT.VULNERABLE,
-        vulnerableLoss
-      );
+      const vulnerableQuantity = targets[0].statusEffects.find(
+        (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+      )?.quantity as number;
 
       statusSubEvents.push({
         type: SUBEVENT_TYPE.INSTANT_EFFECT,
         payload: {
           type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-          targetsId: [targets[0].id], // todo move effect target logic somewhere else
+          targetsId: [targets[0].id], // todo not only [0]
           payload: {
             name: STATUS_EFFECT.VULNERABLE,
-            quantity: -vulnerableLoss,
+            quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
           },
         },
       });
@@ -77,7 +78,7 @@ export class Ability {
             type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
             targetsId: [unit.bm.getTarget(unit, effect.target)[0].id], // todo move effect target logic somewhere else
             payload: {
-              name: effect.payload[0].name,
+              name: effect.payload[0].name, // todo loop?
               quantity: effect.payload[0].quantity as number,
             },
           },

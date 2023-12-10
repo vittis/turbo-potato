@@ -20,6 +20,11 @@ export class Ability {
   cooldown = 0;
 
   constructor(data?: AbilityData) {
+    if (!data) {
+      throw Error(
+        "Ability is undefined. If running from test make sure it's defined in mock files"
+      );
+    }
     const parsedData = AbilityDataSchema.parse(data);
     this.data = parsedData;
     this.cooldown = parsedData.cooldown;

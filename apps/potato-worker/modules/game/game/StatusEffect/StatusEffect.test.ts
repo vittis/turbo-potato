@@ -108,7 +108,7 @@ describe("StatusEffect", () => {
     });
   });
 
-  describe("VULNERABLE", () => {
+  describe("VULNERABLE (Shortbow)", () => {
     test("should apply VULNERABLE status effect on hit", () => {
       const bm = new BoardManager();
       const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
@@ -116,7 +116,6 @@ describe("StatusEffect", () => {
       bm.addToBoard(unit1);
 
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      unit2.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
       bm.addToBoard(unit2);
 
       useAbility(unit1);
@@ -137,7 +136,6 @@ describe("StatusEffect", () => {
       bm.addToBoard(unit1);
 
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      unit2.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
       bm.addToBoard(unit2);
 
       useAbility(unit1);
@@ -153,7 +151,6 @@ describe("StatusEffect", () => {
       bm.addToBoard(unit1);
 
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      unit2.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
       bm.addToBoard(unit2);
 
       useAbility(unit1);
@@ -173,6 +170,28 @@ describe("StatusEffect", () => {
         {
           name: STATUS_EFFECT.VULNERABLE,
           quantity: 25, // 15 + 15 - 5
+        },
+      ]);
+    });
+  });
+
+  describe("ATTACK_POWER (Axe)", () => {
+    test("should apply ATTACK_POWER status effect on hit", () => {
+      const bm = new BoardManager();
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
+
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      bm.addToBoard(unit2);
+
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
+
+      expect(unit1.statusEffects).toEqual([
+        {
+          name: STATUS_EFFECT.ATTACK_POWER,
+          quantity: 10,
         },
       ]);
     });

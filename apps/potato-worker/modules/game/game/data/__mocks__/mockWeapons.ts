@@ -51,4 +51,16 @@ export const MockWeapons = {
       },
     ],
   } as EquipmentData,
+  Axe: {
+    name: "Axe",
+    allowedSlots: ["MAIN_HAND"],
+    mods: [
+      {
+        type: "GRANT_ABILITY",
+        payload: {
+          name: "Empowering Strike",
+        },
+      },
+    ],
+  } as EquipmentData,
 };

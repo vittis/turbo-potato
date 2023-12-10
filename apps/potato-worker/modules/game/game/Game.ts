@@ -19,7 +19,7 @@ export class Game {
       this.boardManager
     );
     // unit1.setClass(new Class(Classes.Ranger));
-    unit1.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
 
     unit1.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit1.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);

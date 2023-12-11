@@ -9,7 +9,7 @@ const PerkTierScaleSchema = z.object({
   values: z.array(z.number()),
 });
 
-export const PossibleTriggerEffectsSchema = z.array(
+export const TriggerEffectsSchema = z.array(
   z.object({
     type: z.literal(TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT),
     trigger: z.nativeEnum(TRIGGER),
@@ -27,5 +27,5 @@ export const PerkDataSchema = z.object({
   name: z.string(),
   type: z.nativeEnum(PERK_TYPE),
   tiers: z.array(PerkTierScaleSchema),
-  effects: PossibleTriggerEffectsSchema,
+  effects: TriggerEffectsSchema,
 }) satisfies z.ZodType<PerkData>;

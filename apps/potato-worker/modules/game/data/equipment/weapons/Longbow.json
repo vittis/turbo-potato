@@ -1,6 +1,8 @@
 {
   "name": "Longbow",
-  "allowedSlots": ["MAIN_HAND"],
+  "allowedSlots": [
+    "MAIN_HAND"
+  ],
   "mods": [
     {
       "type": "GRANT_ABILITY",
@@ -29,5 +31,6 @@
         "value": -10
       }
     }
-  ]
+  ],
+  "effects": []
 }

@@ -1,4 +1,12 @@
 import * as FocusedMind from "../../data/perks/FocusedMind.json";
 import { PerkData } from "../Perk/PerkTypes";
 
-export default { FocusedMind: FocusedMind as PerkData };
+type PerksMap = {
+  [key: string]: PerkData;
+};
+
+const Perks = {
+  FocusedMind: FocusedMind as PerkData,
+};
+
+export default Perks as typeof Perks & PerksMap;

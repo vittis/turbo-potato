@@ -1,12 +1,16 @@
 {
-  "name": "Disarming Shot",
-  "type": "ATTACK",
-  "tags": [
-    "WEAPON_ABILITY"
+  "name": "Axe",
+  "allowedSlots": [
+    "MAIN_HAND"
   ],
-  "target": "STANDARD",
-  "baseDamage": 20,
-  "cooldown": 60,
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Empowering Strike"
+      }
+    }
+  ],
   "effects": [
     {
       "type": "GRANT_STATUS_EFFECT",
@@ -15,7 +19,7 @@
       "payload": [
         {
           "name": "VULNERABLE",
-          "quantity": 15
+          "quantity": 20
         }
       ]
     }

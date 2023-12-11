@@ -1,32 +1,12 @@
-jest.mock("../data");
-
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
-import { Class } from "../Class/Class";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
-import { MOD_TYPE, Mod } from "../Mods/ModsTypes";
 import { Unit } from "../Unit/Unit";
-import { Classes, Weapons } from "../data";
+import { useAbility } from "../_tests_/testsUtils";
+import { Weapons } from "../data";
 import { StatusEffectManager } from "./StatusEffectManager";
 import { STATUS_EFFECT } from "./StatusEffectTypes";
-
-/* const modsMock: Mod<MOD_TYPE.GRANT_PERK>[] = [
-  {
-    type: MOD_TYPE.GRANT_BASE_STAT,
-    payload: {
-      stat: STAT.ATTACK_DAMAGE,
-      value: 5,
-    },
-  },
-  {
-    type: MOD_TYPE.GRANT_BASE_STAT,
-    payload: {
-      stat: STAT.DAMAGE_REDUCTION,
-      value: 10,
-    },
-  },
-]; */
 
 describe("StatusEffect", () => {
   describe("StatusEffectManager", () => {
@@ -128,72 +108,19 @@ describe("StatusEffect", () => {
     });
   });
 
-  describe("In battle", () => {
-    test("should apply status effect on hit", () => {
+  describe("VULNERABLE (Shortbow)", () => {
+    test("should apply VULNERABLE status effect on hit", () => {
       const bm = new BoardManager();
-      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
+
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      bm.addToBoard(unit);
       bm.addToBoard(unit2);
 
-      unit.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
 
-      expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.abilities).toHaveLength(1);
-
-      const ability = unit.abilities[0];
-
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-
-      // expect(ability.progress).toBe(0);
-      sortAndExecuteEvents(bm, unit.serializeEvents());
-
-      expect(unit2.stats.hp).not.toBe(unit2.stats.maxHp);
-      expect(unit2.statusEffects).toEqual([
-        {
-          name: STATUS_EFFECT.VULNERABLE,
-          quantity: 10,
-        },
-      ]);
-    });
-
-    test("should receive more damage when hit with vulnerable", () => {
-      const bm = new BoardManager();
-      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
-      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      bm.addToBoard(unit);
-      bm.addToBoard(unit2);
-
-      unit.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
-
-      expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.abilities).toHaveLength(1);
-
-      const ability = unit.abilities[0];
-
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-
-      sortAndExecuteEvents(bm, unit.serializeEvents());
-
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 40);
-      expect(unit2.statusEffects).toEqual([
-        {
-          name: STATUS_EFFECT.VULNERABLE,
-          quantity: 10,
-        },
-      ]);
-      expect(unit2.stats.damageReductionModifier).toBe(-10);
-
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-      sortAndExecuteEvents(bm, unit.serializeEvents());
-
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 40 - 44);
       expect(unit2.statusEffects).toEqual([
         {
           name: STATUS_EFFECT.VULNERABLE,
@@ -202,38 +129,32 @@ describe("StatusEffect", () => {
       ]);
     });
 
-    test.only("should work attacking multiple times", () => {
+    test("should modify damageReductionModifier when with VULNERABLE", () => {
       const bm = new BoardManager();
-      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
+
       const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      bm.addToBoard(unit);
       bm.addToBoard(unit2);
 
-      unit.equip(new Equipment(Weapons.ShortBow), EQUIPMENT_SLOT.MAIN_HAND);
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
 
-      expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
-      expect(unit.abilities).toHaveLength(1);
+      expect(unit2.stats.damageReductionModifier).toBe(-15);
+    });
 
-      const ability = unit.abilities[0];
+    test("should decrease VULNERABLE stacks when hit", () => {
+      const bm = new BoardManager();
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
 
-      expect(unit2.statusEffects).toEqual([]);
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      bm.addToBoard(unit2);
 
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-      sortAndExecuteEvents(bm, unit.serializeEvents());
-      expect(unit2.statusEffects).toEqual([
-        {
-          name: STATUS_EFFECT.VULNERABLE,
-          quantity: 10,
-        },
-      ]);
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 100);
-
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-      sortAndExecuteEvents(bm, unit.serializeEvents());
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
 
       expect(unit2.statusEffects).toEqual([
         {
@@ -241,33 +162,38 @@ describe("StatusEffect", () => {
           quantity: 15,
         },
       ]);
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 100 - 110);
 
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-      sortAndExecuteEvents(bm, unit.serializeEvents());
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
 
       expect(unit2.statusEffects).toEqual([
         {
           name: STATUS_EFFECT.VULNERABLE,
-          quantity: 20,
+          quantity: 25, // 15 + 15 - 5
         },
       ]);
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 100 - 110 - 125);
+    });
+  });
 
-      for (let i = 0; i < ability.data.cooldown; i++) {
-        unit.step(i);
-      }
-      sortAndExecuteEvents(bm, unit.serializeEvents());
+  describe("ATTACK_POWER (Axe)", () => {
+    test("should apply ATTACK_POWER status effect on hit", () => {
+      const bm = new BoardManager();
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
 
-      expect(unit2.statusEffects).toEqual([
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      bm.addToBoard(unit2);
+
+      useAbility(unit1);
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
+
+      expect(unit1.statusEffects).toEqual([
         {
-          name: STATUS_EFFECT.VULNERABLE,
-          quantity: 25,
+          name: STATUS_EFFECT.ATTACK_POWER,
+          quantity: 10,
         },
       ]);
-      expect(unit2.stats.hp).toBe(unit2.stats.maxHp - 100 - 110 - 125);
     });
   });
 });

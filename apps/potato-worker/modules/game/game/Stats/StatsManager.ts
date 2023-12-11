@@ -71,6 +71,10 @@ export class StatsManager {
           this.statsFromStatusEffects.damageReductionModifier =
             statusEffect.quantity * -1;
           break;
+        case STATUS_EFFECT.ATTACK_POWER:
+          this.statsFromStatusEffects.attackDamageModifier =
+            statusEffect.quantity;
+          break;
       }
     });
   }

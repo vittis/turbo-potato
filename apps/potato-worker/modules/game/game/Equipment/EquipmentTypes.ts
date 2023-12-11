@@ -1,4 +1,5 @@
 import { PossibleMods } from "../Mods/ModsTypes";
+import { TriggerEffect } from "../Perk/PerkTypes";
 
 export enum EQUIPMENT_SLOT {
   MAIN_HAND = "MAIN_HAND",
@@ -13,4 +14,5 @@ export interface EquipmentData {
   name: string;
   allowedSlots: EQUIPMENT_SLOT[];
   mods: PossibleMods;
+  effects: TriggerEffect[];
 }

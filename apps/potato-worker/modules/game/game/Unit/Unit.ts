@@ -54,6 +54,7 @@ export class Unit {
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
   public statusEffectManager: StatusEffectManager;
+  // public triggerManager: TriggerManager;
 
   get stats() {
     return this.statsManager.getStats();
@@ -191,7 +192,6 @@ export class Unit {
   }
 
   applyEvent(event: Event) {
-    // console.log(event);
     if (event.type === EVENT_TYPE.USE_ABILITY) {
       this.applyUseAbilitySubEvents(event as UseAbilityEvent);
     }
@@ -207,6 +207,7 @@ export class Unit {
 
         if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
           const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
+
           target.statusEffectManager.applyStatusEffect(
             subEvent.payload.payload
           );

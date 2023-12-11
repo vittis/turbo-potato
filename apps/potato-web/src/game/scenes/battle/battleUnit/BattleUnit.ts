@@ -192,12 +192,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     targets,
     onEnd,
     onStart,
+    allUnits,
   }: {
     event: StepEvent;
     targets?: BattleUnit[];
     onEnd?: Function;
     onAttack?: Function;
     onStart?: Function;
+    allUnits?: BattleUnit[];
   }) {
     if (event.type === "FAINT") {
       const onFinishAnimation = () => {
@@ -248,7 +250,16 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         ) as StepEvent[];
         if (statusEffectEvents.length > 0) {
           statusEffectEvents.forEach((statusEffectEvent) => {
-            target.playEvent({ event: statusEffectEvent });
+            console.log(statusEffectEvent);
+            const targetIds = statusEffectEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply status effect: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: statusEffectEvent });
+            });
           });
         }
       };

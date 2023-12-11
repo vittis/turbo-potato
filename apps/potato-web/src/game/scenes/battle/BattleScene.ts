@@ -33,7 +33,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 50;
+export const GAME_LOOP_SPEED = 25;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -201,7 +201,8 @@ export class Battle extends Phaser.Scene {
         };
       }
 
-      eventPile.push({ unit, event, targets, onEnd, onStart });
+      //  "allUnits" is a hack to access all units from the event, need to think a better way in the future
+      eventPile.push({ unit, event, targets, onEnd, onStart, allUnits: this.units });
     });
     const unit: BattleUnit = eventPile[0].unit;
     unit.playEvent(eventPile[0]);

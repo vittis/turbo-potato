@@ -4,7 +4,7 @@ import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
 import { runGame } from "../Game";
-import { Weapons, Chests, Heads } from "../data";
+import { Weapons, Chests, Heads, Classes } from "../data";
 import classes from "../data/classes";
 import { Unit } from "./Unit";
 
@@ -13,13 +13,13 @@ describe("Unit", () => {
     test("should equip", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
-      unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+      unit.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
 
       expect(unit.equips).toHaveLength(1);
 
       expect(unit.equips[0].slot).toBe(EQUIPMENT_SLOT.MAIN_HAND);
       expect(unit.equips[0].equip).toBeInstanceOf(Equipment);
-      expect(unit.equips[0].equip.data).toEqual(Weapons.ShortSpear);
+      expect(unit.equips[0].equip.data).toEqual(Weapons.Shortbow);
     });
 
     // todo add this
@@ -63,6 +63,13 @@ describe("Unit", () => {
   });
 
   describe("Abilities", () => {
+    test("class should give ability", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.setClass(new Class(Classes.Ranger));
+
+      expect(unit.abilities).toHaveLength(1);
+    });
     test("equipping a weapon should give an ability", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
@@ -146,7 +153,6 @@ describe("Unit", () => {
     });
   });
 
-  // todo better stats tests
   describe("Stats", () => {
     test("equipping weapon grants stats", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
@@ -155,14 +161,22 @@ describe("Unit", () => {
       expect(unit.statsFromMods.attackDamageModifier).toBe(5);
     });
 
-    test("Equipping two items should accumulate stat", () => {
+    test("equipping two items should accumulate stat", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
 
       unit.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
       unit.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
-      expect(unit.stats.damageReductionModifier).toBe(32); // todo dont hardcode
+      expect(unit.stats.damageReductionModifier).toBe(10);
+    });
+
+    test("class should grant stats", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.setClass(new Class(Classes.Ranger));
+      expect(unit.stats.attackCooldownModifier).toBe(7);
+      expect(unit.stats.attackDamageModifier).toBe(7);
     });
   });
 
@@ -171,6 +185,8 @@ describe("Unit", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+      console.log(unit.perks);
 
       expect(unit.perks).toHaveLength(1);
     });
@@ -185,28 +201,6 @@ describe("Unit", () => {
       unit.unequip(EQUIPMENT_SLOT.MAIN_HAND);
 
       expect(unit.perks).toHaveLength(0);
-    });
-  });
-
-  // todo should this be here?
-  describe.skip("Battle", () => {
-    test("battle works", () => {
-      const bm = new BoardManager();
-      const unit = new Unit(OWNER.TEAM_ONE, POSITION.BOT_BACK, bm);
-      unit.setClass(new Class(classes.Ranger));
-      unit.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-
-      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
-      bm.addToBoard(unit);
-      bm.addToBoard(unit2);
-      unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-
-      const { eventHistory } = runGame(bm);
-
-      expect(eventHistory[eventHistory.length - 1]).toHaveProperty(
-        "type",
-        "FAINT"
-      );
     });
   });
 });

@@ -28,7 +28,7 @@ export const MockAttacks = {
       {
         type: "GRANT_STATUS_EFFECT",
         trigger: "ON_HIT",
-        target: "STANDARD",
+        target: "HIT_TARGET",
         payload: [
           {
             name: "VULNERABLE",

@@ -12,6 +12,7 @@ export const MockWeapons = {
         },
       },
     ],
+    effects: [],
   } as EquipmentData,
   ShortSpear: {
     name: "Short Spear",
@@ -38,6 +39,7 @@ export const MockWeapons = {
         },
       },
     ],
+    effects: [],
   } as EquipmentData,
   Sword: {
     name: "Sword",
@@ -50,6 +52,7 @@ export const MockWeapons = {
         },
       },
     ],
+    effects: [],
   } as EquipmentData,
   Axe: {
     name: "Axe",
@@ -60,6 +63,19 @@ export const MockWeapons = {
         payload: {
           name: "Empowering Strike",
         },
+      },
+    ],
+    effects: [
+      {
+        type: "GRANT_STATUS_EFFECT",
+        trigger: "ON_HIT",
+        target: "HIT_TARGET",
+        payload: [
+          {
+            name: "VULNERABLE",
+            quantity: 20,
+          },
+        ],
       },
     ],
   } as EquipmentData,

@@ -1,14 +1,16 @@
 {
-  "name": "Axe",
-  "allowedSlots": [
-    "MAIN_HAND"
-  ],
-  "mods": [
+  "name": "Prey The Weak",
+  "type": "TIER_SCALE",
+  "tiers": [
     {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
+      "name": "VULNERABLE",
+      "values": [
+        4,
+        10,
+        18,
+        30,
+        45
+      ]
     }
   ],
   "effects": [
@@ -19,7 +21,7 @@
       "payload": [
         {
           "name": "VULNERABLE",
-          "quantity": 20
+          "quantity": "DYNAMIC"
         }
       ]
     }

@@ -54,6 +54,7 @@ export class Unit {
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
   public statusEffectManager: StatusEffectManager;
+  // public triggerManager: TriggerManager;
 
   get stats() {
     return this.statsManager.getStats();

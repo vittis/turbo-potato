@@ -14,6 +14,25 @@ export const MockClasses = {
         ],
         description: "Gain the Weak Spot attack",
       },
+      {
+        mods: [
+          {
+            type: "GRANT_BASE_STAT",
+            payload: {
+              stat: "ATTACK_COOLDOWN",
+              value: 7,
+            },
+          },
+          {
+            type: "GRANT_BASE_STAT",
+            payload: {
+              stat: "ATTACK_DAMAGE",
+              value: 7,
+            },
+          },
+        ],
+        description: "Gain 10% Damage Reduction",
+      },
     ],
     utility: [
       {

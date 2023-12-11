@@ -2,6 +2,7 @@ import { Ability } from "../Ability/Ability";
 import { getAbilitiesInstancesFromMods } from "../Ability/AbilityUtils";
 import { MOD_TYPE, Mod } from "../Mods/ModsTypes";
 import { Perk } from "../Perk/Perk";
+import { TriggerEffect } from "../Perk/PerkTypes";
 import { getPerksInstancesFromMods } from "../Perk/PerkUtils";
 import { STAT } from "../Stats/StatsTypes";
 import { filterStatsMods } from "../Stats/StatsUtils";
@@ -39,5 +40,9 @@ export class Equipment {
 
   getGrantedPerks(): Perk[] {
     return getPerksInstancesFromMods(this.data.mods);
+  }
+
+  getTriggerEffects() {
+    return this.data.effects;
   }
 }

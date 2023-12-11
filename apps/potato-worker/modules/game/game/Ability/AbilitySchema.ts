@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ABILITY_CATEGORY, ABILITY_TAG, AbilityData } from "./AbilityTypes";
 import { TARGET_TYPE } from "./TargetTypes";
-import { PossibleTriggerEffectsSchema } from "../Perk/PerkSchema";
+import { TriggerEffectsSchema } from "../Perk/PerkSchema";
 
 export const AbilityDataSchema = z.object({
   name: z.string(),
@@ -10,5 +10,5 @@ export const AbilityDataSchema = z.object({
   target: z.nativeEnum(TARGET_TYPE),
   baseDamage: z.number(),
   cooldown: z.number(),
-  effects: PossibleTriggerEffectsSchema,
+  effects: TriggerEffectsSchema,
 }) satisfies z.ZodType<AbilityData>;

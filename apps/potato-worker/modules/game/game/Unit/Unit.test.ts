@@ -4,7 +4,7 @@ import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
 import { runGame } from "../Game";
-import { Weapons, Chests, Heads } from "../data";
+import { Weapons, Chests, Heads, Classes } from "../data";
 import classes from "../data/classes";
 import { Unit } from "./Unit";
 
@@ -63,6 +63,13 @@ describe("Unit", () => {
   });
 
   describe("Abilities", () => {
+    test("class should give ability", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.setClass(new Class(Classes.Ranger));
+
+      expect(unit.abilities).toHaveLength(1);
+    });
     test("equipping a weapon should give an ability", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
@@ -146,7 +153,6 @@ describe("Unit", () => {
     });
   });
 
-  // todo better stats tests
   describe("Stats", () => {
     test("equipping weapon grants stats", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
@@ -155,7 +161,7 @@ describe("Unit", () => {
       expect(unit.statsFromMods.attackDamageModifier).toBe(5);
     });
 
-    test("Equipping two items should accumulate stat", () => {
+    test("equipping two items should accumulate stat", () => {
       const bm = new BoardManager();
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
 
@@ -164,6 +170,14 @@ describe("Unit", () => {
 
       expect(unit.stats.damageReductionModifier).toBe(10);
     });
+
+    test("class should grant stats", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
+
+      unit.setClass(new Class(Classes.Ranger));
+      expect(unit.stats.attackCooldownModifier).toBe(7);
+      expect(unit.stats.attackDamageModifier).toBe(7);
+    });
   });
 
   describe("Perks", () => {
@@ -171,6 +185,8 @@ describe("Unit", () => {
       const unit = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT);
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+
+      console.log(unit.perks);
 
       expect(unit.perks).toHaveLength(1);
     });

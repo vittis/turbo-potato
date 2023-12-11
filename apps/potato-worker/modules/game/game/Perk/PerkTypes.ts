@@ -22,26 +22,22 @@ export interface GrantStatusEffectPayload {
   quantity: number | "DYNAMIC";
 }
 
-export type TriggerEffectPayloadMap = {
+/* type TriggerEffectPayloadMap = {
   [TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT]: GrantStatusEffectPayload;
-  // [TRIGGER_EFFECT_TYPE.INSTANT_EFFECT]: InstantEffectPayload;
-};
+}; */
 
-export interface TriggerEffect<T extends TRIGGER_EFFECT_TYPE> {
+type TriggerEffectPayload = GrantStatusEffectPayload /*  | OtherPayloadType */;
+
+export interface TriggerEffect {
   type: TRIGGER_EFFECT_TYPE;
   trigger: TRIGGER;
   target?: TARGET_TYPE;
-  payload: TriggerEffectPayloadMap[T][];
+  payload: TriggerEffectPayload[];
 }
-
-export type PossibleTriggerEffects = Array<
-  TriggerEffect<TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT>
-  // | TriggerEffect<TRIGGER_EFFECT_TYPE.INSTANT_EFFECT>
->;
 
 export interface PerkData {
   name: string;
   type: PERK_TYPE;
   tiers: PerkTierScale[];
-  effects: PossibleTriggerEffects;
+  effects: TriggerEffect[];
 }

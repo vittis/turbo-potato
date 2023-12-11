@@ -1,4 +1,4 @@
-import { TARGET_TYPE } from "../Ability/TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 import { TRIGGER } from "../Trigger/TriggerTypes";
 

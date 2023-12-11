@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PERK_TYPE, PerkData, TRIGGER_EFFECT_TYPE } from "./PerkTypes";
 import { TRIGGER } from "../Trigger/TriggerTypes";
-import { TARGET_TYPE } from "../Ability/TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 const PerkTierScaleSchema = z.object({

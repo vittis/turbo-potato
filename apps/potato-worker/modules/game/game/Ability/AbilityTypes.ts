@@ -1,5 +1,5 @@
 import { TriggerEffect } from "../Perk/PerkTypes";
-import { TARGET_TYPE } from "./TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 
 export enum ABILITY_CATEGORY {
   ATTACK = "ATTACK",

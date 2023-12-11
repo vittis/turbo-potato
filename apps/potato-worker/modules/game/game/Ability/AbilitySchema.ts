@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ABILITY_CATEGORY, ABILITY_TAG, AbilityData } from "./AbilityTypes";
-import { TARGET_TYPE } from "./TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 import { TriggerEffectsSchema } from "../Perk/PerkSchema";
 
 export const AbilityDataSchema = z.object({

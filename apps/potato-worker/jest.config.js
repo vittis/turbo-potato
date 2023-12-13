@@ -4,5 +4,6 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
   },
+  transformIgnorePatterns: ["node_modules/(?!(nanoid)/)"],
   setupFilesAfterEnv: ["./jestTestSetup.ts"],
 };

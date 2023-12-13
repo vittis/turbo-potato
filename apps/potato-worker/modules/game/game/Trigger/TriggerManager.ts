@@ -1,16 +1,36 @@
-import { Ability } from "../Ability/Ability";
+import { Class } from "../Class/Class";
+import { Equipment } from "../Equipment/Equipment";
 import { Perk } from "../Perk/Perk";
-import { TriggerEffect } from "../Perk/PerkTypes";
+import { TRIGGER, TriggerEffect } from "./TriggerTypes";
 
 interface ActiveTriggerEffect {
   effect: TriggerEffect;
-  source: Ability | Perk; // todo should this be the instance class? Maybe string (id)? Maybe everything have base class with id?
+  sourceId: string;
 }
 
 export class TriggerManager {
-  private triggerEffects = [] as ActiveTriggerEffect[];
+  triggerEffects: ActiveTriggerEffect[] = [];
 
   constructor() {}
 
-  // todo addTriggerEffectFromSource?
+  addTriggerEffectsFromSource(effects: TriggerEffect[], sourceId: string) {
+    effects.forEach((effect) => {
+      this.triggerEffects.push({ effect, sourceId });
+    });
+  }
+
+  removeTriggerEffectsFromSource(sourceId: string) {
+    this.triggerEffects = this.triggerEffects.filter(
+      (triggerEffect) => triggerEffect.sourceId !== sourceId
+    );
+  }
+
+  getAllEffectsForTrigger(trigger: TRIGGER) {
+    return this.triggerEffects.reduce((acc, { effect }) => {
+      if (effect.trigger === trigger) {
+        acc.push(effect);
+      }
+      return acc;
+    }, [] as TriggerEffect[]);
+  }
 }

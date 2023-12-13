@@ -186,8 +186,6 @@ describe("Unit", () => {
 
       unit.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-      console.log(unit.perks);
-
       expect(unit.perks).toHaveLength(1);
     });
 

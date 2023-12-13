@@ -5,11 +5,9 @@ import { STAT } from "../Stats/StatsTypes";
 import { Ability } from "./Ability";
 import { ABILITY_CATEGORY } from "./AbilityTypes";
 
-type AbilitySource = EquippedItem | Class;
-
 interface ActiveAbility {
   ability: Ability;
-  source: AbilitySource;
+  sourceId: string;
 }
 
 export class AbilityManager {
@@ -25,15 +23,15 @@ export class AbilityManager {
     this.activeAbilities = [];
   }
 
-  addAbilitiesFromSource(abilities: Ability[], source: AbilitySource) {
+  addAbilitiesFromSource(abilities: Ability[], sourceId: string) {
     abilities.forEach((ability) => {
-      this.activeAbilities.push({ ability, source });
+      this.activeAbilities.push({ ability, sourceId });
     });
   }
 
-  removeAbilitiesFromSource(source: AbilitySource) {
+  removeAbilitiesFromSource(sourceId: string) {
     this.activeAbilities = this.activeAbilities.filter(
-      (ability) => ability.source !== source
+      (ability) => ability.sourceId !== sourceId
     );
   }
 

@@ -1,12 +1,10 @@
 import { Class } from "../Class/Class";
-import { EquippedItem } from "../Equipment/EquipmentManager";
+import { Equipment } from "../Equipment/Equipment";
 import { Perk } from "./Perk";
-
-type PerkSource = EquippedItem | Class;
 
 interface ActivePerk {
   perk: Perk;
-  source: PerkSource;
+  sourceId: string;
 }
 
 export class PerkManager {
@@ -22,15 +20,15 @@ export class PerkManager {
     this.activePerks = [];
   }
 
-  addPerksFromSource(perks: Perk[], source: PerkSource) {
+  addPerksFromSource(perks: Perk[], sourceId: string) {
     perks.forEach((perk) => {
-      this.activePerks.push({ perk, source });
+      this.activePerks.push({ perk, sourceId });
     });
   }
 
-  removePerksFromSource(source: PerkSource) {
+  removePerksFromSource(sourceId: string) {
     this.activePerks = this.activePerks.filter(
-      (perk) => perk.source !== source
+      (perk) => perk.sourceId !== sourceId
     );
   }
 

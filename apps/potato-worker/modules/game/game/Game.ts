@@ -2,7 +2,7 @@ import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Unit } from "./Unit/Unit";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
-import { EVENT_TYPE } from "./Event/EventTypes";
+import { EVENT_TYPE, Event } from "./Event/EventTypes";
 import { sortAndExecuteEvents } from "./Event/EventUtils";
 import { Class } from "./Class/Class";
 import { Classes, Weapons, Chests, Heads } from "./data";
@@ -119,6 +119,17 @@ export function runGame(boardManager: BoardManager) {
   firstStep = { units: serializedUnits };
 
   let currentStep = 1;
+
+  const battleStartEvents: Event[] = [];
+  boardManager.getAllUnits().forEach((unit) => {
+    unit.onBattleStart();
+    battleStartEvents.push(...unit.serializeEvents());
+  });
+  const orderedEvents = sortAndExecuteEvents(boardManager, battleStartEvents);
+  orderedEvents.forEach((event) => {
+    eventHistory.push(event);
+  });
+
   do {
     boardManager.getAllAliveUnits().forEach((unit) => {
       unit.step(currentStep);
@@ -131,7 +142,6 @@ export function runGame(boardManager: BoardManager) {
     });
 
     const orderedEvents = sortAndExecuteEvents(boardManager, stepEvents);
-
     orderedEvents.forEach((event) => {
       eventHistory.push(event);
     });

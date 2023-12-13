@@ -1,8 +1,14 @@
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import {
+  GrantStatusEffectPayload,
+  TRIGGER,
+  TRIGGER_EFFECT_TYPE,
+} from "../Trigger/TriggerTypes";
 
 export enum EVENT_TYPE {
   USE_ABILITY = "USE_ABILITY",
   FAINT = "FAINT",
+  TRIGGER_EFFECT = "TRIGGER_EFFECT",
 }
 
 export enum SUBEVENT_TYPE {
@@ -86,6 +92,41 @@ export interface StatusEffectPayload {
   name: STATUS_EFFECT;
   quantity: number;
 }
+
+// TRIGGER EFFECT EVENTS -----------------------------------------------
+
+export interface TriggerEffectEvent extends Event {
+  payload: TriggerEffectEventPayload;
+}
+
+type TriggerEffectEventPossiblePayload =
+  GrantStatusEffectPayload /* | OtherPayloadType */;
+
+interface TriggerEffectEventPayload {
+  type: TRIGGER_EFFECT_TYPE;
+  targetsId: string[];
+  payload: TriggerEffectEventPossiblePayload[];
+}
+
+/* const triggerEffectEventExample: TriggerEffectEvent = {
+  type: EVENT_TYPE.TRIGGER_EFFECT,
+  actorId: "00",
+  step: 1,
+  payload: {
+    type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
+    targetsId: ["00"],
+    payload: [
+      {
+        name: STATUS_EFFECT.VULNERABLE,
+        quantity: 20,
+      },
+      {
+        name: STATUS_EFFECT.ATTACK_POWER,
+        quantity: 20,
+      },
+    ],
+  },
+}; */
 
 /* const exampleEvent = {
   type: "USE_ABILITY",

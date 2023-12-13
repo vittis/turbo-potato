@@ -77,6 +77,21 @@ export const MockWeapons = {
           },
         ],
       },
+      {
+        type: "GRANT_STATUS_EFFECT",
+        trigger: "BATTLE_START",
+        target: "SELF",
+        payload: [
+          {
+            name: "VULNERABLE",
+            quantity: 10,
+          },
+          {
+            name: "ATTACK_POWER",
+            quantity: 10,
+          },
+        ],
+      },
     ],
   } as EquipmentData,
 };

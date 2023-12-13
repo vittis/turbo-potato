@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { PERK_TYPE, PerkData, TRIGGER_EFFECT_TYPE } from "./PerkTypes";
-import { TRIGGER } from "../Trigger/TriggerTypes";
+import { PERK_TYPE, PerkData } from "./PerkTypes";
+import { TRIGGER, TRIGGER_EFFECT_TYPE } from "../Trigger/TriggerTypes";
 import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 

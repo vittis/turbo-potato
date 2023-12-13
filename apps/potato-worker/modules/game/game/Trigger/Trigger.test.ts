@@ -1,4 +1,4 @@
-import { TARGET_TYPE } from "../Ability/TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";

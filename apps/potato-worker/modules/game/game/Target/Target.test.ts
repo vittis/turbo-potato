@@ -66,7 +66,8 @@ describe("Target", () => {
   it("should work ALL_ALLIES", () => {
     const targets = bm.getTarget(unit00, TARGET_TYPE.ALL_ALLIES);
 
-    expect(targets).toHaveLength(5);
+    expect(targets).toHaveLength(6);
+    expect(targets).toContain(unit00);
     expect(targets).toContain(unit01);
     expect(targets).toContain(unit02);
     expect(targets).toContain(unit03);
@@ -213,7 +214,8 @@ describe("Target", () => {
   it("should work SAME_COLUMN_ALLIES", () => {
     const targets = bm.getTarget(unit00, TARGET_TYPE.SAME_COLUMN_ALLIES);
 
-    expect(targets).toHaveLength(1);
+    expect(targets).toHaveLength(2);
+    expect(targets).toContain(unit00);
     expect(targets).toContain(unit03);
   });
 
@@ -229,7 +231,8 @@ describe("Target", () => {
   it("should work SAME_ROW_ALLIES", () => {
     const targets = bm.getTarget(unit00, TARGET_TYPE.SAME_ROW_ALLIES);
 
-    expect(targets).toHaveLength(2);
+    expect(targets).toHaveLength(3);
+    expect(targets).toContain(unit00);
     expect(targets).toContain(unit01);
     expect(targets).toContain(unit02);
   });

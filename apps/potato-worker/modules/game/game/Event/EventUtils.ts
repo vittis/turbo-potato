@@ -1,5 +1,5 @@
 import { BoardManager } from "../BoardManager";
-import { EVENT_TYPE } from "./EventTypes";
+import { EVENT_TYPE, Event } from "./EventTypes";
 
 function sortEventsByType(events: any[]) {
   events.sort(function (a, b) {
@@ -26,6 +26,6 @@ function executeStepEvents(bm: BoardManager, events: any[]) {
   return events;
 }
 
-export function sortAndExecuteEvents(bm: BoardManager, events: any[]) {
+export function sortAndExecuteEvents(bm: BoardManager, events: Event[]) {
   return executeStepEvents(bm, sortEventsByType(events));
 }

@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { Ability } from "../Ability/Ability";
 import { AbilityManager } from "../Ability/AbilityManager";
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
@@ -11,6 +12,7 @@ import {
   EVENT_TYPE,
   INSTANT_EFFECT_TYPE,
   SUBEVENT_TYPE,
+  TriggerEffectEvent,
   UseAbilityEvent,
 } from "../Event/EventTypes";
 import { PerkManager } from "../Perk/PerkManager";
@@ -18,6 +20,8 @@ import { StatsManager } from "../Stats/StatsManager";
 import { UnitStats } from "../Stats/StatsTypes";
 import { StatusEffectManager } from "../StatusEffect/StatusEffectManager";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import { TriggerManager } from "../Trigger/TriggerManager";
+import { TRIGGER, TRIGGER_EFFECT_TYPE } from "../Trigger/TriggerTypes";
 
 // use for better perfomance
 /* export enum EVENT_TYPE {
@@ -27,16 +31,6 @@ import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
   HAS_DIED = 3,
 } */
 
-type SubStepEvent = Omit<StepEvent, "step" | "subEvents">;
-
-interface StepEvent {
-  actorId: string;
-  type: EVENT_TYPE;
-  payload?: any;
-  step: number;
-  subEvents?: SubStepEvent[];
-}
-
 export class Unit {
   id: string;
   owner: OWNER;
@@ -45,8 +39,8 @@ export class Unit {
 
   isDead = false;
 
-  currentStep = 0;
-  stepEvents: StepEvent[] = [];
+  currentStep = 1;
+  stepEvents: Event[] = [];
 
   private statsManager: StatsManager;
   private equipmentManager: EquipmentManager;
@@ -54,7 +48,7 @@ export class Unit {
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
   public statusEffectManager: StatusEffectManager;
-  // public triggerManager: TriggerManager;
+  private triggerManager: TriggerManager;
 
   get stats() {
     return this.statsManager.getStats();
@@ -66,6 +60,10 @@ export class Unit {
   // todo better stats merge
   get statsFromMods() {
     return this.statsManager.getStatsFromMods();
+  }
+
+  get triggerEffects() {
+    return this.triggerManager.triggerEffects;
   }
 
   get equips() {
@@ -95,9 +93,10 @@ export class Unit {
     this.abilityManager = new AbilityManager();
     this.perkManager = new PerkManager();
     this.statusEffectManager = new StatusEffectManager();
+    this.triggerManager = new TriggerManager();
     this.bm = bm as BoardManager;
 
-    this.id = `${owner}${position}`;
+    this.id = nanoid(8);
     this.owner = owner;
     this.position = position;
 
@@ -118,11 +117,11 @@ export class Unit {
   }
 
   equip(equip: Equipment, slot: EQUIPMENT_SLOT) {
-    const item = this.equipmentManager.equip(equip, slot);
+    this.equipmentManager.equip(equip, slot);
 
     this.abilityManager.addAbilitiesFromSource(
       equip.getGrantedAbilities(),
-      item
+      equip.id
     );
 
     this.abilityManager.applyCooldownModifierFromMods(
@@ -131,25 +130,34 @@ export class Unit {
 
     this.statsManager.addMods(equip.getStatsMods());
 
-    this.perkManager.addPerksFromSource(equip.getGrantedPerks(), item);
+    this.perkManager.addPerksFromSource(equip.getGrantedPerks(), equip.id);
+    // todo add triggers from perks
+
+    this.triggerManager.addTriggerEffectsFromSource(
+      equip.getTriggerEffects(),
+      equip.id
+    );
   }
 
   unequip(slot: EQUIPMENT_SLOT) {
     const equippedItem = this.equipmentManager.unequip(slot);
-    this.abilityManager.removeAbilitiesFromSource(equippedItem);
+    this.abilityManager.removeAbilitiesFromSource(equippedItem.equip.id);
     this.statsManager.removeMods(equippedItem.equip.getStatsMods());
-    this.perkManager.removePerksFromSource(equippedItem);
+    this.perkManager.removePerksFromSource(equippedItem.equip.id);
   }
 
   setClass(unitClass: Class) {
+    this.classManager.setClass(unitClass);
     this.statsManager.setBaseHp(unitClass.getBaseHp());
     this.statsManager.addMods(unitClass.getStatsMods());
 
-    this.classManager.setClass(unitClass);
     this.abilityManager.addAbilitiesFromSource(
       this.classManager.getClassAbilities(),
-      unitClass
+      unitClass.data.name
     );
+
+    // todo add perks
+    // todo add triggers effects
   }
 
   serialize() {
@@ -191,33 +199,76 @@ export class Unit {
     // add step logic
   }
 
+  applyUseAbilitySubEvents(event: UseAbilityEvent) {
+    if (!event.payload.subEvents) {
+      return;
+    }
+
+    event.payload.subEvents.forEach((subEvent) => {
+      if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
+        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
+        target.receiveDamage(subEvent.payload.payload.value);
+      }
+
+      if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
+        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
+
+        target.statusEffectManager.applyStatusEffect(subEvent.payload.payload);
+
+        target.statsManager.recalculateStatsFromStatusEffects(
+          target.statusEffects
+        );
+      }
+    });
+  }
+
   applyEvent(event: Event) {
     if (event.type === EVENT_TYPE.USE_ABILITY) {
       this.applyUseAbilitySubEvents(event as UseAbilityEvent);
     }
+    if (event.type === EVENT_TYPE.TRIGGER_EFFECT) {
+      this.applyTriggerEffectEvent(event as TriggerEffectEvent);
+    }
   }
-
-  applyUseAbilitySubEvents(event: UseAbilityEvent) {
-    if (event.payload.subEvents) {
-      event.payload.subEvents.forEach((subEvent) => {
-        if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
-          const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
-          target.receiveDamage(subEvent.payload.payload.value);
-        }
-
-        if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
-          const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
-
-          target.statusEffectManager.applyStatusEffect(
-            subEvent.payload.payload
-          );
-
-          target.statsManager.recalculateStatsFromStatusEffects(
-            target.statusEffects
-          );
-        }
+  applyTriggerEffectEvent(event: TriggerEffectEvent) {
+    if (event.payload.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT) {
+      event.payload.payload.forEach((statusEffect) => {
+        event.payload.targetsId.forEach((targetId) => {
+          const target = this.bm.getUnitById(targetId);
+          target.statusEffectManager.applyStatusEffect({
+            name: statusEffect.name,
+            quantity: statusEffect.quantity as number,
+          });
+        });
       });
     }
+  }
+
+  onBattleStart() {
+    this.triggerManager
+      .getAllEffectsForTrigger(TRIGGER.BATTLE_START)
+      .forEach((effect) => {
+        switch (effect.type) {
+          case TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT:
+            const targets = this.bm.getTarget(this, effect.target);
+
+            let event: TriggerEffectEvent = {
+              actorId: this.id,
+              type: EVENT_TYPE.TRIGGER_EFFECT,
+              step: this.currentStep,
+              payload: {
+                type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
+                targetsId: targets.map((target) => target.id),
+                payload: effect.payload.map((statusEffect) => ({
+                  name: statusEffect.name,
+                  quantity: statusEffect.quantity as number,
+                })),
+              },
+            };
+            this.stepEvents.push(event);
+            break;
+        }
+      });
   }
 
   /* attack(target: Unit) {

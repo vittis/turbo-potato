@@ -1,5 +1,5 @@
 import { PossibleMods } from "../Mods/ModsTypes";
-import { TriggerEffect } from "../Perk/PerkTypes";
+import { TriggerEffect } from "../Trigger/TriggerTypes";
 
 export enum EQUIPMENT_SLOT {
   MAIN_HAND = "MAIN_HAND",

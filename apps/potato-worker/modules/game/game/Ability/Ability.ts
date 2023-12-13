@@ -8,8 +8,7 @@ import {
   UseAbilityEvent,
   UseAbilitySubEvent,
 } from "../Event/EventTypes";
-import { TRIGGER_EFFECT_TYPE } from "../Perk/PerkTypes";
-import { TRIGGER } from "../Trigger/TriggerTypes";
+import { TRIGGER, TRIGGER_EFFECT_TYPE } from "../Trigger/TriggerTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 export const VULNERABLE_LOSS_PER_HIT = 5; // todo put in json? (data/config/statusEffects.json)

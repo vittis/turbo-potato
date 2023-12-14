@@ -12,7 +12,7 @@ export const MockPerks = {
     ],
     effects: [
       {
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "BATTLE_START",
         target: "SELF",
         payload: [

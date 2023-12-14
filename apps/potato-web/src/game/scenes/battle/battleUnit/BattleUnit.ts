@@ -283,7 +283,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {
-      this.addStatusEffect({ name: event.payload.payload.name, quantity: event.payload.payload.quantity });
+      event.payload.payload.forEach((statusEffect) => {
+        this.addStatusEffect({ name: statusEffect.name, quantity: statusEffect.quantity });
+      });
+
       // temporary
 
       // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));

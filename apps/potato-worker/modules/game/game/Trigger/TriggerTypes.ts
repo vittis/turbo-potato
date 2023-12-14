@@ -1,5 +1,6 @@
 import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import { DamagePayload } from "../Event/EventTypes";
 
 export enum TRIGGER {
   BATTLE_START = "BATTLE_START",
@@ -11,20 +12,27 @@ export enum TRIGGER {
 }
 
 export enum TRIGGER_EFFECT_TYPE {
-  GRANT_STATUS_EFFECT = "GRANT_STATUS_EFFECT",
-  // INSTANT_EFFECT = "INSTANT_EFFECT",
+  STATUS_EFFECT = "STATUS_EFFECT",
+  DAMAGE = "DAMAGE",
 }
 
-export interface GrantStatusEffectPayload {
+export interface StatusEffectPayload {
   name: STATUS_EFFECT;
   quantity: number | "DYNAMIC";
 }
 
-type TriggerEffectPayload = GrantStatusEffectPayload /*  | OtherPayloadType */;
+export type TriggerEffectPayloadMap = {
+  [TRIGGER_EFFECT_TYPE.DAMAGE]: DamagePayload;
+  [TRIGGER_EFFECT_TYPE.STATUS_EFFECT]: StatusEffectPayload[];
+};
 
-export interface TriggerEffect {
-  type: TRIGGER_EFFECT_TYPE;
+export interface TriggerEffect<T extends TRIGGER_EFFECT_TYPE> {
+  type: T;
   trigger: TRIGGER;
   target?: TARGET_TYPE;
-  payload: TriggerEffectPayload[];
+  payload: TriggerEffectPayloadMap[T];
 }
+
+export type PossibleTriggerEffect =
+  | TriggerEffect<TRIGGER_EFFECT_TYPE.DAMAGE>
+  | TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>;

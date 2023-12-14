@@ -1,9 +1,4 @@
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
-import {
-  GrantStatusEffectPayload,
-  TRIGGER,
-  TRIGGER_EFFECT_TYPE,
-} from "../Trigger/TriggerTypes";
 
 export enum EVENT_TYPE {
   USE_ABILITY = "USE_ABILITY",
@@ -42,10 +37,10 @@ export interface UseAbilityEvent extends Event {
 export interface UseAbilityEventPayload {
   name: string;
   targetsId: string[];
-  subEvents: UseAbilitySubEvent[];
+  subEvents: SubEvent[];
 }
 
-export interface UseAbilitySubEvent {
+export interface SubEvent {
   type: SUBEVENT_TYPE;
   payload: InstantEffectPossiblePayload;
 }
@@ -68,7 +63,7 @@ export type InstantEffectPayloadMap = {
   [INSTANT_EFFECT_TYPE.HEAL]: HealPayload;
   [INSTANT_EFFECT_TYPE.SHIELD]: ShieldPayload;
   [INSTANT_EFFECT_TYPE.DISABLE]: DisablePayload;
-  [INSTANT_EFFECT_TYPE.STATUS_EFFECT]: StatusEffectPayload;
+  [INSTANT_EFFECT_TYPE.STATUS_EFFECT]: StatusEffectPayload[];
 };
 
 export interface DamagePayload {
@@ -96,61 +91,5 @@ export interface StatusEffectPayload {
 // TRIGGER EFFECT EVENTS -----------------------------------------------
 
 export interface TriggerEffectEvent extends Event {
-  payload: TriggerEffectEventPayload;
+  subEvents: SubEvent[];
 }
-
-type TriggerEffectEventPossiblePayload =
-  GrantStatusEffectPayload /* | OtherPayloadType */;
-
-interface TriggerEffectEventPayload {
-  type: TRIGGER_EFFECT_TYPE;
-  targetsId: string[];
-  payload: TriggerEffectEventPossiblePayload[];
-}
-
-/* const triggerEffectEventExample: TriggerEffectEvent = {
-  type: EVENT_TYPE.TRIGGER_EFFECT,
-  actorId: "00",
-  step: 1,
-  payload: {
-    type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
-    targetsId: ["00"],
-    payload: [
-      {
-        name: STATUS_EFFECT.VULNERABLE,
-        quantity: 20,
-      },
-      {
-        name: STATUS_EFFECT.ATTACK_POWER,
-        quantity: 20,
-      },
-    ],
-  },
-}; */
-
-/* const exampleEvent = {
-  type: "USE_ABILITY",
-  actorId: "00",
-  step: 99,
-  payload: {
-    name: "Disarming Shot",
-    subEvents: [
-      {
-        type: "INSTANT_EFFECT",
-        payload: {
-          type: "DAMAGE",
-          targetId: ["10"],
-          payload: { value: 40 },
-        },
-      },
-      {
-        type: "INSTANT_EFFECT",
-        payload: {
-          type: "STATUS_EFFECT",
-          targetId: ["10"],
-          payload: { name: "VULNERABLE", quantity: 5 },
-        },
-      },
-    ],
-  },
-}; */

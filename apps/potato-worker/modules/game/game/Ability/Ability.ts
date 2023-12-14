@@ -6,9 +6,13 @@ import {
   INSTANT_EFFECT_TYPE,
   SUBEVENT_TYPE,
   UseAbilityEvent,
-  UseAbilitySubEvent,
+  SubEvent,
 } from "../Event/EventTypes";
-import { TRIGGER, TRIGGER_EFFECT_TYPE } from "../Trigger/TriggerTypes";
+import {
+  TRIGGER,
+  TRIGGER_EFFECT_TYPE,
+  TriggerEffect,
+} from "../Trigger/TriggerTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 
 export const VULNERABLE_LOSS_PER_HIT = 5; // todo put in json? (data/config/statusEffects.json)
@@ -44,7 +48,7 @@ export class Ability {
   use(unit: Unit): UseAbilityEvent {
     const targets = this.getTargets(unit);
 
-    const statusSubEvents: UseAbilitySubEvent[] = [];
+    const statusSubEvents: SubEvent[] = [];
 
     const targetHasVulnerable = targets[0].statusEffects.some(
       (effect) => effect.name === STATUS_EFFECT.VULNERABLE
@@ -60,10 +64,12 @@ export class Ability {
         payload: {
           type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
           targetsId: [targets[0].id], // todo not only [0]
-          payload: {
-            name: STATUS_EFFECT.VULNERABLE,
-            quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
-          },
+          payload: [
+            {
+              name: STATUS_EFFECT.VULNERABLE,
+              quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
+            },
+          ],
         },
       });
     }
@@ -71,27 +77,31 @@ export class Ability {
     const onHitGrantStatusEffects = this.data.effects.filter(
       (effect) =>
         effect.trigger === TRIGGER.ON_HIT &&
-        effect.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT
-    );
+        effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT
+    ) as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
 
-    const onHitStatusSubEvents: UseAbilitySubEvent[] =
-      onHitGrantStatusEffects.map((effect) => {
+    const onHitStatusSubEvents: SubEvent[] = onHitGrantStatusEffects.map(
+      (effect) => {
         const target =
           effect.target === "HIT_TARGET"
             ? targets[0]
             : unit.bm.getTarget(unit, effect.target)[0];
+
         return {
           type: SUBEVENT_TYPE.INSTANT_EFFECT,
           payload: {
             type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
             targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: {
-              name: effect.payload[0].name, // todo loop?
-              quantity: effect.payload[0].quantity as number,
-            },
+            payload: [
+              {
+                name: effect.payload[0].name, // todo loop?
+                quantity: effect.payload[0].quantity as number,
+              },
+            ],
           },
         };
-      });
+      }
+    );
 
     const damage =
       this.data.baseDamage +

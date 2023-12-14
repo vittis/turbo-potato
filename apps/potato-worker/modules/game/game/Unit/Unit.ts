@@ -11,6 +11,7 @@ import {
   Event,
   EVENT_TYPE,
   INSTANT_EFFECT_TYPE,
+  SubEvent,
   SUBEVENT_TYPE,
   TriggerEffectEvent,
   UseAbilityEvent,
@@ -199,12 +200,8 @@ export class Unit {
     // add step logic
   }
 
-  applyUseAbilitySubEvents(event: UseAbilityEvent) {
-    if (!event.payload.subEvents) {
-      return;
-    }
-
-    event.payload.subEvents.forEach((subEvent) => {
+  applySubEvents(subEvents: SubEvent[]) {
+    subEvents.forEach((subEvent) => {
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
         const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
         target.receiveDamage(subEvent.payload.payload.value);
@@ -213,7 +210,9 @@ export class Unit {
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
         const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
 
-        target.statusEffectManager.applyStatusEffect(subEvent.payload.payload);
+        subEvent.payload.payload.forEach((statusEffect) => {
+          target.statusEffectManager.applyStatusEffect(statusEffect);
+        });
 
         target.statsManager.recalculateStatsFromStatusEffects(
           target.statusEffects
@@ -224,81 +223,58 @@ export class Unit {
 
   applyEvent(event: Event) {
     if (event.type === EVENT_TYPE.USE_ABILITY) {
-      this.applyUseAbilitySubEvents(event as UseAbilityEvent);
+      this.applySubEvents((event as UseAbilityEvent).payload.subEvents);
     }
     if (event.type === EVENT_TYPE.TRIGGER_EFFECT) {
-      this.applyTriggerEffectEvent(event as TriggerEffectEvent);
-    }
-  }
-  applyTriggerEffectEvent(event: TriggerEffectEvent) {
-    if (event.payload.type === TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT) {
-      event.payload.payload.forEach((statusEffect) => {
-        event.payload.targetsId.forEach((targetId) => {
-          const target = this.bm.getUnitById(targetId);
-          target.statusEffectManager.applyStatusEffect({
-            name: statusEffect.name,
-            quantity: statusEffect.quantity as number,
-          });
-        });
-      });
+      this.applySubEvents((event as TriggerEffectEvent).subEvents);
     }
   }
 
   onBattleStart() {
-    this.triggerManager
-      .getAllEffectsForTrigger(TRIGGER.BATTLE_START)
-      .forEach((effect) => {
-        switch (effect.type) {
-          case TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT:
-            const targets = this.bm.getTarget(this, effect.target);
+    const battleStartEffects = this.triggerManager.getAllEffectsForTrigger(
+      TRIGGER.BATTLE_START
+    );
 
-            let event: TriggerEffectEvent = {
-              actorId: this.id,
-              type: EVENT_TYPE.TRIGGER_EFFECT,
-              step: this.currentStep,
-              payload: {
-                type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
-                targetsId: targets.map((target) => target.id),
-                payload: effect.payload.map((statusEffect) => ({
-                  name: statusEffect.name,
-                  quantity: statusEffect.quantity as number,
-                })),
-              },
-            };
-            this.stepEvents.push(event);
-            break;
-        }
-      });
-  }
+    let subEvents: SubEvent[] = [];
 
-  /* attack(target: Unit) {
-    let newSp = this.stats.sp;
+    battleStartEffects.forEach((activeEffect) => {
+      const targets = this.bm.getTarget(this, activeEffect.effect.target);
 
-    const spGained =
-      this.stats.skillRegen * Multipliers.srAtkBase +
-      this.stats.skillRegen * this.stats.attackDamage * Multipliers.srAtkMult;
-    newSp += spGained;
-
-    const receiveDamageEvent = target.receiveDamage(this.stats.attackDamage);
-
-    this.stepEvents.push({
-      actorId: this.id,
-      type: EVENT_TYPE.ATTACK,
-      payload: {
-        targetsId: [target.id],
-        stats: {
-          ap: this.stats.ap,
-          sp: newSp,
-        },
-        modifiers: {
-          ap: -1000, // sepa criar variavel pra isso
-          sp: spGained,
-        },
-      },
-      step: this.currentStep,
-      subEvents: [receiveDamageEvent],
+      if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
+        subEvents.push({
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+            targetsId: targets.map((target) => target.id),
+            payload: activeEffect.effect.payload.map((statusEffect) => ({
+              name: statusEffect.name,
+              quantity: statusEffect.quantity as number,
+            })),
+          },
+        });
+      } else if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
+        subEvents.push({
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.DAMAGE,
+            targetsId: targets.map((target) => target.id),
+            payload: { value: activeEffect.effect.payload.value },
+          },
+        });
+      }
     });
-  } */
+
+    if (subEvents.length > 0) {
+      const event: TriggerEffectEvent = {
+        actorId: this.id,
+        step: this.currentStep,
+        type: EVENT_TYPE.TRIGGER_EFFECT,
+        subEvents,
+      };
+
+      this.stepEvents.push(event);
+    }
+  }
 
   receiveDamage(damage: number) {
     let newHp = this.stats.hp;
@@ -319,69 +295,8 @@ export class Unit {
 
     this.stats = { ...this.stats, hp: newHp, shield: newShield };
 
-    // this.statusEffectManager.removeStacks(STATUS_EFFECT.VULNERABLE, 5); // todo dont hardcode 5
-
     this.statsManager.recalculateStatsFromStatusEffects(this.statusEffects);
   }
-
-  /* receiveDamage(damage: number) {
-    let newHp = this.stats.hp;
-    let newShield = this.stats.shield;
-
-    const finalDamage = Math.round(damage);
-
-    if (newShield > 0) {
-      newShield -= finalDamage;
-      if (newShield < 0) {
-        // If the armor is now depleted, apply any remaining damage to the unit's HP
-        newHp += newShield;
-        newShield = 0;
-      }
-    } else {
-      newHp -= Math.round(finalDamage);
-    }
-
-    const receiveDamageEvent: SubStepEvent = {
-      actorId: this.id,
-      type: EVENT_TYPE.RECEIVED_DAMAGE,
-      payload: {
-        stats: {
-          hp: newHp,
-          shield: newShield,
-        },
-        modifiers: {
-          hp: (this.stats.hp - newHp) * -1,
-          shield: (this.stats.shield - newShield) * -1,
-        },
-      },
-    };
-
-    return receiveDamageEvent;
-  } */
-
-  /* receiveHeal(healValue: number) {
-    let newHp = this.stats.hp;
-
-    const hpAfterHeal = Math.min(this.stats.hp + healValue, this.stats.maxHp);
-    const hpHealed = hpAfterHeal - this.stats.hp;
-
-    newHp = hpAfterHeal;
-
-    const receiveHealEvent: SubStepEvent = {
-      actorId: this.id,
-      type: EVENT_TYPE.RECEIVED_HEAL,
-      payload: {
-        stats: {
-          hp: newHp,
-        },
-        modifiers: {
-          hp: hpHealed,
-        },
-      },
-    };
-
-    return receiveHealEvent;
-  } */
 
   markAsDead() {
     if (this.isDead) {
@@ -401,55 +316,6 @@ export class Unit {
   getName() {
     return `${this.owner}${this.position} ${this.classManager?.class?.data?.name}`;
   }
-
-  /* receiveDisable(type: DISABLE_TYPE, duration: number) {
-    let newDuration = duration;
-    let modifiedDuration = duration;
-
-    const sameTypeAlreadyApplied = this.disables.find(
-      (disable) => disable.type === type
-    );
-
-    if (sameTypeAlreadyApplied) {
-      if (duration > sameTypeAlreadyApplied.duration) {
-        modifiedDuration -= sameTypeAlreadyApplied.duration;
-      } else {
-        newDuration = sameTypeAlreadyApplied.duration;
-        modifiedDuration = 0;
-      }
-    }
-
-    const receiveDisableEvent: SubStepEvent = {
-      actorId: this.id,
-      type: EVENT_TYPE.RECEIVED_DISABLE,
-      payload: {
-        disableName: DISABLE_TYPE.STUN,
-        apply: !!!sameTypeAlreadyApplied, //check if working
-        stats: {
-          duration: newDuration,
-        },
-        modifiers: {
-          duration: modifiedDuration,
-        },
-      },
-    };
-
-    return receiveDisableEvent;
-  }
-
-  decreaseDisables() {
-    if (!this.disables) return;
-
-    this.disables.forEach((disable) => {
-      disable.duration -= 1;
-    });
-
-    this.disables = this.disables.filter((disable) => disable.duration > 0);
-  }
-
-  hasDisable(type: DISABLE_TYPE) {
-    return !!this.disables.find((disable) => disable.type === type);
-  } */
 
   public toString = (): string => {
     return `${this.owner}${this.position} ${this.classManager?.class?.data?.name}`;

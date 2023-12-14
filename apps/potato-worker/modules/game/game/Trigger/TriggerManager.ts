@@ -1,10 +1,7 @@
-import { Class } from "../Class/Class";
-import { Equipment } from "../Equipment/Equipment";
-import { Perk } from "../Perk/Perk";
-import { TRIGGER, TriggerEffect } from "./TriggerTypes";
+import { PossibleTriggerEffect, TRIGGER } from "./TriggerTypes";
 
 interface ActiveTriggerEffect {
-  effect: TriggerEffect;
+  effect: PossibleTriggerEffect;
   sourceId: string;
 }
 
@@ -13,7 +10,10 @@ export class TriggerManager {
 
   constructor() {}
 
-  addTriggerEffectsFromSource(effects: TriggerEffect[], sourceId: string) {
+  addTriggerEffectsFromSource(
+    effects: PossibleTriggerEffect[],
+    sourceId: string
+  ) {
     effects.forEach((effect) => {
       this.triggerEffects.push({ effect, sourceId });
     });
@@ -26,11 +26,11 @@ export class TriggerManager {
   }
 
   getAllEffectsForTrigger(trigger: TRIGGER) {
-    return this.triggerEffects.reduce((acc, { effect }) => {
-      if (effect.trigger === trigger) {
-        acc.push(effect);
+    return this.triggerEffects.reduce((acc, activeEffect) => {
+      if (activeEffect.effect.trigger === trigger) {
+        acc.push(activeEffect);
       }
       return acc;
-    }, [] as TriggerEffect[]);
+    }, [] as ActiveTriggerEffect[]);
   }
 }

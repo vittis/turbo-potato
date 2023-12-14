@@ -196,4 +196,44 @@ describe("StatusEffect", () => {
       ]);
     });
   });
+
+  describe("VULNERABLE (Axe)", () => {
+    test("should remove all VULNERABLE when hit", () => {
+      const bm = new BoardManager();
+      const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
+      unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+      bm.addToBoard(unit1);
+
+      unit1.onBattleStart();
+      sortAndExecuteEvents(bm, unit1.serializeEvents());
+
+      expect(unit1.statusEffects).toContainEqual({
+        name: STATUS_EFFECT.VULNERABLE,
+        quantity: 10,
+      });
+
+      const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+      unit2.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+
+      bm.addToBoard(unit2);
+
+      // attacks
+      useAbility(unit2);
+      sortAndExecuteEvents(bm, unit2.serializeEvents());
+      expect(unit1.statusEffects).toContainEqual({
+        name: STATUS_EFFECT.VULNERABLE,
+        quantity: 5,
+      });
+
+      // attacks again
+      useAbility(unit2);
+      sortAndExecuteEvents(bm, unit2.serializeEvents());
+
+      expect(unit1.statusEffects).toHaveLength(1);
+      expect(unit1.statusEffects).not.toContainEqual({
+        name: STATUS_EFFECT.VULNERABLE,
+        quantity: 0,
+      });
+    });
+  });
 });

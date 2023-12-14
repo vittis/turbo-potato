@@ -1,4 +1,4 @@
-import { TARGET_TYPE } from "../Ability/TargetTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
@@ -7,11 +7,15 @@ import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 import { Unit } from "../Unit/Unit";
 import { Weapons } from "../data";
 import { TriggerManager } from "./TriggerManager";
-import { TRIGGER, TRIGGER_EFFECT_TYPE, TriggerEffect } from "./TriggerTypes";
+import {
+  PossibleTriggerEffect,
+  TRIGGER,
+  TRIGGER_EFFECT_TYPE,
+} from "./TriggerTypes";
 
-const effectsMock: TriggerEffect[] = [
+const effectsMock: PossibleTriggerEffect[] = [
   {
-    type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
+    type: TRIGGER_EFFECT_TYPE.STATUS_EFFECT,
     trigger: TRIGGER.ON_HIT,
     target: TARGET_TYPE.HIT_TARGET,
     payload: [
@@ -22,7 +26,7 @@ const effectsMock: TriggerEffect[] = [
     ],
   },
   {
-    type: TRIGGER_EFFECT_TYPE.GRANT_STATUS_EFFECT,
+    type: TRIGGER_EFFECT_TYPE.STATUS_EFFECT,
     trigger: TRIGGER.BATTLE_START,
     target: TARGET_TYPE.SELF,
     payload: [
@@ -67,10 +71,10 @@ describe("Triggers", () => {
 
       unit.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
 
-      expect(unit.triggerEffects).toHaveLength(2);
+      expect(unit.triggerEffects).toHaveLength(3);
 
       expect(unit.triggerEffects[0].effect).toEqual({
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "HIT_TARGET",
         payload: [
@@ -97,6 +101,8 @@ describe("Triggers", () => {
       sortAndExecuteEvents(bm, unit.serializeEvents());
 
       expect(unit.statusEffects).toHaveLength(2);
+
+      expect(unit.stats.hp).toBe(unit.stats.maxHp - 50);
     });
   });
 });

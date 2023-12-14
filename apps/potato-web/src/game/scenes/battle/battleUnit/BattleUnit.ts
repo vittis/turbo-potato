@@ -8,6 +8,7 @@ import {
   createHeadCrushAnimation,
   createHealingWordAnimation,
   createPowershotAnimation,
+  createTriggerEffectAnimation,
   createWiggleAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
@@ -216,6 +217,53 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.currentAnimation = deathTween;
     }
 
+    if (event.type === "TRIGGER_EFFECT") {
+      const target = targets?.[0];
+      if (!target) {
+        throw new Error("Trigger Effect target is undefined");
+      }
+
+      const onImpactPoint = () => {
+        const receiveDamageEvent = event.subEvents?.find(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+        ) as StepEvent;
+        if (receiveDamageEvent) {
+          target.playEvent({ event: receiveDamageEvent });
+        }
+
+        const statusEffectEvents = event.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+        ) as StepEvent[];
+        if (statusEffectEvents.length > 0) {
+          statusEffectEvents.forEach((statusEffectEvent) => {
+            const targetIds = statusEffectEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply status effect: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: statusEffectEvent });
+            });
+          });
+        }
+      };
+
+      const onFinishAnimation = () => {
+        if (onEnd) onEnd();
+      };
+
+      const { triggerEffectTweenChain } = createTriggerEffectAnimation({
+        unit: this,
+        target,
+        trigger: event?.trigger || "",
+        onImpactPoint,
+        onFinishAnimation,
+      });
+
+      this.currentAnimation = triggerEffectTweenChain;
+    }
+
     if (event.type === "USE_ABILITY") {
       const abilityUsed = this.abilities.find((ability) => ability.name === event.payload.name) as Ability;
 
@@ -237,6 +285,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         this.restoreAbilities();
         if (onEnd) onEnd();
       };
+
       const onImpactPoint = () => {
         const receiveDamageEvent = event.payload.subEvents?.find(
           (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
@@ -250,7 +299,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         ) as StepEvent[];
         if (statusEffectEvents.length > 0) {
           statusEffectEvents.forEach((statusEffectEvent) => {
-            console.log(statusEffectEvent);
             const targetIds = statusEffectEvent.payload.targetsId as string[];
 
             targetIds.forEach((targetId) => {
@@ -283,10 +331,13 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {
-      this.addStatusEffect({ name: event.payload.payload.name, quantity: event.payload.payload.quantity });
-      // temporary
-
-      // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
+      event.payload.payload.forEach((statusEffect) => {
+        if (statusEffect.quantity < 0) {
+          this.removeStatusEffect({ name: statusEffect.name, quantity: statusEffect.quantity * -1 });
+        } else {
+          this.addStatusEffect({ name: statusEffect.name, quantity: statusEffect.quantity });
+        }
+      });
     }
 
     if (event.type === "CAST_SKILL") {
@@ -580,10 +631,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public removeStatusEffect({ name, quantity }: any) {
     const statusEffectToRemove = this.statusEffects.find((statusEffect) => statusEffect.name === name);
 
+    console.log({ statusEffectToRemove });
     if (!statusEffectToRemove) return;
 
     statusEffectToRemove.quantity -= quantity;
 
+    console.log(statusEffectToRemove.quantity);
     if (statusEffectToRemove.quantity <= 0) {
       statusEffectToRemove.container.destroy();
       this.statusEffects = this.statusEffects.filter((statusEffect) => statusEffect.name !== name);

@@ -205,6 +205,84 @@ export function createAttackAnimation({
   return { attackTweenChain };
 }
 
+export function createTriggerEffectAnimation({
+  unit,
+  target,
+  trigger,
+  onImpactPoint,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  target: BattleUnit;
+  trigger: string;
+  onImpactPoint: Function;
+  onFinishAnimation: Function;
+}) {
+  const targetGlowFx = target.sprite.preFX?.addGlow(0x10ab8c, 0);
+  unit.scene.tweens.add({
+    targets: targetGlowFx,
+    outerStrength: 2,
+    duration: 260 * animationSpeed,
+  });
+
+  const triggerEffectTweenChain = unit.scene.tweens.chain({
+    delay: 200 * animationSpeed,
+    targets: unit,
+    onComplete: () => {
+      unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
+      targetGlowFx?.destroy();
+    },
+    tweens: [
+      // pulinho
+      {
+        targets: unit.sprite,
+        y: unit.sprite.y - 38,
+        duration: 225 * animationSpeed,
+        yoyo: true,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+        onYoyo: () => {
+          onImpactPoint();
+
+          const battleStartText = unit.scene.add.text(0, -30, trigger.replace(/_/g, " "), {
+            fontSize: 28,
+            color: "#10AB8C",
+            fontFamily: "IM Fell DW Pica",
+            stroke: "#000000",
+            strokeThickness: 2,
+            fontStyle: "bold",
+            shadow: {
+              offsetX: 0,
+              offsetY: 3,
+              color: "#000",
+              blur: 0,
+              stroke: true,
+              fill: false,
+            },
+          });
+          battleStartText.setOrigin(0.5);
+
+          // damage text going up
+          unit.scene.tweens.add({
+            targets: battleStartText,
+            x: Phaser.Math.Between(-15, 15),
+            y: battleStartText.y - 38 - Phaser.Math.Between(0, 10),
+            alpha: 0,
+            duration: 1200,
+            ease: "Linear",
+            onComplete: () => {
+              battleStartText.destroy();
+            },
+          });
+
+          unit.add(battleStartText);
+        },
+      },
+    ],
+  });
+
+  return { triggerEffectTweenChain };
+}
+
 export function createHealingWordAnimation({
   unit,
   onImpactPoint,

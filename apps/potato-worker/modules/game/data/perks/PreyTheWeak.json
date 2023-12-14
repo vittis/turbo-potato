@@ -15,7 +15,7 @@
   ],
   "effects": [
     {
-      "type": "GRANT_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
       "payload": [

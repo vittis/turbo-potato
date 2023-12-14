@@ -26,7 +26,7 @@ export class Game {
 
     const unit2 = new Unit(
       OWNER.TEAM_TWO,
-      POSITION.BOT_BACK,
+      POSITION.TOP_BACK,
       this.boardManager
     );
     // unit2.setClass(new Class(Classes.Blacksmith));
@@ -83,8 +83,28 @@ export class Game {
     unit8.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit8.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
+    const unit9 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.BOT_BACK,
+      this.boardManager
+    );
+    unit9.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit9.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit9.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
+    const unit10 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.BOT_BACK,
+      this.boardManager
+    );
+    unit10.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit10.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unit10.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+
     this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);
+    /* this.boardManager.addToBoard(unit9);
+    this.boardManager.addToBoard(unit10); */
     /* this.boardManager.addToBoard(unit3);
     this.boardManager.addToBoard(unit4);
     this.boardManager.addToBoard(unit5);

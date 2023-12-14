@@ -1,4 +1,4 @@
-import { TARGET_TYPE } from "./Ability/TargetTypes";
+import { TARGET_TYPE } from "./Target/TargetTypes";
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Unit } from "./Unit/Unit";
 

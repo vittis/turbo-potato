@@ -67,7 +67,7 @@ export const MockWeapons = {
     ],
     effects: [
       {
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "HIT_TARGET",
         payload: [
@@ -78,7 +78,7 @@ export const MockWeapons = {
         ],
       },
       {
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "BATTLE_START",
         target: "SELF",
         payload: [
@@ -91,6 +91,14 @@ export const MockWeapons = {
             quantity: 10,
           },
         ],
+      },
+      {
+        type: "DAMAGE",
+        trigger: "BATTLE_START",
+        target: "SELF",
+        payload: {
+          value: 50,
+        },
       },
     ],
   } as EquipmentData,

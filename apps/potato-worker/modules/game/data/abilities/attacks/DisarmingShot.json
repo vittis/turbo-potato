@@ -6,10 +6,10 @@
   ],
   "target": "STANDARD",
   "baseDamage": 20,
-  "cooldown": 60,
+  "cooldown": 600,
   "effects": [
     {
-      "type": "GRANT_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
       "payload": [

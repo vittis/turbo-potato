@@ -1,5 +1,5 @@
-import { TriggerEffect } from "../Trigger/TriggerTypes";
-import { TARGET_TYPE } from "./TargetTypes";
+import { PossibleTriggerEffect, TriggerEffect } from "../Trigger/TriggerTypes";
+import { TARGET_TYPE } from "../Target/TargetTypes";
 
 export enum ABILITY_CATEGORY {
   ATTACK = "ATTACK",
@@ -21,5 +21,5 @@ export interface AbilityData {
   target: TARGET_TYPE;
   baseDamage: number;
   cooldown: number;
-  effects: TriggerEffect[];
+  effects: PossibleTriggerEffect[];
 }

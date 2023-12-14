@@ -13,7 +13,7 @@
   ],
   "effects": [
     {
-      "type": "GRANT_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
       "payload": [
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "type": "GRANT_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "BATTLE_START",
       "target": "SELF",
       "payload": [
@@ -37,6 +37,14 @@
           "quantity": 10
         }
       ]
+    },
+    {
+      "type": "DAMAGE",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "payload": {
+        "value": 20
+      }
     }
   ]
 }

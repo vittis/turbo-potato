@@ -1,5 +1,5 @@
-import { TARGET_TYPE } from "./Ability/TargetTypes";
-import { getTargetFunction } from "./Ability/TargetUtils";
+import { TARGET_TYPE } from "./Target/TargetTypes";
+import { getTargetFunction } from "./Target/TargetUtils";
 import { Unit } from "./Unit/Unit";
 
 export enum OWNER {

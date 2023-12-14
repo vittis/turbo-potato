@@ -1,5 +1,6 @@
 import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import { TRIGGER_EFFECT_TYPE, TriggerEffect } from "../Trigger/TriggerTypes";
 import { Unit } from "../Unit/Unit";
 import { Attacks } from "../data";
 import { Ability, VULNERABLE_LOSS_PER_HIT } from "./Ability";
@@ -54,15 +55,20 @@ describe("Ability", () => {
 
         expect(event.payload.subEvents).toHaveLength(2);
 
+        const effects = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+
         expect(event.payload.subEvents[1]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
             targetsId: [unit2.id],
-            payload: {
-              name: "VULNERABLE",
-              quantity: ability.data.effects[0].payload[0].quantity,
-            },
+            payload: [
+              {
+                name: "VULNERABLE",
+                quantity: effects[0].payload[0].quantity,
+              },
+            ],
           },
         });
       });
@@ -84,7 +90,9 @@ describe("Ability", () => {
           payload: {
             type: "STATUS_EFFECT",
             targetsId: [unit2.id],
-            payload: { name: "VULNERABLE", quantity: -VULNERABLE_LOSS_PER_HIT },
+            payload: [
+              { name: "VULNERABLE", quantity: -VULNERABLE_LOSS_PER_HIT },
+            ],
           },
         });
       });
@@ -106,7 +114,7 @@ describe("Ability", () => {
           payload: {
             type: "STATUS_EFFECT",
             targetsId: [unit2.id],
-            payload: { name: "VULNERABLE", quantity: -2 },
+            payload: [{ name: "VULNERABLE", quantity: -2 }],
           },
         });
       });
@@ -121,15 +129,20 @@ describe("Ability", () => {
 
         expect(event.payload.subEvents).toHaveLength(2);
 
+        const effects = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+
         expect(event.payload.subEvents[1]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
             targetsId: [unit1.id],
-            payload: {
-              name: "ATTACK_POWER",
-              quantity: ability.data.effects[0].payload[0].quantity,
-            },
+            payload: [
+              {
+                name: "ATTACK_POWER",
+                quantity: effects[0].payload[0].quantity,
+              },
+            ],
           },
         });
       });

@@ -175,26 +175,21 @@ function getSameRowTarget(bm: BoardManager, unit: Unit): Unit[] {
 }
 
 function getSameRowAlliesTarget(bm: BoardManager, unit: Unit): Unit[] {
-  const unitsInRow = bm.getAllAliveUnitsInRow(unit.owner, bm.getUnitRow(unit));
-
-  const alliedUnitInRow = unitsInRow.filter(
-    (alliedUnit) => alliedUnit.id !== unit.id
+  const alliedUnitsInSameRow = bm.getAllAliveUnitsInRow(
+    unit.owner,
+    bm.getUnitRow(unit)
   );
 
-  return alliedUnitInRow as Unit[];
+  return alliedUnitsInSameRow as Unit[];
 }
 
 function getSameColumnAlliesTarget(bm: BoardManager, unit: Unit): Unit[] {
-  const unitsInColumn = bm.getAllAliveUnitsInColumn(
+  const alliedUnitsInSameColumn = bm.getAllAliveUnitsInColumn(
     unit.owner,
     bm.getUnitColumn(unit)
   );
 
-  const alliedUnitInColumn = unitsInColumn.filter(
-    (alliedUnit) => alliedUnit.id !== unit.id
-  );
-
-  return alliedUnitInColumn as Unit[];
+  return alliedUnitsInSameColumn as Unit[];
 }
 
 function getSideAllyTarget(bm: BoardManager, unit: Unit): Unit[] {
@@ -262,11 +257,7 @@ function getAllUnitsTarget(bm: BoardManager, unit: Unit): Unit[] {
 }
 
 function getAllAlliedUnitsTarget(bm: BoardManager, unit: Unit): Unit[] {
-  const allUnitsInTeam = bm.getAllAliveUnitsOfOwner(unit.owner);
-
-  const allAlliedUnits = allUnitsInTeam.filter(
-    (alliedUnit) => alliedUnit.id !== unit.id
-  );
+  const allAlliedUnits = bm.getAllAliveUnitsOfOwner(unit.owner);
 
   return allAlliedUnits as Unit[];
 }

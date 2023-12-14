@@ -26,7 +26,7 @@ export const MockAttacks = {
     cooldown: 120,
     effects: [
       {
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "HIT_TARGET",
         payload: [
@@ -47,7 +47,7 @@ export const MockAttacks = {
     cooldown: 60,
     effects: [
       {
-        type: "GRANT_STATUS_EFFECT",
+        type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "SELF",
         payload: [

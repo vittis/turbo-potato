@@ -1,4 +1,5 @@
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import { TRIGGER } from "../Trigger/TriggerTypes";
 
 export enum EVENT_TYPE {
   USE_ABILITY = "USE_ABILITY",
@@ -91,5 +92,6 @@ export interface StatusEffectPayload {
 // TRIGGER EFFECT EVENTS -----------------------------------------------
 
 export interface TriggerEffectEvent extends Event {
+  trigger: TRIGGER;
   subEvents: SubEvent[];
 }

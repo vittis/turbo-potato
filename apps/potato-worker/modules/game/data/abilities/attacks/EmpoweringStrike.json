@@ -29,17 +29,6 @@
           "quantity": 5
         }
       ]
-    },
-    {
-      "type": "STATUS_EFFECT",
-      "trigger": "ON_HIT",
-      "target": "HIT_TARGET",
-      "payload": [
-        {
-          "name": "ATTACK_POWER",
-          "quantity": 200
-        }
-      ]
     }
   ]
 }

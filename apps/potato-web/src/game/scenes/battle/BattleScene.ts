@@ -8,6 +8,7 @@ import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
 // todo: reuse from server
 enum EVENT_TYPE {
   USE_ABILITY = "USE_ABILITY",
+  TRIGGER_EFFECT = "TRIGGER_EFFECT",
   INSTANT_EFFECT = "INSTANT_EFFECT", // todo better event/subevent type organization
   FAINT = "FAINT",
   ATTACK = "ATTACK",
@@ -24,6 +25,7 @@ export interface StepEvent {
   type: EVENT_TYPE;
   payload?: any;
   step: number;
+  trigger?: string;
   subEvents?: SubStepEvent[];
 }
 
@@ -33,7 +35,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 25;
+export const GAME_LOOP_SPEED = 10;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -139,29 +141,40 @@ export class Battle extends Phaser.Scene {
 
     const onEndAnimation = () => {
       eventPile.shift();
-      if (eventPile.length > 0) {
-        eventPile[0].unit.playEvent(eventPile[0]);
-      } else {
-        this.resumeTimeEvents();
 
-        const isLastStep = step === this.totalSteps;
-        if (isLastStep) {
-          useGameStore.getState().setIsGamePaused(true);
+      if (eventPile.length > 0 && eventPile.every((event) => event.event.type === "FAINT")) {
+        eventPile.forEach((event) => {
+          event.unit.playEvent(event);
+        });
+        eventPile.splice(0, eventPile.length);
+      } else {
+        if (eventPile.length > 0) {
+          eventPile[0].unit.playEvent(eventPile[0]);
+        } else {
+          this.resumeTimeEvents();
+
+          const isLastStep = step === this.totalSteps;
+          if (isLastStep) {
+            useGameStore.getState().setIsGamePaused(true);
+          }
         }
       }
     };
 
-    eventsOnThisStep.forEach((event) => {
+    eventsOnThisStep.forEach((event, index) => {
       const unit = this.units.find((unit) => unit.id === event.actorId);
       if (!unit) {
         throw Error(`couldnt find unit id: ${event.actorId}`);
       }
 
-      const targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
+      let targets;
 
       let onEnd;
       let onStart;
+
       if (event.type === "USE_ABILITY") {
+        targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
+
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
@@ -180,6 +193,19 @@ export class Battle extends Phaser.Scene {
         };
       }
 
+      if (event.type === "TRIGGER_EFFECT") {
+        targets = [unit];
+
+        this.board.bringToTop(unit);
+
+        this.isPlayingEventAnimation = true;
+        this.pauseTimeEvents();
+
+        onEnd = () => {
+          onEndAnimation();
+        };
+      }
+
       if (event.type === "CAST_SKILL") {
         this.board.bringToTop(unit);
 
@@ -195,7 +221,9 @@ export class Battle extends Phaser.Scene {
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
+
         this.pauseTimeEvents();
+
         onEnd = () => {
           onEndAnimation();
         };

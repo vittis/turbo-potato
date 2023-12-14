@@ -211,7 +211,14 @@ export class Unit {
         const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
 
         subEvent.payload.payload.forEach((statusEffect) => {
-          target.statusEffectManager.applyStatusEffect(statusEffect);
+          if (statusEffect.quantity > 0) {
+            target.statusEffectManager.applyStatusEffect(statusEffect);
+          } else {
+            target.statusEffectManager.removeStacks(
+              statusEffect.name,
+              statusEffect.quantity * -1
+            );
+          }
         });
 
         target.statsManager.recalculateStatsFromStatusEffects(
@@ -269,6 +276,7 @@ export class Unit {
         actorId: this.id,
         step: this.currentStep,
         type: EVENT_TYPE.TRIGGER_EFFECT,
+        trigger: TRIGGER.BATTLE_START,
         subEvents,
       };
 

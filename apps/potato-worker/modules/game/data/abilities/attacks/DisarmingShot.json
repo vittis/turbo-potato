@@ -6,7 +6,7 @@
   ],
   "target": "STANDARD",
   "baseDamage": 20,
-  "cooldown": 60,
+  "cooldown": 600,
   "effects": [
     {
       "type": "STATUS_EFFECT",

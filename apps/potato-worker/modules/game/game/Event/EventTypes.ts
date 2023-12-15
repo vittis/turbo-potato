@@ -36,6 +36,7 @@ export interface UseAbilityEvent extends Event {
 }
 
 export interface UseAbilityEventPayload {
+  id: string;
   name: string;
   targetsId: string[];
   subEvents: SubEvent[];

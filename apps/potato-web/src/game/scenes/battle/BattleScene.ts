@@ -181,14 +181,14 @@ export class Battle extends Phaser.Scene {
         this.pauseTimeEvents();
         onEnd = () => {
           this.units.forEach((unit) => {
-            unit.restoreAbilities();
+            unit.abilitiesManager.restoreAbilities();
           });
           onEndAnimation();
         };
         onStart = () => {
           this.units.forEach((unit) => {
             if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) return;
-            unit.unhighlightAbilities();
+            unit.abilitiesManager.unhighlightAbilities();
           });
         };
       }
@@ -269,7 +269,7 @@ export class Battle extends Phaser.Scene {
   resumeTimeEvents() {
     this.isPlayingEventAnimation = false;
     this.units.forEach((unit) => {
-      unit.resumeSkillCooldown();
+      unit.abilitiesManager.resumeSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = false;
@@ -277,7 +277,7 @@ export class Battle extends Phaser.Scene {
   }
   pauseTimeEvents() {
     this.units.forEach((unit) => {
-      unit.pauseSkillCooldown();
+      unit.abilitiesManager.pauseSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = true;

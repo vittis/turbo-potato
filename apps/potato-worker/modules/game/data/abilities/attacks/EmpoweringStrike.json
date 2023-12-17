@@ -5,7 +5,7 @@
     "WEAPON_ABILITY"
   ],
   "target": "STANDARD",
-  "baseDamage": 20,
+  "baseDamage": 200,
   "cooldown": 60,
   "effects": [
     {

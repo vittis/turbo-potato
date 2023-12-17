@@ -87,6 +87,23 @@ describe("Triggers", () => {
     });
   });
 
+  describe("From perk", () => {
+    test("should add trigger effect from FOCUSED MIND (from WAND)", () => {
+      const unit = new Unit(OWNER.TEAM_ONE, POSITION.BOT_MID);
+
+      unit.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
+
+      expect(unit.triggerEffects).toHaveLength(1);
+
+      expect(unit.triggerEffects[0].effect).toEqual({
+        type: "STATUS_EFFECT",
+        trigger: "BATTLE_START",
+        target: "SELF",
+        payload: [{ name: "FOCUS", quantity: 5 }],
+      });
+    });
+  });
+
   describe("BATTLE_START", () => {
     it("should generate event and apply trigger effect on battle start (from AXE)", () => {
       const bm = new BoardManager();
@@ -96,7 +113,7 @@ describe("Triggers", () => {
 
       unit.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
 
-      unit.onBattleStart();
+      unit.triggerManager.onTrigger(TRIGGER.BATTLE_START, unit, bm);
 
       sortAndExecuteEvents(bm, unit.serializeEvents());
 

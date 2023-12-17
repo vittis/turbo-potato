@@ -144,7 +144,17 @@ export class Battle extends Phaser.Scene {
 
       if (eventPile.length > 0 && eventPile.every((event) => event.event.type === "FAINT")) {
         eventPile.forEach((event) => {
-          event.unit.playEvent(event);
+          // todo better way to do this (maybe refactor this entire function)
+          const onEnd = () => {
+            if (event?.onEnd) {
+              event.onEnd();
+            }
+            const isLastStep = step === this.totalSteps;
+            if (isLastStep) {
+              useGameStore.getState().setIsGamePaused(true);
+            }
+          };
+          event.unit.playEvent({ ...event, onEnd });
         });
         eventPile.splice(0, eventPile.length);
       } else {
@@ -217,7 +227,8 @@ export class Battle extends Phaser.Scene {
       }
 
       // todo is this necessary: test with more than one death
-      if (event.type === "FAINT") {
+      /* if (event.type === "FAINT") {
+        console.log("oi???");
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
@@ -227,7 +238,7 @@ export class Battle extends Phaser.Scene {
         onEnd = () => {
           onEndAnimation();
         };
-      }
+      } */
 
       //  "allUnits" is a hack to access all units from the event, need to think a better way in the future
       eventPile.push({ unit, event, targets, onEnd, onStart, allUnits: this.units });

@@ -34,6 +34,7 @@ export interface UseAbilityEvent extends Event<EVENT_TYPE.USE_ABILITY> {
 }
 
 export interface UseAbilityEventPayload {
+  id: string;
   name: string;
   targetsId: string[];
   subEvents: SubEvent[];

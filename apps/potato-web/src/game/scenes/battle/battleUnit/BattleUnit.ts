@@ -12,16 +12,7 @@ import {
   createWiggleAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
-
-interface Ability {
-  name: string;
-  container: Phaser.GameObjects.Container;
-  icon: Phaser.GameObjects.Image;
-  overlay: Phaser.GameObjects.Image;
-  tween: Phaser.Tweens.Tween;
-  border: Phaser.GameObjects.Image;
-  shineFX: Phaser.FX.Shine | undefined;
-}
+import { Ability, BattleUnitAbilities } from "./BattleUnitAbilities";
 
 interface StatusEffect {
   name: string;
@@ -37,8 +28,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public sprite!: Phaser.GameObjects.Image;
   public hpBar: Phaser.GameObjects.Rectangle;
   public shieldBar: Phaser.GameObjects.Rectangle;
-  /* public apBar: Phaser.GameObjects.Rectangle;
-  public spBar: Phaser.GameObjects.Rectangle; */
   public boardPosition: number;
   public owner: number;
   public hpText: Phaser.GameObjects.Text;
@@ -53,7 +42,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public isSelected = false;
   public spBarTween!: Phaser.Tweens.Tween;
 
-  public abilities = [] as Ability[];
+  public abilitiesManager: BattleUnitAbilities;
 
   public statusEffects = [] as StatusEffect[];
 
@@ -108,8 +97,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     const { hpBar, shieldBar } = createBars(this);
     this.hpBar = hpBar;
     this.shieldBar = shieldBar;
-    /* this.apBar = apBar;
-    this.spBar = spBar; */
 
     const { hpText, shieldText } = createTexts(this, hpBar.x, hpBar.y);
     this.hpText = hpText;
@@ -127,53 +114,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     /* this.addStatusEffect({ name: "vulnerable", quantity: 10 });
     this.removeStatusEffect({ name: "fast", quantity: 10 }); */
 
-    this.abilities = dataUnit.abilities.map((ability: any, index: number) => {
-      const abilityContainer = scene.add.container(0, 0);
-
-      const icon = scene.add.image(0, 0, ability.data.name.toLowerCase().replace(/\s/g, "_"));
-
-      const shineFX = icon.preFX?.addShine(2);
-      shineFX?.setActive(false);
-
-      abilityContainer.add(icon);
-
-      const borderGraphics = scene.add.graphics();
-      borderGraphics.lineStyle(3, 0xffffff); // You can customize the color and thickness of the border
-      borderGraphics.strokeRoundedRect(0, 0, icon.width + 4, icon.height + 4, 8);
-      borderGraphics.generateTexture("border_texture", icon.width + 4, icon.height + 4);
-      borderGraphics.destroy();
-
-      const iconBorder = scene.add.image(0, 0, "border_texture");
-      iconBorder.setTint(0x232422);
-      abilityContainer.add(iconBorder);
-
-      const background = scene.add.graphics();
-      background.fillStyle(0x1f1f1f, 1);
-      background.fillRect(0, 0, 32, 32);
-      background.generateTexture("ability_overlay", icon.width, icon.height);
-      background.destroy();
-
-      const overlay = scene.add
-        .image((icon.width / 2) * -1, icon.height / 2, "ability_overlay")
-        .setTint(0x000000)
-        .setAlpha(0);
-      overlay.setOrigin(0, 1);
-
-      abilityContainer.add(overlay);
-      abilityContainer.setDepth(1);
-      abilityContainer.setPosition((icon.width + 10) * index, 102);
-
-      this.add(abilityContainer);
-
-      return {
-        name: ability.data.name,
-        icon,
-        overlay,
-        container: abilityContainer,
-        border: iconBorder,
-        shineFX,
-      };
-    });
+    this.abilitiesManager = new BattleUnitAbilities(this, scene, dataUnit);
+    this.add(this.abilitiesManager);
 
     scene.add.existing(this);
   }
@@ -265,7 +207,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "USE_ABILITY") {
-      const abilityUsed = this.abilities.find((ability) => ability.name === event.payload.name) as Ability;
+      const abilityUsed = this.abilitiesManager.abilities.find((ability) => ability.id === event.payload.id) as Ability;
 
       const target = targets?.[0];
       if (!target) {
@@ -274,15 +216,15 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
       const onStartAnimation = () => {
         // this.glow?.setActive(true);
-        this.highlightAbility(abilityUsed);
-        this.unhighlightAbilities({ exclude: [abilityUsed] });
+        this.abilitiesManager.highlightAbility(abilityUsed);
+        this.abilitiesManager.unhighlightAbilities({ exclude: [abilityUsed] });
         if (onStart) onStart();
       };
 
       const onFinishAnimation = () => {
         // this.glow?.setActive(false);
         abilityUsed?.overlay?.setAlpha(0.6);
-        this.restoreAbilities();
+        this.abilitiesManager.restoreAbilities();
         if (onEnd) onEnd();
       };
 
@@ -499,58 +441,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
   }
 
-  public highlightAbility(abilityUsed: Ability) {
-    if (!abilityUsed) return;
-    abilityUsed.shineFX?.setActive(true);
-    abilityUsed.overlay.setAlpha(0);
-    this.scene.tweens.add({
-      targets: abilityUsed?.container,
-      scale: 1.2,
-      duration: 200,
-      ease: "Bounce.easeOut",
-    });
-  }
-
-  public unhighlightAbilities({ exclude }: { exclude?: Ability[] } = {}) {
-    this.abilities.forEach((ability) => {
-      if (exclude?.includes(ability)) return;
-      this.scene.tweens.add({
-        targets: ability?.container,
-        scale: 0.7,
-        duration: 200,
-        ease: "Bounce.easeOut",
-      });
-    });
-  }
-
-  public restoreAbilities() {
-    this.abilities.forEach((ability) => {
-      ability?.shineFX?.setActive(false);
-      this.scene.tweens.add({
-        targets: ability?.container,
-        scale: 1,
-        duration: 200,
-        ease: "Bounce.easeOut",
-      });
-    });
-  }
-
-  public createAbilityOverlayTween() {
-    this.abilities.forEach((ability, index: number) => {
-      ability.overlay.setAlpha(0.6);
-
-      ability.tween = this.scene.tweens.add({
-        targets: ability.overlay,
-        scaleY: { from: 1, to: 0 },
-        duration: GAME_LOOP_SPEED * this.dataUnit.abilities[index].cooldown,
-        ease: "Linear",
-        repeat: -1,
-      });
-    });
-  }
-
   public onStart() {
-    this.createAbilityOverlayTween();
+    this.abilitiesManager.createAbilityOverlayTween();
   }
 
   public resumeAnimations() {
@@ -562,21 +454,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     if (this.currentAnimation?.isPlaying()) {
       this.currentAnimation.pause();
     }
-  }
-  public resumeSkillCooldown() {
-    this.abilities.forEach((ability) => {
-      if (ability.tween && ability.tween.isPaused()) {
-        ability.tween.resume();
-      }
-    });
-  }
-
-  public pauseSkillCooldown() {
-    this.abilities.forEach((ability) => {
-      if (ability.tween && ability.tween.isPlaying()) {
-        ability.tween.pause();
-      }
-    });
   }
 
   public addStatusEffect({ name, quantity }: any) {

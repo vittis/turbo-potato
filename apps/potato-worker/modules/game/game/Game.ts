@@ -104,9 +104,9 @@ export class Game {
 
     this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);
-    /* this.boardManager.addToBoard(unit9);
+    this.boardManager.addToBoard(unit9);
     this.boardManager.addToBoard(unit10);
-    this.boardManager.addToBoard(unit3); */
+    this.boardManager.addToBoard(unit3);
     /* this.boardManager.addToBoard(unit4);
     this.boardManager.addToBoard(unit5);
     this.boardManager.addToBoard(unit6);
@@ -161,19 +161,14 @@ export function runGame(bm: BoardManager) {
 
     bm.getAllAliveUnits().forEach((unit) => {
       if (!unit.isDead && unit.hasDied()) {
-        unit.markAsDead();
-        eventHistory.push(...unit.serializeEvents());
+        unit.onDeath();
 
-        const teamUnits = bm.getAllUnitsOfOwner(unit.owner);
-        teamUnits.forEach((teamUnit) => {
-          if (!teamUnit.isDead && teamUnit.id !== unit.id) {
-            teamUnit.triggerManager.onTrigger(TRIGGER.ALLY_FAINT, teamUnit, bm);
-
-            const triggerEvents: PossibleEvent[] = [];
-            triggerEvents.push(...teamUnit.serializeEvents());
-            const orderedEvents = sortAndExecuteEvents(bm, triggerEvents);
-            eventHistory.push(...orderedEvents);
-          }
+        // execute events from death related triggers
+        bm.getAllUnits().forEach((unit) => {
+          const triggerEvents: PossibleEvent[] = [];
+          triggerEvents.push(...unit.serializeEvents());
+          const orderedEvents = sortAndExecuteEvents(bm, triggerEvents);
+          eventHistory.push(...orderedEvents);
         });
       }
     });

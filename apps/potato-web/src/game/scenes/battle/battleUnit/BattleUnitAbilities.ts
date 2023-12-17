@@ -10,6 +10,52 @@ export interface Ability {
   tween: Phaser.Tweens.Tween;
   border: Phaser.GameObjects.Image;
   shineFX: Phaser.FX.Shine | undefined;
+  hasUsed: boolean;
+}
+
+// not using this yet
+export function highlightAbility(ability: Ability, scene: Phaser.Scene) {
+  if (!ability) {
+    throw Error("Couldnt find ability");
+  }
+  ability.shineFX?.setActive(true);
+  ability.overlay.setAlpha(0);
+  scene.tweens.add({
+    targets: ability?.container,
+    scale: 1.2,
+    duration: 200,
+    ease: "Bounce.easeOut",
+  });
+}
+
+// not using this yet
+export function unhighlightAbilities(abilities: Ability[], scene: Phaser.Scene) {
+  abilities.forEach((ability) => {
+    if (ability.hasUsed) {
+      ability.overlay.scaleY = 1;
+    }
+    ability?.shineFX?.setActive(false);
+    scene.tweens.add({
+      targets: ability?.container,
+      scale: 0.7,
+      duration: 200,
+      ease: "Bounce.easeOut",
+    });
+  });
+}
+
+// not using this yet
+export function restoreAbilities(abilities: Ability[], scene: Phaser.Scene) {
+  abilities.forEach((ability) => {
+    ability.hasUsed = false;
+    ability?.shineFX?.setActive(false);
+    scene.tweens.add({
+      targets: ability?.container,
+      scale: 1,
+      duration: 200,
+      ease: "Bounce.easeOut",
+    });
+  });
 }
 
 export class BattleUnitAbilities extends Phaser.GameObjects.Container {

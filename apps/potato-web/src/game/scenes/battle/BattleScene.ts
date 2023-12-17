@@ -4,6 +4,7 @@ import { queryClient } from "../../../services/api/queryClient";
 import { useGameStore } from "../../../services/state/game";
 import { preloadBattle, setupBattle } from "./BattleSetup";
 import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
+import { Ability, highlightAbility, restoreAbilities, unhighlightAbilities } from "./battleUnit/BattleUnitAbilities";
 
 // todo: reuse from server
 enum EVENT_TYPE {
@@ -35,7 +36,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 10;
+export const GAME_LOOP_SPEED = 20;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -183,6 +184,11 @@ export class Battle extends Phaser.Scene {
       let onStart;
 
       if (event.type === "USE_ABILITY") {
+        const useAbilityEventsOnThisStep = eventsOnThisStep.filter((e) => e.step === step && e.type === "USE_ABILITY");
+        const allAbilitiesOfAllUnits = this.units.reduce((acc, unit) => {
+          return [...acc, ...unit.abilitiesManager.abilities];
+        }, [] as Ability[]);
+
         targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
 
         this.board.bringToTop(unit);
@@ -190,16 +196,60 @@ export class Battle extends Phaser.Scene {
         this.isPlayingEventAnimation = true;
         this.pauseTimeEvents();
         onEnd = () => {
-          this.units.forEach((unit) => {
-            unit.abilitiesManager.restoreAbilities();
-          });
+          if (useAbilityEventsOnThisStep.length === 1) {
+            this.units.forEach((unit) => {
+              unit.abilitiesManager.restoreAbilities();
+            });
+          } else {
+            // more than one ability used in the step
+            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            abilityUsed.hasUsed = true;
+            unhighlightAbilities([abilityUsed], this);
+            const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
+            const areAllAbilitiesUsed = allAbilitiesUsedIds.every((abilityId) => {
+              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+              return abilityUsed.hasUsed;
+            });
+            if (areAllAbilitiesUsed) {
+              restoreAbilities(allAbilitiesOfAllUnits, this);
+            }
+          }
+
           onEndAnimation();
         };
         onStart = () => {
-          this.units.forEach((unit) => {
-            if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) return;
-            unit.abilitiesManager.unhighlightAbilities();
-          });
+          if (useAbilityEventsOnThisStep.length === 1) {
+            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            highlightAbility(abilityUsed, this);
+            unhighlightAbilities(
+              allAbilitiesOfAllUnits.filter((a) => a.id !== abilityUsed.id),
+              this
+            );
+
+            this.units.forEach((unit) => {
+              if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) {
+                return;
+              }
+              unit.abilitiesManager.unhighlightAbilities();
+            });
+          } else {
+            // more than one ability used in the step
+            const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
+
+            allAbilitiesUsedIds.forEach((abilityId) => {
+              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+
+              if (!abilityUsed.hasUsed) {
+                highlightAbility(abilityUsed, this);
+              }
+            });
+
+            allAbilitiesOfAllUnits.forEach((ability) => {
+              if (!allAbilitiesUsedIds.includes(ability.id)) {
+                unhighlightAbilities([ability], this);
+              }
+            });
+          }
         };
       }
 
@@ -227,8 +277,7 @@ export class Battle extends Phaser.Scene {
       }
 
       // todo is this necessary: test with more than one death
-      /* if (event.type === "FAINT") {
-        console.log("oi???");
+      if (event.type === "FAINT") {
         this.board.bringToTop(unit);
 
         this.isPlayingEventAnimation = true;
@@ -238,7 +287,7 @@ export class Battle extends Phaser.Scene {
         onEnd = () => {
           onEndAnimation();
         };
-      } */
+      }
 
       //  "allUnits" is a hack to access all units from the event, need to think a better way in the future
       eventPile.push({ unit, event, targets, onEnd, onStart, allUnits: this.units });

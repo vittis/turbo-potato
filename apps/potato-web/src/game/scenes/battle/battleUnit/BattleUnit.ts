@@ -215,16 +215,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }
 
       const onStartAnimation = () => {
-        // this.glow?.setActive(true);
-        this.abilitiesManager.highlightAbility(abilityUsed);
-        this.abilitiesManager.unhighlightAbilities({ exclude: [abilityUsed] });
         if (onStart) onStart();
       };
 
       const onFinishAnimation = () => {
-        // this.glow?.setActive(false);
         abilityUsed?.overlay?.setAlpha(0.6);
-        this.abilitiesManager.restoreAbilities();
         if (onEnd) onEnd();
       };
 

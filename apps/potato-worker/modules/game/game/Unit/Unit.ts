@@ -266,7 +266,7 @@ export class Unit {
     this.statsManager.recalculateStatsFromStatusEffects(this.statusEffects);
   }
 
-  markAsDead() {
+  onDeath() {
     if (this.isDead) {
       throw Error(`Unit ${this.toString()} is already dead`);
     }
@@ -276,6 +276,19 @@ export class Unit {
       actorId: this.id,
       type: EVENT_TYPE.FAINT,
       step: this.currentStep,
+    });
+
+    // todo add other death triggers
+
+    const teamUnits = this.bm.getAllUnitsOfOwner(this.owner);
+    teamUnits.forEach((teamUnit) => {
+      if (!teamUnit.isDead && teamUnit.id !== this.id) {
+        teamUnit.triggerManager.onTrigger(
+          TRIGGER.ALLY_FAINT,
+          teamUnit,
+          this.bm
+        );
+      }
     });
   }
 

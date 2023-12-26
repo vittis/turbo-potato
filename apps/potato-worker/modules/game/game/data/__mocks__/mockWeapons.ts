@@ -102,4 +102,24 @@ export const MockWeapons = {
       },
     ],
   } as EquipmentData,
+  Wand: {
+    name: "Wand",
+    allowedSlots: ["MAIN_HAND"],
+    mods: [
+      {
+        type: "GRANT_ABILITY",
+        payload: {
+          name: "Empowering Strike",
+        },
+      },
+      {
+        type: "GRANT_PERK",
+        payload: {
+          name: "Focused Mind",
+          tier: 1,
+        },
+      },
+    ],
+    effects: [],
+  } as EquipmentData,
 };

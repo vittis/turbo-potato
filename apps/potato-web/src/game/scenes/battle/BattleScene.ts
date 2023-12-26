@@ -4,6 +4,7 @@ import { queryClient } from "../../../services/api/queryClient";
 import { useGameStore } from "../../../services/state/game";
 import { preloadBattle, setupBattle } from "./BattleSetup";
 import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
+import { Ability, highlightAbility, restoreAbilities, unhighlightAbilities } from "./battleUnit/BattleUnitAbilities";
 
 // todo: reuse from server
 enum EVENT_TYPE {
@@ -35,7 +36,7 @@ export async function fetchBattleSetup() {
   return data;
 }
 
-export const GAME_LOOP_SPEED = 10;
+export const GAME_LOOP_SPEED = 20;
 
 export class Battle extends Phaser.Scene {
   text: any;
@@ -144,7 +145,17 @@ export class Battle extends Phaser.Scene {
 
       if (eventPile.length > 0 && eventPile.every((event) => event.event.type === "FAINT")) {
         eventPile.forEach((event) => {
-          event.unit.playEvent(event);
+          // todo better way to do this (maybe refactor this entire function)
+          const onEnd = () => {
+            if (event?.onEnd) {
+              event.onEnd();
+            }
+            const isLastStep = step === this.totalSteps;
+            if (isLastStep) {
+              useGameStore.getState().setIsGamePaused(true);
+            }
+          };
+          event.unit.playEvent({ ...event, onEnd });
         });
         eventPile.splice(0, eventPile.length);
       } else {
@@ -173,6 +184,11 @@ export class Battle extends Phaser.Scene {
       let onStart;
 
       if (event.type === "USE_ABILITY") {
+        const useAbilityEventsOnThisStep = eventsOnThisStep.filter((e) => e.step === step && e.type === "USE_ABILITY");
+        const allAbilitiesOfAllUnits = this.units.reduce((acc, unit) => {
+          return [...acc, ...unit.abilitiesManager.abilities];
+        }, [] as Ability[]);
+
         targets = this.units.filter((unit) => event.payload?.targetsId?.includes(unit.id));
 
         this.board.bringToTop(unit);
@@ -180,16 +196,60 @@ export class Battle extends Phaser.Scene {
         this.isPlayingEventAnimation = true;
         this.pauseTimeEvents();
         onEnd = () => {
-          this.units.forEach((unit) => {
-            unit.restoreAbilities();
-          });
+          if (useAbilityEventsOnThisStep.length === 1) {
+            this.units.forEach((unit) => {
+              unit.abilitiesManager.restoreAbilities();
+            });
+          } else {
+            // more than one ability used in the step
+            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            abilityUsed.hasUsed = true;
+            unhighlightAbilities([abilityUsed], this);
+            const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
+            const areAllAbilitiesUsed = allAbilitiesUsedIds.every((abilityId) => {
+              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+              return abilityUsed.hasUsed;
+            });
+            if (areAllAbilitiesUsed) {
+              restoreAbilities(allAbilitiesOfAllUnits, this);
+            }
+          }
+
           onEndAnimation();
         };
         onStart = () => {
-          this.units.forEach((unit) => {
-            if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) return;
-            unit.unhighlightAbilities();
-          });
+          if (useAbilityEventsOnThisStep.length === 1) {
+            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            highlightAbility(abilityUsed, this);
+            unhighlightAbilities(
+              allAbilitiesOfAllUnits.filter((a) => a.id !== abilityUsed.id),
+              this
+            );
+
+            this.units.forEach((unit) => {
+              if (unit.id === event.actorId /* || event.payload?.targetsId?.includes(unit.id) */) {
+                return;
+              }
+              unit.abilitiesManager.unhighlightAbilities();
+            });
+          } else {
+            // more than one ability used in the step
+            const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
+
+            allAbilitiesUsedIds.forEach((abilityId) => {
+              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+
+              if (!abilityUsed.hasUsed) {
+                highlightAbility(abilityUsed, this);
+              }
+            });
+
+            allAbilitiesOfAllUnits.forEach((ability) => {
+              if (!allAbilitiesUsedIds.includes(ability.id)) {
+                unhighlightAbilities([ability], this);
+              }
+            });
+          }
         };
       }
 
@@ -269,7 +329,7 @@ export class Battle extends Phaser.Scene {
   resumeTimeEvents() {
     this.isPlayingEventAnimation = false;
     this.units.forEach((unit) => {
-      unit.resumeSkillCooldown();
+      unit.abilitiesManager.resumeSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = false;
@@ -277,7 +337,7 @@ export class Battle extends Phaser.Scene {
   }
   pauseTimeEvents() {
     this.units.forEach((unit) => {
-      unit.pauseSkillCooldown();
+      unit.abilitiesManager.pauseSkillCooldown();
     });
     this.timeEventsHistory.forEach((event) => {
       event.paused = true;

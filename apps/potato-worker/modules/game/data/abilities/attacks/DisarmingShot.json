@@ -5,8 +5,8 @@
     "WEAPON_ABILITY"
   ],
   "target": "STANDARD",
-  "baseDamage": 20,
-  "cooldown": 600,
+  "baseDamage": 50,
+  "cooldown": 60,
   "effects": [
     {
       "type": "STATUS_EFFECT",

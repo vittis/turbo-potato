@@ -1,7 +1,7 @@
 import { BoardManager } from "../BoardManager";
-import { EVENT_TYPE, Event } from "./EventTypes";
+import { EVENT_TYPE, PossibleEvent } from "./EventTypes";
 
-function sortEventsByType(events: any[]) {
+function sortEventsByType(events: PossibleEvent[]) {
   events.sort(function (a, b) {
     if (a.type === EVENT_TYPE.USE_ABILITY && b.type === EVENT_TYPE.FAINT) {
       return -1;
@@ -18,7 +18,7 @@ function sortEventsByType(events: any[]) {
   return events;
 }
 
-function executeStepEvents(bm: BoardManager, events: any[]) {
+function executeStepEvents(bm: BoardManager, events: PossibleEvent[]) {
   events.forEach((event) => {
     bm.getUnitById(event.actorId).applyEvent(event);
   });
@@ -26,6 +26,9 @@ function executeStepEvents(bm: BoardManager, events: any[]) {
   return events;
 }
 
-export function sortAndExecuteEvents(bm: BoardManager, events: Event[]) {
+export function sortAndExecuteEvents(
+  bm: BoardManager,
+  events: PossibleEvent[]
+) {
   return executeStepEvents(bm, sortEventsByType(events));
 }

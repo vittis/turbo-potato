@@ -2,10 +2,11 @@ import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Unit } from "./Unit/Unit";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
-import { EVENT_TYPE, Event } from "./Event/EventTypes";
 import { sortAndExecuteEvents } from "./Event/EventUtils";
 import { Class } from "./Class/Class";
 import { Classes, Weapons, Chests, Heads } from "./data";
+import { PossibleEvent } from "./Event/EventTypes";
+import { TRIGGER } from "./Trigger/TriggerTypes";
 
 export class Game {
   boardManager: BoardManager;
@@ -19,7 +20,7 @@ export class Game {
       this.boardManager
     );
     // unit1.setClass(new Class(Classes.Ranger));
-    unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unit1.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
 
     unit1.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit1.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
@@ -31,7 +32,7 @@ export class Game {
     );
     // unit2.setClass(new Class(Classes.Blacksmith));
 
-    unit2.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+    unit2.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
 
     unit2.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit2.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
@@ -41,7 +42,7 @@ export class Game {
       POSITION.TOP_BACK,
       this.boardManager
     );
-    unit3.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit3.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
     unit3.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit3.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit3.setClass(new Class(Classes.Ranger));
@@ -94,19 +95,19 @@ export class Game {
 
     const unit10 = new Unit(
       OWNER.TEAM_TWO,
-      POSITION.BOT_BACK,
+      POSITION.TOP_FRONT,
       this.boardManager
     );
-    unit10.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit10.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
     unit10.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit10.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);
-    /* this.boardManager.addToBoard(unit9);
-    this.boardManager.addToBoard(unit10); */
-    /* this.boardManager.addToBoard(unit3);
-    this.boardManager.addToBoard(unit4);
+    this.boardManager.addToBoard(unit9);
+    this.boardManager.addToBoard(unit10);
+    this.boardManager.addToBoard(unit3);
+    /* this.boardManager.addToBoard(unit4);
     this.boardManager.addToBoard(unit5);
     this.boardManager.addToBoard(unit6);
     this.boardManager.addToBoard(unit7);
@@ -120,65 +121,59 @@ export class Game {
   }
 }
 
-function hasGameEnded(boardManager: BoardManager) {
+function hasGameEnded(bm: BoardManager) {
   return (
-    boardManager
-      .getAllUnitsOfOwner(OWNER.TEAM_ONE)
-      .every((unit) => unit.isDead) ||
-    boardManager.getAllUnitsOfOwner(OWNER.TEAM_TWO).every((unit) => unit.isDead)
+    bm.getAllUnitsOfOwner(OWNER.TEAM_ONE).every((unit) => unit.isDead) ||
+    bm.getAllUnitsOfOwner(OWNER.TEAM_TWO).every((unit) => unit.isDead)
   );
 }
 
-export function runGame(boardManager: BoardManager) {
+export function runGame(bm: BoardManager) {
   let firstStep: any;
-  const eventHistory: any[] = [];
+  const eventHistory: PossibleEvent[] = [];
 
-  const serializedUnits = boardManager
-    .getAllUnits()
-    .map((unit) => unit.serialize());
+  const serializedUnits = bm.getAllUnits().map((unit) => unit.serialize());
   firstStep = { units: serializedUnits };
 
   let currentStep = 1;
 
-  const battleStartEvents: Event[] = [];
-  boardManager.getAllUnits().forEach((unit) => {
-    unit.onBattleStart();
+  const battleStartEvents: PossibleEvent[] = [];
+  bm.getAllUnits().forEach((unit) => {
+    unit.triggerManager.onTrigger(TRIGGER.BATTLE_START, unit, bm);
     battleStartEvents.push(...unit.serializeEvents());
   });
-  const orderedEvents = sortAndExecuteEvents(boardManager, battleStartEvents);
+  const orderedEvents = sortAndExecuteEvents(bm, battleStartEvents);
   orderedEvents.forEach((event) => {
     eventHistory.push(event);
   });
 
   do {
-    boardManager.getAllAliveUnits().forEach((unit) => {
+    bm.getAllAliveUnits().forEach((unit) => {
       unit.step(currentStep);
     });
 
-    const stepEvents: any[] = [];
-
-    boardManager.getAllAliveUnits().forEach((unit) => {
+    const stepEvents: PossibleEvent[] = [];
+    bm.getAllUnits().forEach((unit) => {
       stepEvents.push(...unit.serializeEvents());
     });
+    const orderedEvents = sortAndExecuteEvents(bm, stepEvents);
+    eventHistory.push(...orderedEvents);
 
-    const orderedEvents = sortAndExecuteEvents(boardManager, stepEvents);
-    orderedEvents.forEach((event) => {
-      eventHistory.push(event);
-    });
-
-    boardManager.getAllAliveUnits().forEach((unit) => {
+    bm.getAllAliveUnits().forEach((unit) => {
       if (!unit.isDead && unit.hasDied()) {
-        unit.markAsDead();
-        eventHistory.push({
-          actorId: unit.id,
-          type: EVENT_TYPE.FAINT,
-          step: currentStep,
+        unit.onDeath();
+
+        // execute events from death related triggers
+        bm.getAllUnits().forEach((unit) => {
+          const triggerEvents: PossibleEvent[] = [];
+          triggerEvents.push(...unit.serializeEvents());
+          const orderedEvents = sortAndExecuteEvents(bm, triggerEvents);
+          eventHistory.push(...orderedEvents);
         });
       }
     });
-
     currentStep++;
-  } while (!hasGameEnded(boardManager));
+  } while (!hasGameEnded(bm));
 
   return { totalSteps: currentStep - 1, eventHistory, firstStep };
 }

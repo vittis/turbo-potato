@@ -1,7 +1,7 @@
 import { MOD_TYPE, Mod, PossibleMods } from "../Mods/ModsTypes";
 import { filterModsByType } from "../Mods/ModsUtils";
 import { Perk } from "./Perk";
-import Perks from "../data/perks";
+import { Perks } from "../data";
 
 function getPerkData(name: string) {
   const nameWithoutSpaces = name.replace(/\s/g, "");

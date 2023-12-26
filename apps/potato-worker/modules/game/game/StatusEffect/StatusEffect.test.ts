@@ -2,6 +2,7 @@ import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { Equipment } from "../Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import { sortAndExecuteEvents } from "../Event/EventUtils";
+import { TRIGGER } from "../Trigger/TriggerTypes";
 import { Unit } from "../Unit/Unit";
 import { useAbility } from "../_tests_/testsUtils";
 import { Weapons } from "../data";
@@ -204,7 +205,7 @@ describe("StatusEffect", () => {
       unit1.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
       bm.addToBoard(unit1);
 
-      unit1.onBattleStart();
+      unit1.triggerManager.onTrigger(TRIGGER.BATTLE_START, unit1, bm);
       sortAndExecuteEvents(bm, unit1.serializeEvents());
 
       expect(unit1.statusEffects).toContainEqual({

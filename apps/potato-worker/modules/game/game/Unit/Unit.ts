@@ -8,9 +8,10 @@ import { Equipment } from "../Equipment/Equipment";
 import { EquipmentManager } from "../Equipment/EquipmentManager";
 import { EQUIPMENT_SLOT } from "../Equipment/EquipmentTypes";
 import {
-  Event,
   EVENT_TYPE,
+  FaintEvent,
   INSTANT_EFFECT_TYPE,
+  PossibleEvent,
   SubEvent,
   SUBEVENT_TYPE,
   TriggerEffectEvent,
@@ -41,7 +42,7 @@ export class Unit {
   isDead = false;
 
   currentStep = 1;
-  stepEvents: Event[] = [];
+  stepEvents: PossibleEvent[] = [];
 
   private statsManager: StatsManager;
   private equipmentManager: EquipmentManager;
@@ -49,7 +50,7 @@ export class Unit {
   private abilityManager: AbilityManager;
   private perkManager: PerkManager;
   public statusEffectManager: StatusEffectManager;
-  private triggerManager: TriggerManager;
+  public triggerManager: TriggerManager;
 
   get stats() {
     return this.statsManager.getStats();
@@ -131,13 +132,19 @@ export class Unit {
 
     this.statsManager.addMods(equip.getStatsMods());
 
-    this.perkManager.addPerksFromSource(equip.getGrantedPerks(), equip.id);
-    // todo add triggers from perks
-
     this.triggerManager.addTriggerEffectsFromSource(
       equip.getTriggerEffects(),
       equip.id
     );
+
+    const grantedPerks = equip.getGrantedPerks();
+    this.perkManager.addPerksFromSource(grantedPerks, equip.id);
+    grantedPerks.forEach((perk) => {
+      this.triggerManager.addTriggerEffectsFromSource(
+        perk.getTriggerEffects(),
+        perk.id
+      );
+    });
   }
 
   unequip(slot: EQUIPMENT_SLOT) {
@@ -228,59 +235,12 @@ export class Unit {
     });
   }
 
-  applyEvent(event: Event) {
+  applyEvent(event: PossibleEvent) {
     if (event.type === EVENT_TYPE.USE_ABILITY) {
       this.applySubEvents((event as UseAbilityEvent).payload.subEvents);
     }
     if (event.type === EVENT_TYPE.TRIGGER_EFFECT) {
       this.applySubEvents((event as TriggerEffectEvent).subEvents);
-    }
-  }
-
-  onBattleStart() {
-    const battleStartEffects = this.triggerManager.getAllEffectsForTrigger(
-      TRIGGER.BATTLE_START
-    );
-
-    let subEvents: SubEvent[] = [];
-
-    battleStartEffects.forEach((activeEffect) => {
-      const targets = this.bm.getTarget(this, activeEffect.effect.target);
-
-      if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
-        subEvents.push({
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-            targetsId: targets.map((target) => target.id),
-            payload: activeEffect.effect.payload.map((statusEffect) => ({
-              name: statusEffect.name,
-              quantity: statusEffect.quantity as number,
-            })),
-          },
-        });
-      } else if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
-        subEvents.push({
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.DAMAGE,
-            targetsId: targets.map((target) => target.id),
-            payload: { value: activeEffect.effect.payload.value },
-          },
-        });
-      }
-    });
-
-    if (subEvents.length > 0) {
-      const event: TriggerEffectEvent = {
-        actorId: this.id,
-        step: this.currentStep,
-        type: EVENT_TYPE.TRIGGER_EFFECT,
-        trigger: TRIGGER.BATTLE_START,
-        subEvents,
-      };
-
-      this.stepEvents.push(event);
     }
   }
 
@@ -306,11 +266,30 @@ export class Unit {
     this.statsManager.recalculateStatsFromStatusEffects(this.statusEffects);
   }
 
-  markAsDead() {
+  onDeath() {
     if (this.isDead) {
-      throw Error("Unit is already dead");
+      throw Error(`Unit ${this.toString()} is already dead`);
     }
     this.isDead = true;
+
+    this.stepEvents.push({
+      actorId: this.id,
+      type: EVENT_TYPE.FAINT,
+      step: this.currentStep,
+    });
+
+    // todo add other death triggers
+
+    const teamUnits = this.bm.getAllUnitsOfOwner(this.owner);
+    teamUnits.forEach((teamUnit) => {
+      if (!teamUnit.isDead && teamUnit.id !== this.id) {
+        teamUnit.triggerManager.onTrigger(
+          TRIGGER.ALLY_FAINT,
+          teamUnit,
+          this.bm
+        );
+      }
+    });
   }
 
   hasDied() {

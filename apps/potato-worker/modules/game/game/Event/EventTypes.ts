@@ -19,23 +19,22 @@ export enum INSTANT_EFFECT_TYPE {
   STATUS_EFFECT = "STATUS_EFFECT",
 }
 
-export interface Event {
-  type: EVENT_TYPE;
+export type PossibleEvent = UseAbilityEvent | FaintEvent | TriggerEffectEvent;
+
+interface Event<T extends EVENT_TYPE> {
+  type: T;
   actorId: string;
   step: number;
 }
 
-export interface FaintEvent extends Event {
-  actorId: string;
-}
+export interface FaintEvent extends Event<EVENT_TYPE.FAINT> {}
 
-export interface UseAbilityEvent extends Event {
-  type: EVENT_TYPE.USE_ABILITY;
-  actorId: string;
+export interface UseAbilityEvent extends Event<EVENT_TYPE.USE_ABILITY> {
   payload: UseAbilityEventPayload;
 }
 
 export interface UseAbilityEventPayload {
+  id: string;
   name: string;
   targetsId: string[];
   subEvents: SubEvent[];
@@ -91,7 +90,7 @@ export interface StatusEffectPayload {
 
 // TRIGGER EFFECT EVENTS -----------------------------------------------
 
-export interface TriggerEffectEvent extends Event {
+export interface TriggerEffectEvent extends Event<EVENT_TYPE.TRIGGER_EFFECT> {
   trigger: TRIGGER;
   subEvents: SubEvent[];
 }

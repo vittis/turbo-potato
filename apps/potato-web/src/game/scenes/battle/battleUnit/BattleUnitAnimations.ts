@@ -22,11 +22,11 @@ export function createDeathAnimation({ unit, onFinishAnimation }: { unit: Battle
     scaleX: 0,
     scaleY: 0,
     angle: 180,
-    duration: 1400,
-    delay: 75 * animationSpeed,
+    duration: 1200 * animationSpeed,
+    delay: 10 * animationSpeed,
     ease: "Sine.easeInOut",
     onComplete: () => {
-      unit.scene.time.delayedCall(75 * animationSpeed, onFinishAnimation);
+      unit.scene.time.delayedCall(10 * animationSpeed, onFinishAnimation);
     },
   });
 
@@ -44,6 +44,8 @@ export function createAttackAnimation({
   onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
+  const unitGlowFx = unit.sprite.preFX?.addGlow(0xeeee00, 2);
+
   const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
   unit.scene.tweens.add({
     targets: targetGlowFx,
@@ -59,6 +61,7 @@ export function createAttackAnimation({
     delay: 200 * animationSpeed,
     targets: unit,
     onComplete: () => {
+      unitGlowFx?.destroy();
       unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
     },
     tweens: [
@@ -222,7 +225,7 @@ export function createTriggerEffectAnimation({
   unit.scene.tweens.add({
     targets: targetGlowFx,
     outerStrength: 2,
-    duration: 260 * animationSpeed,
+    duration: 150 * animationSpeed,
   });
 
   const triggerEffectTweenChain = unit.scene.tweens.chain({

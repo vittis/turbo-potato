@@ -14,10 +14,12 @@ import {
   TriggerEffect,
 } from "../Trigger/TriggerTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
+import { nanoid } from "nanoid";
 
 export const VULNERABLE_LOSS_PER_HIT = 5; // todo put in json? (data/config/statusEffects.json)
 
 export class Ability {
+  id: string;
   data: AbilityData;
   progress = 0;
   cooldown = 0;
@@ -31,6 +33,7 @@ export class Ability {
     const parsedData = AbilityDataSchema.parse(data);
     this.data = parsedData;
     this.cooldown = parsedData.cooldown;
+    this.id = nanoid(8);
   }
 
   step() {
@@ -119,6 +122,7 @@ export class Ability {
       actorId: unit.id,
       step: unit.currentStep,
       payload: {
+        id: this.id,
         name: this.data.name,
         targetsId: targets.map((t) => t?.id),
         subEvents: [

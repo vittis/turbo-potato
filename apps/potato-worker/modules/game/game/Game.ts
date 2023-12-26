@@ -2,7 +2,10 @@ import { BoardManager, OWNER, POSITION } from "./BoardManager";
 import { Unit } from "./Unit/Unit";
 import { Equipment } from "./Equipment/Equipment";
 import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
-import { sortAndExecuteEvents } from "./Event/EventUtils";
+import {
+  getAndExecuteDeathEvents,
+  sortAndExecuteEvents,
+} from "./Event/EventUtils";
 import { Class } from "./Class/Class";
 import { Classes, Weapons, Chests, Heads } from "./data";
 import { PossibleEvent } from "./Event/EventTypes";
@@ -20,7 +23,7 @@ export class Game {
       this.boardManager
     );
     // unit1.setClass(new Class(Classes.Ranger));
-    unit1.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
+    unit1.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
     unit1.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit1.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
@@ -32,7 +35,7 @@ export class Game {
     );
     // unit2.setClass(new Class(Classes.Blacksmith));
 
-    unit2.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
+    unit2.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 
     unit2.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit2.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
@@ -71,7 +74,7 @@ export class Game {
       POSITION.TOP_FRONT,
       this.boardManager
     );
-    unit7.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit7.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
     unit7.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
     unit7.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
@@ -159,19 +162,8 @@ export function runGame(bm: BoardManager) {
     const orderedEvents = sortAndExecuteEvents(bm, stepEvents);
     eventHistory.push(...orderedEvents);
 
-    bm.getAllAliveUnits().forEach((unit) => {
-      if (!unit.isDead && unit.hasDied()) {
-        unit.onDeath();
+    eventHistory.push(...getAndExecuteDeathEvents(bm));
 
-        // execute events from death related triggers
-        bm.getAllUnits().forEach((unit) => {
-          const triggerEvents: PossibleEvent[] = [];
-          triggerEvents.push(...unit.serializeEvents());
-          const orderedEvents = sortAndExecuteEvents(bm, triggerEvents);
-          eventHistory.push(...orderedEvents);
-        });
-      }
-    });
     currentStep++;
   } while (!hasGameEnded(bm));
 

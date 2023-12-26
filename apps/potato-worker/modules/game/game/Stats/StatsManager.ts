@@ -75,6 +75,11 @@ export class StatsManager {
           this.statsFromStatusEffects.attackDamageModifier =
             statusEffect.quantity;
           break;
+        case STATUS_EFFECT.STURDY:
+          this.statsFromStatusEffects.damageReductionModifier =
+            statusEffect.quantity;
+          break;
+        // todo add them all
       }
     });
   }

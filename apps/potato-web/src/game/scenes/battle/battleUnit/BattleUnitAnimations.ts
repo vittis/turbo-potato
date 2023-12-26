@@ -17,7 +17,7 @@ export function createWiggleAnimation(unit: BattleUnit) {
 
 export function createDeathAnimation({ unit, onFinishAnimation }: { unit: BattleUnit; onFinishAnimation: Function }) {
   const deathTween = unit.scene.tweens.add({
-    targets: unit,
+    targets: unit.sprite,
     alpha: 0,
     scaleX: 0,
     scaleY: 0,
@@ -44,7 +44,7 @@ export function createAttackAnimation({
   onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
-  const unitGlowFx = unit.sprite.preFX?.addGlow(0xeeee00, 2);
+  // const unitGlowFx = unit.sprite.preFX?.addGlow(0xeeee00, 2);
 
   const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
   unit.scene.tweens.add({
@@ -61,7 +61,7 @@ export function createAttackAnimation({
     delay: 200 * animationSpeed,
     targets: unit,
     onComplete: () => {
-      unitGlowFx?.destroy();
+      // unitGlowFx?.destroy();
       unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
     },
     tweens: [

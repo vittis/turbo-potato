@@ -172,6 +172,11 @@ export class Battle extends Phaser.Scene {
       }
     };
 
+    const hasFaintEvent = eventsOnThisStep.find(
+      (event) => event.type === "TRIGGER_EFFECT" && event.trigger === "SELF_FAINT"
+    );
+    console.log(eventsOnThisStep);
+
     eventsOnThisStep.forEach((event, index) => {
       const unit = this.units.find((unit) => unit.id === event.actorId);
       if (!unit) {

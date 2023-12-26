@@ -7,6 +7,7 @@ import { PHASER_CONFIG } from "./game/config";
 import { Battle } from "./game/scenes/battle/BattleScene";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./services/api/queryClient";
+import { WebSocketClient } from "./WebSocketClient";
 
 const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
@@ -31,6 +32,9 @@ game.events.on("ready", onReady); */
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <>
+      {/* <WebSocketClient /> */}
+      <App />
+    </>
   </QueryClientProvider>
 );

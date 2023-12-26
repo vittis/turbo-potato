@@ -32,3 +32,22 @@ export function sortAndExecuteEvents(
 ) {
   return executeStepEvents(bm, sortEventsByType(events));
 }
+
+export function getAndExecuteDeathEvents(bm: BoardManager) {
+  let events: PossibleEvent[] = [];
+  bm.getAllAliveUnits().forEach((unit) => {
+    if (!unit.isDead && unit.hasDied()) {
+      unit.onDeath();
+
+      // execute events from death related triggers
+      bm.getAllUnits().forEach((unit) => {
+        const triggerEvents: PossibleEvent[] = [];
+        triggerEvents.push(...unit.serializeEvents());
+        const orderedEvents = sortAndExecuteEvents(bm, triggerEvents);
+        events.push(...orderedEvents);
+      });
+    }
+  });
+
+  return events;
+}

@@ -15,11 +15,14 @@
     "phaser": "3.60.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-use-websocket": "^4.5.0",
+    "ws": "^8.15.1",
     "zustand": "^4.3.8"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react-swc": "^3.0.0",

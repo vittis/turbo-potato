@@ -30,7 +30,7 @@ export class BattleUnitStatusEffects extends Phaser.GameObjects.Container {
       -10 + this.statusEffects.length * 25
     );
 
-    const statusEffect = this.scene.add.image(0, 0, name.toLowerCase().replace(/\s/g, "_"));
+    const statusEffect = this.scene.add.image(0, 0, "statusEffect_" + name.toLowerCase().replace(/\s/g, "_"));
 
     statusEffect.scale = 0.3;
 
@@ -95,7 +95,20 @@ export class BattleUnitStatusEffects extends Phaser.GameObjects.Container {
 
   reorderStatusEffects(a: StatusEffect, b: StatusEffect) {
     // Set custom order
-    const customOrder = ["attack_power", "fast", "focus", "vulnerable"];
+    const customOrder = [
+      "taunt",
+      "attack_power",
+      "fast",
+      "spell_potency",
+      "focus",
+      "regen",
+      "sturdy",
+      "multistrike",
+      "thorn",
+      "vulnerable",
+      "slow",
+      "poison",
+    ];
 
     const indexA = customOrder.indexOf(a.name.toLocaleLowerCase());
     const indexB = customOrder.indexOf(b.name.toLocaleLowerCase());

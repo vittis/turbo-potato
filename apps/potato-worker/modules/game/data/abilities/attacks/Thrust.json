@@ -6,6 +6,6 @@
   ],
   "target": "STANDARD",
   "baseDamage": 30,
-  "cooldown": 80,
+  "cooldown": 10,
   "effects": []
 }

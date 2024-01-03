@@ -10,6 +10,12 @@
       "payload": {
         "name": "Slash"
       }
+    },
+    {
+      "type": "GRANT_PERK",
+      "payload": {
+        "name": "Desperate Will"
+      }
     }
   ],
   "effects": []

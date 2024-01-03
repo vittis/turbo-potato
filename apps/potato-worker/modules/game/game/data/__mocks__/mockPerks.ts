@@ -55,4 +55,27 @@ export const MockPerks = {
       },
     ],
   } as PerkData,
+  LastWords: {
+    name: "Last Words",
+    type: "TIER_SCALE",
+    tiers: [
+      {
+        name: "STURDY",
+        values: [20, 25, 30, 35, 45],
+      },
+    ],
+    effects: [
+      {
+        type: "STATUS_EFFECT",
+        trigger: "SELF_FAINT",
+        target: "ALL_ALLIES",
+        payload: [
+          {
+            name: "STURDY",
+            quantity: "DYNAMIC",
+          },
+        ],
+      },
+    ],
+  } as PerkData,
 };

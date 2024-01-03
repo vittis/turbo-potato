@@ -215,6 +215,10 @@ export class Unit {
       }
 
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
+        if (subEvent.payload.targetsId.length === 0) {
+          throw Error("applySubEvents: No targets for status effect");
+        }
+
         const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
 
         subEvent.payload.payload.forEach((statusEffect) => {
@@ -272,12 +276,6 @@ export class Unit {
     }
     this.isDead = true;
 
-    this.stepEvents.push({
-      actorId: this.id,
-      type: EVENT_TYPE.FAINT,
-      step: this.currentStep,
-    });
-
     // todo add other death triggers
 
     const teamUnits = this.bm.getAllUnitsOfOwner(this.owner);
@@ -289,6 +287,14 @@ export class Unit {
           this.bm
         );
       }
+    });
+
+    this.triggerManager.onTrigger(TRIGGER.SELF_FAINT, this, this.bm);
+
+    this.stepEvents.push({
+      actorId: this.id,
+      type: EVENT_TYPE.FAINT,
+      step: this.currentStep,
     });
   }
 

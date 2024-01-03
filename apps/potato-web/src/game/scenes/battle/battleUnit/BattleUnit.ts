@@ -136,6 +136,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     onStart?: Function;
     allUnits?: BattleUnit[];
   }) {
+    console.log("playing ", event.type, event.trigger);
     if (event.type === "FAINT") {
       const onFinishAnimation = () => {
         this.setVisible(false);

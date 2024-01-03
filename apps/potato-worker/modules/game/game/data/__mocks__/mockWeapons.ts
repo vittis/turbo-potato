@@ -51,6 +51,13 @@ export const MockWeapons = {
           name: "Slash",
         },
       },
+      {
+        type: "GRANT_PERK",
+        payload: {
+          name: "Desperate Will",
+          tier: 1,
+        },
+      },
     ],
     effects: [],
   } as EquipmentData,
@@ -117,6 +124,13 @@ export const MockWeapons = {
         payload: {
           name: "Focused Mind",
           tier: 1,
+        },
+      },
+      {
+        type: "GRANT_PERK",
+        payload: {
+          name: "Last Words",
+          tier: 3,
         },
       },
     ],

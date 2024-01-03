@@ -13,9 +13,9 @@
       ]
     },
     {
-      "name": "SPELL_POTENCY",
+      "name": "STURDY",
       "values": [
-        5,
+        90,
         10,
         15,
         20,
@@ -27,14 +27,14 @@
     {
       "type": "STATUS_EFFECT",
       "trigger": "ALLY_FAINT",
-      "target": "SELF",
+      "target": "ALL_ALLIES",
       "payload": [
         {
           "name": "ATTACK_POWER",
           "quantity": "DYNAMIC"
         },
         {
-          "name": "SPELL_POTENCY",
+          "name": "STURDY",
           "quantity": "DYNAMIC"
         }
       ]

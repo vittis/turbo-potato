@@ -88,8 +88,30 @@ export class BattleUnitStatusEffects extends Phaser.GameObjects.Container {
   repositionStatusEffect() {
     this.statusEffects.sort(this.reorderStatusEffects);
 
-    this.statusEffects.forEach((statusEffect, index) => {
-      statusEffect.container.setPosition(this.dataUnit.owner === 0 ? -60 : 44, -10 + index * 25);
+    const breakColThreshold = 5;
+    const widthOffsetTeam0 = -62;
+    const widthOffsetTeam1 = 46;
+    const widthBetween = 40;
+    const heightOffset = -10;
+    const heightBetween = 25;
+
+    const breakCol = this.statusEffects.length >= breakColThreshold;
+    const frontColAmount = breakCol ? Math.round(this.statusEffects.length / 2) : this.statusEffects.length;
+
+    this.statusEffects.forEach((statusEffect: any, index: number) => {
+      const isOnFrontCol = frontColAmount - 1 >= index;
+
+      const x =
+        this.dataUnit.owner === 0
+          ? widthOffsetTeam0 - (isOnFrontCol ? 0 : widthBetween)
+          : widthOffsetTeam1 + (isOnFrontCol ? 0 : widthBetween);
+
+      const y =
+        heightOffset +
+        (isOnFrontCol ? index * heightBetween : (index - frontColAmount) * heightBetween) -
+        Math.max(frontColAmount - 4, 0) * heightBetween;
+
+      statusEffect.container.setPosition(x, y);
     });
   }
 
@@ -114,18 +136,12 @@ export class BattleUnitStatusEffects extends Phaser.GameObjects.Container {
     const indexB = customOrder.indexOf(b.name.toLocaleLowerCase());
 
     // If both elements are in the custom order, compare their indices
-    if (indexA !== -1 && indexB !== -1) {
-      return indexA - indexB;
-    }
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
 
     // If one element is in the custom order and the other is not,
     // prioritize the one in the custom order
-    if (indexA !== -1) {
-      return -1;
-    }
-    if (indexB !== -1) {
-      return 1;
-    }
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
 
     // If neither element is in the custom order, use default order
     return 0;

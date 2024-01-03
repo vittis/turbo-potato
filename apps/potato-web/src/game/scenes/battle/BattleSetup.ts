@@ -68,7 +68,7 @@ function addTrees(scene: Phaser.Scene) {
 function addTiles(scene: Phaser.Scene) {
   const widthFromCenter = 130;
   const heightFromCenter = -80;
-  const widthBetweenTiles = 60;
+  const widthBetweenTiles = 80;
   const heightBetweenTiles = 100;
   const scale = 1.2;
 

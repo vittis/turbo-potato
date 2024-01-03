@@ -144,6 +144,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     onStart?: Function;
     allUnits?: BattleUnit[];
   }) {
+    console.log("playing ", event.type, event.trigger);
     if (event.type === "FAINT") {
       const onFinishAnimation = () => {
         this.setVisible(false);
@@ -503,12 +504,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public removeStatusEffect({ name, quantity }: any) {
     const statusEffectToRemove = this.statusEffects.find((statusEffect) => statusEffect.name === name);
 
-    console.log({ statusEffectToRemove });
     if (!statusEffectToRemove) return;
 
     statusEffectToRemove.quantity -= quantity;
 
-    console.log(statusEffectToRemove.quantity);
     if (statusEffectToRemove.quantity <= 0) {
       statusEffectToRemove.container.destroy();
       this.statusEffects = this.statusEffects.filter((statusEffect) => statusEffect.name !== name);

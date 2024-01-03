@@ -13,13 +13,6 @@
     {
       "type": "GRANT_PERK",
       "payload": {
-        "name": "Focused Mind",
-        "tier": 1
-      }
-    },
-    {
-      "type": "GRANT_PERK",
-      "payload": {
         "name": "Desperate Will",
         "tier": 1
       }

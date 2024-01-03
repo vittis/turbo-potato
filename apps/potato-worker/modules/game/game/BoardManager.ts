@@ -198,6 +198,7 @@ export class BoardManager {
   getUnitById(id: string): Unit {
     const unit = this.getAllUnits().find((unit) => unit.id === id);
     if (!unit) {
+      console.trace("show");
       throw Error(`Tried to getUnitById ${id} that doesnt exist`);
     }
     return unit;

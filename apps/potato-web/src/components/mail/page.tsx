@@ -2,20 +2,22 @@ import { Mail } from "./components/mail";
 import { accounts, mails } from "./data";
 
 export default function MailPage() {
-  /* const layout = cookies().get("react-resizable-panels:layout");
-  const collapsed = cookies().get("react-resizable-panels:collapsed");
+  const layout = localStorage.getItem("react-resizable-panels:layout");
+  const collapsed = localStorage.getItem("react-resizable-panels:collapsed");
 
-  const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
-  const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined; */
+  console.log(layout, collapsed);
+
+  const defaultLayout = layout ? JSON.parse(layout) : undefined;
+  const defaultCollapsed = collapsed ? JSON.parse(collapsed) : undefined;
 
   return (
     <>
       <Mail
         accounts={accounts}
         mails={mails}
-        defaultLayout={undefined}
+        defaultLayout={defaultLayout}
         defaultCollapsed={undefined}
-        navCollapsedSize={4}
+        navCollapsedSize={1}
       />
     </>
   );

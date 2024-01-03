@@ -8,12 +8,14 @@ interface AccountSwitcherProps {
   accounts: {
     label: string;
     email: string;
-    icon: React.ReactNode;
+    avatar: string;
   }[];
 }
 
 export function AccountSwitcher({ isCollapsed, accounts }: AccountSwitcherProps) {
   const [selectedAccount, setSelectedAccount] = React.useState<string>(accounts[0].email);
+
+  const account = accounts.find((account) => account.email === selectedAccount);
 
   return (
     <Select defaultValue={selectedAccount} onValueChange={setSelectedAccount}>
@@ -25,17 +27,32 @@ export function AccountSwitcher({ isCollapsed, accounts }: AccountSwitcherProps)
         aria-label="Select account"
       >
         <SelectValue placeholder="Select an account">
-          {accounts.find((account) => account.email === selectedAccount)?.icon}
-          <span className={cn("ml-2", isCollapsed && "hidden")}>
-            {accounts.find((account) => account.email === selectedAccount)?.label}
-          </span>
+          <div className="flex items-center space-x-1">
+            {account?.avatar ? (
+              <div className="avatar">
+                <div className="w-5 rounded-full">
+                  <img alt="Tailwind CSS chat bubble component" src={account?.avatar} />
+                </div>
+              </div>
+            ) : (
+              <div className="w-5 h-5 rounded-full dark:bg-stone-800 bg-zinc-800 dark:text-accent-foreground text-primary-foreground flex items-center justify-center text-xs">
+                {account?.label?.[0]}
+              </div>
+            )}
+
+            <div className={`text-ellipsis overflow-hidden text-xs text-left`}>{account?.label}</div>
+          </div>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {accounts.map((account) => (
           <SelectItem key={account.email} value={account.email}>
             <div className="flex items-center gap-3 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:text-foreground">
-              {account.icon}
+              <div className="avatar">
+                <div className="w-5 rounded-full">
+                  <img alt="Tailwind CSS chat bubble component" src={account?.avatar} />
+                </div>
+              </div>
               {account.email}
             </div>
           </SelectItem>

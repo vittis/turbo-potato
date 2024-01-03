@@ -175,14 +175,15 @@ export type Mail = (typeof mails)[number];
 
 export const accounts = [
   {
-    label: "Renato",
-    email: "renatada@gmail.com",
-    icon: <div>🥔</div>,
+    label: "Mosquitao",
+    email: "mosquitao@gmail.com",
+    avatar:
+      "https://i.ytimg.com/vi/H2Y__-IhdKM/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGHIgSihGMA8=&rs=AOn4CLBQgwlWkUWjK3Z1h_f9GsDfwiw9iA",
   },
   {
-    label: "Julio",
-    email: "juliao@gmail.com",
-    icon: <div>🥦</div>,
+    label: "Paul",
+    email: "paulaodamassa@gmail.com",
+    avatar: "https://avatars.githubusercontent.com/u/29383947?v=4",
   },
 ];
 

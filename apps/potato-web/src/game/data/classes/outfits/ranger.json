@@ -1,0 +1,8 @@
+{
+  "showHead": true,
+  "showNeck": false,
+  "showArms": true,
+  "helmet": "leatherHat",
+  "chest": "reinforcedShirt",
+  "back": "quiver"
+}

@@ -1,3 +1,5 @@
+import Outfits from "../../data/classes/outfits/outfits";
+
 export function addUnitSprite(scene: Phaser.Scene, x: number, y: number, keyword: string) {
   const sprite = scene.add.sprite(x, y, "unit");
 
@@ -114,4 +116,16 @@ export function addEquipWeaponSprite(scene: Phaser.Scene, x: number, y: number, 
   else throw Error(`addEquipWeaponSprite: ${keyword} not found`);
 
   return sprite;
+}
+
+export function getOutfitFromClass(unitClass: string) {
+  if (unitClass === "blacksmith") return Outfits.Blacksmith;
+  else if (unitClass === "cleric") return Outfits.Cleric;
+  else if (unitClass === "mage") return Outfits.Mage;
+  else if (unitClass === "paladin") return Outfits.Paladin;
+  else if (unitClass === "ranger") return Outfits.Ranger;
+  else if (unitClass === "rogue") return Outfits.Rogue;
+  else if (unitClass === "warlock") return Outfits.Warlock;
+  else if (unitClass === "warrior") return Outfits.Warrior;
+  else return Outfits.Default;
 }

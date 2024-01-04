@@ -173,6 +173,7 @@ export class Unit {
       id: this.id,
       owner: this.owner,
       name: this.getName(),
+      class: `${this.classManager?.class?.data?.name}`,
       stats: {
         ...this.stats,
       },

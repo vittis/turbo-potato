@@ -3,8 +3,6 @@ tags: perk
 type: tier_scale
 ---
 
-[[Perk]]
-
 Gain Max HP.
 
 | Tier | Effect        | 
@@ -12,3 +10,5 @@ Gain Max HP.
 | 1    | + 25 Max HP   |
 | 2    | +   50 Max HP |
 
+
+See also: [[Perk]]

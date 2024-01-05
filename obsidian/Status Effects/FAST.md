@@ -4,4 +4,4 @@ tags: status_effect
 
 See: [[Status Effect]]
 
-Modify [[Attack Cooldown Modifier]] by -1% per stack and remove 1 on [[Attack]] used
+Increase 1 [[Attack Cooldown Modifier]] per stack and remove 1 on [[Attack]] used

@@ -7,9 +7,15 @@ interface CollapsibleHeaderProps {
   children: React.ReactNode;
   defaultIsOpen?: boolean;
   header: React.ReactNode;
+  rightElement?: React.ReactNode;
 }
 
-const CollapsibleHeader = ({ children, header, defaultIsOpen = false }: CollapsibleHeaderProps) => {
+const CollapsibleHeader = ({
+  children,
+  header,
+  defaultIsOpen = false,
+  rightElement,
+}: CollapsibleHeaderProps) => {
   const [isOpen, setIsOpen] = useState(defaultIsOpen);
 
   const icon = !isOpen ? (
@@ -20,19 +26,22 @@ const CollapsibleHeader = ({ children, header, defaultIsOpen = false }: Collapsi
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center w-fit mb-4 gap-2 p-0 py-0 hover:bg-transparent hover:opacity-85 transition-all"
-        >
-          <div>
-            {icon}
-            <span className="sr-only">Toggle</span>
-          </div>
-          {header}
-        </Button>
-      </CollapsibleTrigger>
+      <div className="flex items-center mb-4">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center w-fit gap-2 p-0 py-0 hover:bg-transparent hover:opacity-85 transition-all"
+          >
+            <div>
+              {icon}
+              <span className="sr-only">Toggle</span>
+            </div>
+            {header}
+          </Button>
+        </CollapsibleTrigger>
+        {rightElement}
+      </div>
       <CollapsibleContent className="CollapsibleContent">{children}</CollapsibleContent>
     </Collapsible>
   );

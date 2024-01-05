@@ -6,12 +6,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
 import {
   Form,
   FormControl,
@@ -25,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { queryClient } from "@/services/api/queryClient";
+import { api } from "@/services/api/http";
 
 const FormSchema = z.object({
   name: z.string().min(4, { message: "Name must be at least 4 characters" }).max(30, {
@@ -45,15 +44,13 @@ const FormSchema = z.object({
 interface CreateRoomDrawerProps {}
 
 async function createRoom(data) {
-  const res = await fetch("http://localhost:8080/api/rooms/create", {
-    method: "POST",
-    credentials: "include",
-    body: JSON.stringify(data),
-    headers: {
+  const response = await api.post("http://localhost:8080/api/rooms/create", data, {
+    withCredentials: true,
+    /* headers: {
       "Content-Type": "application/json",
-    },
+    }, */
   });
-  return await res.json();
+  return response.data;
 }
 
 const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
@@ -70,11 +67,10 @@ const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
 
   const { mutateAsync } = useMutation({
     mutationFn: createRoom,
-    mutationKey: ["lobby/createRoom"],
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.invalidateQueries({ queryKey: ["lobby/rooms"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    mutationKey: ["createRoom"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "rooms"] });
     },
   });
 
@@ -86,7 +82,7 @@ const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button onClick={() => setIsOpen(true)} type="button" size="sm" variant="outline">
+      <Button onClick={() => setIsOpen(true)} type="button" variant="outline">
         Create Room
       </Button>
       <DialogContent>

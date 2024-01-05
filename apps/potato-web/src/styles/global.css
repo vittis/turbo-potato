@@ -24,18 +24,18 @@
   .bg-pattern-gradient-error {
     background-image: repeating-linear-gradient(
       45deg,
-      #09090b,
-      #09090b 13px,
-      #321717b5 13px,
-      #321717b5 14px
+      var(--b1),
+      var(--b1) 13px,
+      rgba(255 0 0 / 0.07) 13px,
+      rgba(255 0 0 / 0.07) 14px
     );
   }
 
   .bg-pattern-gradient-success {
     background-image: repeating-linear-gradient(
       45deg,
-      #09090b,
-      #09090b 13px,
+      var(--b1),
+      var(--b1) 13px,
       #142116b7 13px,
       #142116b7 14px
     );
@@ -77,8 +77,11 @@
   }
 
   .dark {
-    --b1: #09090b;
-    --b2: #212115b2;
+    /* --b1: #09090b;
+    --b2: #212115b2; */
+
+    --b1: #040404;
+    --b2: rgba(255 255 0 / 0.04);
 
     --background: 240 10% 5%;
     --foreground: 0 0% 98%;
@@ -112,8 +115,9 @@
 }
 
 @layer components {
-  .chat-start {
-    @apply last:mb-2;
+  .chat-start,
+  .chat-end {
+    @apply last:mb-4;
   }
   .chat-bubble {
     font-size: 14px;
@@ -122,16 +126,16 @@
   }
 
   .main-panel {
-    box-shadow: 0px 0px 30px 2px rgba(255 172 56 / 0.12) !important;
+    box-shadow: 0px 0px 28px 1px rgba(255 172 56 / 0.12) !important;
   }
 
   .glow-sm-error {
-    box-shadow: 0px 0px 5px 0px rgba(255 21 0 / 0.11) !important;
+    box-shadow: 0px 0px 5px 0px rgba(255 0 0 / 0.17) !important;
     /* transition: all 0.2s ease-in-out; */
   }
 
   .glow-sm-success {
-    box-shadow: 0px 0px 5px 0px rgba(13 255 0 / 0.11) !important;
+    box-shadow: 0px 0px 5px 0px rgba(255 255 255 / 0.11) !important;
     /* transition: all 0.2s ease-in-out; */
   }
 

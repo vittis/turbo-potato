@@ -2,7 +2,7 @@ import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBattleSetup } from "./game/scenes/battle/BattleScene";
-import { WebSocketClient } from "./WebSocketClient";
+import { WebSocketClient } from "./WebSocketClient_recent_old";
 
 function App() {
   const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();
@@ -47,7 +47,9 @@ function App() {
           className="collapse collapse-plus bg-stone-800 absolute left-2 bottom-2 w-fit mr-auto ml-auto"
         >
           <input type="checkbox" />
-          <div className="collapse-title text-xl font-medium text-white text-center">Show Units</div>
+          <div className="collapse-title text-xl font-medium text-white text-center">
+            Show Units
+          </div>
           <div className="collapse-content">
             {firstState && (
               <div className="w-fit flex justify-center inset-x-0 bg-stone-800 shadow-md p-4 rounded-lg mx-auto">

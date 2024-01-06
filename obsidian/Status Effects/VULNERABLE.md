@@ -4,4 +4,4 @@ tags: status_effect
 
 See: [[Status Effect]]
 
-Increase 1% damage taken per stack, remove 1 stack on hit taken
+Decrease 1 [[Damage Reduction Modifier]] per stack and remove 5 stack on hit taken

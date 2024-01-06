@@ -1,8 +1,10 @@
 ---
 tags: class
 ---
+* Base HP: 80
+* Gain the [[Weak Spot]] attack
 
-Gain the [[Weak Spot]] attack.
+[[Ranger Talent Tree]]
 
 ## Talent Tree
 
@@ -19,9 +21,9 @@ Gain the [[Weak Spot]] attack.
 	- Gain [[Summon Rabbit]] spell
 	- Gain [[Summon Boar]] spell
 - Tier 2 (requires 1 point in this tree):
-	- Gain the [[Companion Master]] perk. 
+	- Gain the [[Companion Master]] perk
 - Tier 3 (requires 3 points spent in this tree):
-	- FAINT: Trigger all summon spells
+	- [[FAINT]]: Trigger all summon spells
 
 ### Utility
 - Gain 1 [[Desperate Will]]

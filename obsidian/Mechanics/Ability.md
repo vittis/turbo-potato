@@ -12,10 +12,10 @@ The cooldown is affected by [[Attack Cooldown Modifier]] or [[Spell Cooldown Mod
 
 Refers to the ability granted by a weapon, that is, a Weapon Attack or Weapon Spell. 
 
-When using an ability that instructs you to do a Weapon attack, like [[Powershot]], if the character is equipped with two weapons, only the main weapon will be used to trigger the attack. The secondary weapon will not be utilized for this particular ability.
+When using an ability that instructs you to make a Weapon Attack or Weapon Spell, like [[Powershot]], if the character is equipped with two weapons, only the main weapon will be used to trigger the attack. The secondary weapon will not be utilized for this particular ability.
 
 # List of Abilities
 ```dataview
-LIST
+TABLE source, type
 FROM #ability 
 ```

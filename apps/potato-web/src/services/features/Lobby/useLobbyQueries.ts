@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-import { api } from "../api/http";
-import { useUserStore } from "./useUserStore";
+import { api } from "../../api/http";
+import { useUserStore } from "../User/useUserStore";
+import { useLobbyRealtime } from "./useLobbyRealtime";
 
 async function fetchLobbyRooms() {
   const { data } = await api.get("http://localhost:8080/api/rooms", { withCredentials: true });
@@ -21,6 +22,8 @@ interface LobbyData {
 }
 
 const useLobbyQueries = (): LobbyData => {
+  useLobbyRealtime();
+
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
   const {
@@ -34,8 +37,6 @@ const useLobbyQueries = (): LobbyData => {
     enabled: isLoggedIn,
   });
 
-  console;
-
   const {
     data: userRoomsData,
     isLoading: userRoomsIsLoading,
@@ -48,10 +49,20 @@ const useLobbyQueries = (): LobbyData => {
     enabled: isLoggedIn,
   });
 
-  const allRooms = useMemo(() => roomsData?.rooms || [], [roomsData]);
+  console.log(userRoomsData);
+
+  const allRooms = useMemo(
+    () =>
+      roomsData?.rooms?.map((room) => ({
+        ...room,
+        members: JSON.parse(room.members),
+      })) || [],
+    [roomsData]
+  );
+
   const userRoom = useMemo(
-    () => roomsData?.rooms?.find((room) => userRoomsData?.rooms.includes(room.id)),
-    [roomsData, userRoomsData]
+    () => allRooms?.find((room) => userRoomsData?.rooms.includes(room.id)),
+    [allRooms, userRoomsData]
   );
   const allRoomsExceptUserRoom = useMemo(
     () => allRooms?.filter((room) => room.id !== userRoom?.id) || [],

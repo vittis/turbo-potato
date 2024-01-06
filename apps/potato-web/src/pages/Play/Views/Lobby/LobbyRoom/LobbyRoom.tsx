@@ -16,8 +16,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LobbyRoomUserRow } from "./LobbyRoomUserRow";
-import { useUserStore } from "@/services/state/useUserStore";
-import { useLobbyMutations } from "@/services/state/useLobbyMutations";
+import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
+import { useUserStore } from "@/services/features/User/useUserStore";
 
 interface LobbyRoomMember {
   id: string;
@@ -66,11 +66,11 @@ const LobbyRoom = ({
       <FlaskConical className="mr-1 h-3 w-3 dark:fill-black-800 dark:text-yellow-400" />
     );
 
-  function onClickJoin() {
-    joinRoom(id);
+  async function onClickJoin() {
+    await joinRoom(id);
   }
-  function onClickLeave() {
-    leaveRoom(id);
+  async function onClickLeave() {
+    await leaveRoom(id);
   }
 
   const orderedMembers = members.sort((a, b) => {

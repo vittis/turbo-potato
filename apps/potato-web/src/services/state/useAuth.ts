@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../api/http";
 import { queryClient } from "../api/queryClient";
-import { useUserStore } from "./useUserStore";
+import { useUserStore } from "../features/User/useUserStore";
 
 async function loginMutation() {
   const { data } = await api.post("http://localhost:8080/login", {}, { withCredentials: true });

@@ -35,10 +35,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <MainLayout />
-      {/* <ExamplesLayout>
-        <MailPage />
-      </ExamplesLayout> */}
-      {/* <WebSocketClient /> */}
       {/* <App /> */}
     </ThemeProvider>
   </QueryClientProvider>

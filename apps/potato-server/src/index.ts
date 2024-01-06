@@ -14,7 +14,7 @@ import {
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
 import { nanoid } from "nanoid";
-import { EntityData, EntityId, Schema, Repository } from "redis-om";
+import { EntityId, Schema, Repository } from "redis-om";
 
 interface Room {
   id: string;
@@ -23,14 +23,18 @@ interface Room {
   members: string[];
 }
 
-const roomSchema = new Schema("room", {
-  id: { type: "string" },
-  creatorId: { type: "string" },
-  name: { type: "string" },
-  members: { type: "string[]" },
-  capacity: { type: "number" },
-  createdAt: { type: "date", sortable: true },
-});
+const roomSchema = new Schema(
+  "room",
+  {
+    id: { type: "string" },
+    creatorId: { type: "string" },
+    name: { type: "string" },
+    members: { type: "string" },
+    capacity: { type: "number" },
+    createdAt: { type: "date", sortable: true },
+  },
+  { dataStructure: "HASH" }
+);
 
 const roomRepository = new Repository(roomSchema, redisClient);
 
@@ -152,7 +156,7 @@ app.post("/api/rooms/:roomId/join", async (c) => {
     `user_rooms:${session.userId}`
   );
 
-  if (!room.id || !Array.isArray(room.members)) {
+  if (!room.id || typeof room.members !== "string") {
     return c.json({ error: "Room not found" }, 404);
   }
 
@@ -160,14 +164,28 @@ app.post("/api/rooms/:roomId/join", async (c) => {
     return c.json({ error: "You are already in a room" }, 400);
   }
 
-  room.members = [...room.members, session.userId];
+  const userInfo = await redisClient.hGet("online_users_data", session.userId);
+  if (!userInfo) {
+    return c.json({ error: "User not found" }, 404);
+  }
+
+  const roomMembers = JSON.parse(room.members);
+  const newRoomMembers = [...roomMembers, JSON.parse(userInfo)];
+
+  room.members = JSON.stringify(newRoomMembers);
 
   const updatedRoom = await roomRepository.save(room);
 
-  redisClient.sAdd(`user_rooms:${session.userId}`, roomId);
-  // todo publish user state
+  await redisClient.sAdd(`user_rooms:${session.userId}`, roomId);
+  redisClient.publish(
+    "user:update-rooms",
+    JSON.stringify({ type: "add-room", roomId, userId: session.userId })
+  );
 
-  redisClient.publish("update-room", JSON.stringify({ room: updatedRoom }));
+  redisClient.publish(
+    "lobby:update-room",
+    JSON.stringify({ room: updatedRoom })
+  );
 
   return c.json({ room: updatedRoom });
 });
@@ -177,49 +195,60 @@ app.post("/api/rooms/:roomId/leave", async (c) => {
   const session = c.get("session");
 
   const room = await roomRepository.fetch(roomId);
+  if (!room.id || typeof room.members !== "string") {
+    return c.json({ error: "Room not found" }, 404);
+  }
+
+  const roomMembers = JSON.parse(room.members);
 
   const userNumberOfRooms = await redisClient.sCard(
     `user_rooms:${session.userId}`
   );
-  if (!room.id || !Array.isArray(room.members)) {
-    return c.json({ error: "Room not found" }, 404);
-  }
 
   if (userNumberOfRooms === 0) {
     return c.json({ error: "You are not in a room" }, 400);
   }
 
-  if (!room.members.includes(session.userId)) {
+  if (!roomMembers.find((m: any) => m.id === session.userId)) {
     return c.json({ error: "User is not a member of the room" }, 400);
   }
 
-  const newMembers = room.members.filter((m) => m !== session.userId);
+  const newMembers = roomMembers.filter((m: any) => m.id !== session.userId);
 
   if (newMembers.length === 0) {
     await roomRepository.remove(roomId);
 
     await redisClient.sRem(`user_rooms:${session.userId}`, roomId);
-    // todo publish user state
+    redisClient.publish(
+      "user:update-rooms",
+      JSON.stringify({ type: "remove-room", roomId, userId: session.userId })
+    );
 
-    redisClient.publish("remove-room", JSON.stringify({ roomId }));
+    redisClient.publish("lobby:remove-room", JSON.stringify({ roomId }));
 
     return c.json({ ok: true });
   }
 
-  room.members = newMembers;
-  room.creatorId = room.members?.[0];
+  room.creatorId = newMembers?.[0]?.id;
+  room.members = JSON.stringify(newMembers);
 
   const updatedRoom = await roomRepository.save(room);
 
   await redisClient.sRem(`user_rooms:${session.userId}`, roomId);
-  // todo publish user state
+  redisClient.publish(
+    "user:update-rooms",
+    JSON.stringify({ type: "remove-room", roomId, userId: session.userId })
+  );
 
-  redisClient.publish("update-room", JSON.stringify({ room: updatedRoom }));
+  redisClient.publish(
+    "lobby:update-room",
+    JSON.stringify({ room: updatedRoom })
+  );
 
   return c.json({ room: updatedRoom });
 });
 
-app.post("/api/rooms/:roomId/remove", async (c) => {
+/* app.post("/api/rooms/:roomId/remove", async (c) => {
   const session = c.get("session");
 
   const roomId = c.req.param("roomId");
@@ -231,10 +260,10 @@ app.post("/api/rooms/:roomId/remove", async (c) => {
 
   await roomRepository.remove(roomId);
 
-  redisClient.publish("remove-room", JSON.stringify({ roomId }));
+  redisClient.publish("lobby:remove-room", JSON.stringify({ roomId }));
 
   return c.json({ ok: true });
-});
+}); */
 
 app.post("/api/rooms/create", async (c) => {
   const session = c.get("session");
@@ -251,11 +280,19 @@ app.post("/api/rooms/create", async (c) => {
 
   const id = nanoid(8);
 
+  const userInfo = await redisClient.hGet("online_users_data", session.userId);
+
+  if (!userInfo) {
+    return c.json({ error: "User not found" }, 404);
+  }
+
+  const members = JSON.stringify([JSON.parse(userInfo)]);
+
   const room = {
     id,
     name,
     creatorId: session.userId,
-    members: [session.userId],
+    members,
     capacity,
     description,
     createdAt: new Date(),
@@ -264,8 +301,12 @@ app.post("/api/rooms/create", async (c) => {
   const savedRoom = await roomRepository.save(id, room);
 
   await redisClient.sAdd(`user_rooms:${session.userId}`, id);
+  redisClient.publish(
+    "user:update-rooms",
+    JSON.stringify({ type: "add-room", roomId: id, userId: session.userId })
+  );
 
-  redisClient.publish("create-room", JSON.stringify({ room: savedRoom }));
+  redisClient.publish("lobby:create-room", JSON.stringify({ room: savedRoom }));
 
   return c.json({ room: savedRoom });
 });
@@ -349,14 +390,15 @@ const connectAll = async () => {
     });
   });
 
-  await redisSub.subscribe("update-room", (message) => {
-    const room: Room = JSON.parse(message).room;
+  await redisSub.subscribe("lobby:update-room", (message) => {
+    const room: Room = JSON.parse(message)?.room;
+    if (!room) {
+      console.log("no room to update");
+      return;
+    }
 
     wsConnections.forEach((c) => {
-      if (
-        c.channels.includes(`rooms:${room.id}`) ||
-        c.channels.includes(`global`)
-      ) {
+      if (c.channels.includes("lobby")) {
         c.socket.send(
           JSON.stringify({
             type: "room_updated",
@@ -367,14 +409,15 @@ const connectAll = async () => {
     });
   });
 
-  await redisSub.subscribe("create-room", (message) => {
+  await redisSub.subscribe("lobby:create-room", (message) => {
     const room: Room = JSON.parse(message)?.room;
     if (!room) {
-      throw Error("no room to create");
+      console.log("no room to create");
+      return;
     }
 
     wsConnections.forEach((c) => {
-      if (c.channels.includes(`global`)) {
+      if (c.channels.includes("lobby")) {
         c.socket.send(
           JSON.stringify({
             type: "room_created",
@@ -385,18 +428,42 @@ const connectAll = async () => {
     });
   });
 
-  await redisSub.subscribe("remove-room", (message) => {
+  await redisSub.subscribe("lobby:remove-room", (message) => {
     const roomId: string = JSON.parse(message)?.roomId;
     if (!roomId) {
-      throw Error("no room to remove");
+      console.log("no room to remove");
+      return;
     }
 
     wsConnections.forEach((c) => {
-      if (c.channels.includes(`global`)) {
+      if (c.channels.includes("lobby")) {
         c.socket.send(
           JSON.stringify({
             type: "room_removed",
             id: roomId,
+          })
+        );
+      }
+    });
+  });
+
+  await redisSub.subscribe("user:update-rooms", (message) => {
+    const parsedMessage = JSON.parse(message);
+    const userId: string = parsedMessage?.userId;
+    const roomId: string = parsedMessage?.roomId;
+    const type: string = parsedMessage?.type;
+
+    if (!roomId || !type) {
+      console.log("no room to update");
+      return;
+    }
+
+    wsConnections.forEach((c) => {
+      if (c.channels.includes("user") && userId === c.userId) {
+        c.socket.send(
+          JSON.stringify({
+            type,
+            roomId,
           })
         );
       }
@@ -439,32 +506,46 @@ connectAll().then(() => {
     console.log("connecting into: ", req.url);
 
     const urlParams = new URLSearchParams(req.url?.replace("/", "") || "");
-    const paramsArray = [];
-
-    const keys = urlParams.keys();
-    let key = keys.next().value;
-    while (key) {
-      /* if (key !== "userId") {
-        paramsArray.push(`${key}:${urlParams.get(key)}`);
-      } */
-      paramsArray.push(`${key}:${urlParams.get(key)}`);
-      key = keys.next().value;
-    }
-
-    console.log("All parameters:", paramsArray);
-
     const userId = urlParams.get("userId");
-    const name = urlParams.get("name");
-
-    if (userId === null || name === null) {
-      throw Error("Not all query param provided");
+    if (!userId) {
+      console.log("userId not provided, closing connection");
+      ws.close();
+      return;
     }
 
-    await redisClient
-      .multi()
-      .sAdd("online_users", userId)
-      .hSet("online_users_data", userId, JSON.stringify({ id: userId, name }))
-      .exec();
+    const channels = urlParams.getAll("channels");
+
+    console.log("Channels:", channels);
+
+    wsConnections.push({
+      socket: ws,
+      userId,
+      channels,
+    });
+
+    const isGlobal = channels.includes("global");
+
+    if (isGlobal) {
+      const name = urlParams.get("name");
+      if (!name) {
+        console.log("name not provided in Global, closing connection");
+        ws.close();
+        return;
+      }
+
+      await redisClient
+        .multi()
+        .sAdd("online_users", userId)
+        .hSet("online_users_data", userId, JSON.stringify({ id: userId, name }))
+        .exec();
+
+      /* ws.send(
+        JSON.stringify({
+          type: "online_users",
+          data: await redisClient.hGetAll("online_users_data"),
+        })
+      ); */
+    }
 
     ws.on("error", console.error);
 
@@ -473,11 +554,13 @@ connectAll().then(() => {
     });
 
     ws.on("close", () => {
-      redisClient
-        .multi()
-        .sRem("online_users", userId)
-        .hDel("online_users_data", userId)
-        .exec();
+      if (isGlobal) {
+        redisClient
+          .multi()
+          .sRem("online_users", userId)
+          .hDel("online_users_data", userId)
+          .exec();
+      }
     });
   });
 });

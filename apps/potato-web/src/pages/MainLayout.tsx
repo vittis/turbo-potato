@@ -6,7 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ResizablePanelGroup } from "@/components/ui/resizable";
 import LobbyView from "./Play/Views/Lobby/LobbyView";
 import MessagesPanel from "./MessagesPanel/MessagesPanel";
-import { useFetchProfile } from "@/services/state/useFetchProfile";
+import { useFetchProfile } from "@/services/features/User/useFetchProfile";
+import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
 
 const MainLayout = () => {
   const layout = localStorage.getItem("react-resizable-panels:layout");
@@ -23,6 +24,7 @@ const MainLayout = () => {
   );
 
   useFetchProfile();
+  useGlobalConnection();
 
   return (
     <>

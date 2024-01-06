@@ -60,6 +60,7 @@ export function restoreAbilities(abilities: Ability[], scene: Phaser.Scene) {
 
 export class BattleUnitAbilities extends Phaser.GameObjects.Container {
   public abilities: Ability[] = [];
+
   public battleUnit: BattleUnit;
   public dataUnit: any;
 

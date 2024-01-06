@@ -1,30 +1,23 @@
 import Phaser from "phaser";
-import { GAME_LOOP_SPEED, StepEvent } from "../BattleScene";
-import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
-import { onReceiveDamage } from "./BattleUnitEventHandler";
+import { StepEvent } from "../BattleScene";
+import { getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import {
   createAttackAnimation,
   createDeathAnimation,
-  createHeadCrushAnimation,
-  createHealingWordAnimation,
-  createPowershotAnimation,
   createTriggerEffectAnimation,
   createWiggleAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
 import { Ability, BattleUnitAbilities } from "./BattleUnitAbilities";
 import { BattleUnitStatusEffects } from "./BattleUnitStatusEffects";
+import { BattleUnitBars } from "./BattleUnitBars";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public battleUnitSprite!: BattleUnitSprite;
   public sprite!: Phaser.GameObjects.Image;
-  public hpBar: Phaser.GameObjects.Rectangle;
-  public shieldBar: Phaser.GameObjects.Rectangle;
   public boardPosition: number;
   public owner: number;
-  public hpText: Phaser.GameObjects.Text;
-  public shieldText: Phaser.GameObjects.Text;
 
   public stats: any;
   public equipment: any;
@@ -37,6 +30,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
   public abilitiesManager: BattleUnitAbilities;
   public statusEffectsManager: BattleUnitStatusEffects;
+  public barsManager: BattleUnitBars;
 
   public isDead = false;
   public startingX;
@@ -86,16 +80,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     setupUnitPointerEvents(this);
 
-    const { hpBar, shieldBar } = createBars(this);
-    this.hpBar = hpBar;
-    this.shieldBar = shieldBar;
-
-    const { hpText, shieldText } = createTexts(this, hpBar.x, hpBar.y);
-    this.hpText = hpText;
-    this.shieldText = shieldText;
-    this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
-    this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
-
     this.glow = this.sprite.preFX?.addGlow(0xeeee00, 4);
     this.glow?.setActive(false);
 
@@ -108,6 +92,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
     this.statusEffectsManager = new BattleUnitStatusEffects(scene, dataUnit);
     this.add(this.statusEffectsManager);
+
+    this.barsManager = new BattleUnitBars(this, scene, dataUnit);
+    this.add(this.barsManager);
 
     scene.add.existing(this);
   }
@@ -254,10 +241,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "DAMAGE") {
-      onReceiveDamage(this, event);
-      // temporary
-
-      // this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
+      this.barsManager.onReceiveDamage(this, event);
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {
@@ -270,164 +254,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         } else {
           this.statusEffectsManager.addStatusEffect({ name: statusEffect.name, quantity: statusEffect.quantity });
         }
-      });
-    }
-
-    if (event.type === "CAST_SKILL") {
-      if (event.payload.skillName === "Healing Word") {
-        const target = targets?.[0];
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          const receiveHealEvent = event.subEvents?.find((e) => e.type === "RECEIVED_HEAL") as StepEvent;
-          target?.playEvent({ event: receiveHealEvent });
-        };
-
-        const { healingWordTween } = createHealingWordAnimation({
-          unit: this,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = healingWordTween;
-      }
-
-      if (event.payload.skillName === "Powershot") {
-        const target = targets?.[0];
-
-        if (!target) {
-          throw new Error("Attack target is undefined");
-        }
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          const receiveDamageEvents = targets?.map(
-            (target) =>
-              event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE" && e.actorId === target.id) as StepEvent
-          );
-
-          if (receiveDamageEvents) {
-            receiveDamageEvents.forEach((e) => {
-              const target = targets?.find((target) => target.id === e.actorId);
-              if (target) target.playEvent({ event: e });
-            });
-          }
-        };
-
-        const { powershotAnimation } = createPowershotAnimation({
-          unit: this,
-          target,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = powershotAnimation;
-      }
-
-      if (event.payload.skillName === "Head Crush") {
-        const target = targets?.[0];
-
-        if (!target) {
-          throw new Error("Attack target is undefined");
-        }
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
-          target?.playEvent({ event: receiveDamageEvent });
-        };
-
-        const { headCrushAnimation } = createHeadCrushAnimation({
-          unit: this,
-          target,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = headCrushAnimation;
-      }
-    }
-
-    // todo: combine logic of receive damage and heal
-    if (event.type === "RECEIVED_HEAL") {
-      const newHp = event.payload.stats.hp;
-      const hpHealed = event.payload.modifiers.hp;
-      this.hpText.setText(`${newHp}`);
-
-      this.scene.tweens.add({
-        targets: this.hpText,
-        scaleX: 1.25,
-        scaleY: 1.25,
-        duration: 150,
-        ease: "Bounce.easeOut",
-        onComplete: () => {
-          this.scene.tweens.add({
-            targets: this.hpText,
-            scaleX: 1,
-            scaleY: 1,
-            duration: 150,
-            ease: "Bounce.easeOut",
-          });
-        },
-      });
-
-      if (!this.isSelected) {
-        // this.sprite.setTint(0x1dad2e);
-      }
-
-      this.scene.time.addEvent({
-        delay: 150,
-        callback: () => {
-          if (!this.isSelected) {
-            // this.sprite.clearTint();
-          }
-        },
-      });
-
-      const healText = this.scene.add.text(0, 30, "+" + hpHealed.toString(), {
-        fontSize: hpHealed > 50 ? "40px" : "30px",
-        color: "#1dad2e",
-        fontFamily: "IM Fell DW Pica",
-        stroke: "#000000",
-        strokeThickness: 2,
-        fontStyle: "bold",
-        shadow: {
-          offsetX: 0,
-          offsetY: 3,
-          color: "#000",
-          blur: 0,
-          stroke: true,
-          fill: false,
-        },
-      });
-      healText.setOrigin(0.5);
-
-      this.scene.tweens.add({
-        targets: healText,
-        x: Phaser.Math.Between(-15, 15),
-        y: healText.y - 40,
-        alpha: 0,
-        duration: hpHealed > 50 ? 1900 : 1200,
-        ease: "Linear",
-        onComplete: () => {
-          healText.destroy();
-        },
-      });
-
-      this.add(healText);
-
-      const newHpBarValue = (newHp / this.stats.maxHp) * BAR_WIDTH;
-      this.scene.tweens.add({
-        targets: this.hpBar,
-        width: newHpBarValue <= 0 ? 0 : newHpBarValue,
-        duration: 80,
-        ease: "Linear",
       });
     }
   }

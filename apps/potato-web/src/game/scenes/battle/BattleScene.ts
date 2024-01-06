@@ -3,7 +3,6 @@ import { BattleUnit } from "./battleUnit/BattleUnit";
 import { queryClient } from "../../../services/api/queryClient";
 import { useGameStore } from "../../../services/state/game";
 import { preloadBattle, setupBattle } from "./BattleSetup";
-import { setupUnitAnimations } from "./battleUnit/BattleUnitSetup";
 import { Ability, highlightAbility, restoreAbilities, unhighlightAbilities } from "./battleUnit/BattleUnitAbilities";
 
 // todo: reuse from server
@@ -72,8 +71,6 @@ export class Battle extends Phaser.Scene {
     graphics.generateTexture("square", 10, 10);
     graphics.destroy();
 
-    setupUnitAnimations(this);
-
     const { board, tiles } = setupBattle(this);
     this.board = board;
     this.tiles = tiles;
@@ -112,7 +109,6 @@ export class Battle extends Phaser.Scene {
 
         if (isGamePaused) {
           if (this.isPlayingEventAnimation) {
-            console.log("kk?");
             this.pauseUnitsAnimations();
           } else {
             this.pauseTimeEvents();

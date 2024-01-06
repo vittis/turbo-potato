@@ -35,3 +35,19 @@ export function getUnitPos(position, owner, tiles: Phaser.GameObjects.Sprite[]) 
 
   return { x, y };
 }
+
+export function createShadow(unit: BattleUnit, scene: Phaser.Scene) {
+  const spriteOffsetX = unit.owner === 0 ? -4 : 4;
+
+  const shadowContainer = scene.add.container();
+  const shadowColor = 0x000000;
+  const shadowAlpha = 0.4;
+  const shadowWidth = 65;
+  const shadowHeight = 25;
+  const shadowCircle = scene.add.graphics();
+  shadowCircle.fillStyle(shadowColor, shadowAlpha);
+  shadowCircle.fillEllipse(0, 0, shadowWidth, shadowHeight);
+  shadowContainer.add(shadowCircle);
+  shadowContainer.setPosition(unit.sprite.x + spriteOffsetX, unit.sprite.y + 63);
+  unit.add(shadowContainer);
+}

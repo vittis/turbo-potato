@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { StepEvent } from "../BattleScene";
-import { getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
+import { createShadow, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import {
   createAttackAnimation,
   createDeathAnimation,
@@ -56,45 +56,30 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.owner = dataUnit.owner;
 
     this.battleUnitSprite = new BattleUnitSprite(scene, x, y, dataUnit);
-
     this.sprite = scene.add.image(0, 0, this.battleUnitSprite.textureName);
-
     if (dataUnit.owner === 0) {
       this.sprite.flipX = true;
     }
     this.sprite.setScale(0.79);
 
-    const spriteOffsetX = this.owner === 0 ? -4 : 4;
-
-    const shadowContainer = scene.add.container();
-    const shadowColor = 0x000000;
-    const shadowAlpha = 0.4;
-    const shadowWidth = 65;
-    const shadowHeight = 25;
-    const shadowCircle = scene.add.graphics();
-    shadowCircle.fillStyle(shadowColor, shadowAlpha);
-    shadowCircle.fillEllipse(0, 0, shadowWidth, shadowHeight);
-    shadowContainer.add(shadowCircle);
-    shadowContainer.setPosition(this.sprite.x + spriteOffsetX, this.sprite.y + 63);
-    this.add(shadowContainer);
+    createShadow(this, scene);
+    this.add(this.sprite);
 
     setupUnitPointerEvents(this);
 
     this.glow = this.sprite.preFX?.addGlow(0xeeee00, 4);
     this.glow?.setActive(false);
 
-    this.add(this.sprite);
-
     createWiggleAnimation(this);
+
+    this.barsManager = new BattleUnitBars(this, scene, dataUnit);
+    this.add(this.barsManager);
 
     this.abilitiesManager = new BattleUnitAbilities(this, scene, dataUnit);
     this.add(this.abilitiesManager);
 
     this.statusEffectsManager = new BattleUnitStatusEffects(scene, dataUnit);
     this.add(this.statusEffectsManager);
-
-    this.barsManager = new BattleUnitBars(this, scene, dataUnit);
-    this.add(this.barsManager);
 
     scene.add.existing(this);
   }

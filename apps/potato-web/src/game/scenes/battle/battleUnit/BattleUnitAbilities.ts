@@ -13,51 +13,6 @@ export interface Ability {
   hasUsed: boolean;
 }
 
-// not using this yet
-export function highlightAbility(ability: Ability, scene: Phaser.Scene) {
-  if (!ability) {
-    throw Error("Couldnt find ability");
-  }
-  ability.shineFX?.setActive(true);
-  ability.overlay.setAlpha(0);
-  scene.tweens.add({
-    targets: ability?.container,
-    scale: 1.2,
-    duration: 200,
-    ease: "Bounce.easeOut",
-  });
-}
-
-// not using this yet
-export function unhighlightAbilities(abilities: Ability[], scene: Phaser.Scene) {
-  abilities.forEach((ability) => {
-    if (ability.hasUsed) {
-      ability.overlay.scaleY = 1;
-    }
-    ability?.shineFX?.setActive(false);
-    scene.tweens.add({
-      targets: ability?.container,
-      scale: 0.7,
-      duration: 200,
-      ease: "Bounce.easeOut",
-    });
-  });
-}
-
-// not using this yet
-export function restoreAbilities(abilities: Ability[], scene: Phaser.Scene) {
-  abilities.forEach((ability) => {
-    ability.hasUsed = false;
-    ability?.shineFX?.setActive(false);
-    scene.tweens.add({
-      targets: ability?.container,
-      scale: 1,
-      duration: 200,
-      ease: "Bounce.easeOut",
-    });
-  });
-}
-
 export class BattleUnitAbilities extends Phaser.GameObjects.Container {
   public abilities: Ability[] = [];
 
@@ -73,7 +28,7 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
     this.abilities = dataUnit.abilities.map((ability: any) => {
       const abilityContainer = scene.add.container(0, 0);
 
-      const icon = scene.add.image(0, 0, ability.data.name.toLowerCase().replace(/\s/g, "_"));
+      const icon = scene.add.image(0, 0, `ability_${ability.data.name.toLowerCase().replace(/\s/g, "_")}`);
 
       const shineFX = icon.preFX?.addShine(2);
       shineFX?.setActive(false);
@@ -81,7 +36,7 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
       abilityContainer.add(icon);
 
       const borderGraphics = scene.add.graphics();
-      borderGraphics.lineStyle(3, 0xffffff); // You can customize the color and thickness of the border
+      borderGraphics.lineStyle(3, 0xffffff);
       borderGraphics.strokeRoundedRect(0, 0, icon.width + 4, icon.height + 4, 8);
       borderGraphics.generateTexture("border_texture", icon.width + 4, icon.height + 4);
       borderGraphics.destroy();
@@ -124,7 +79,7 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
 
   positionAbilities() {
     const breakRowThreshold = 4;
-    const heightOffset = this.battleUnit.sprite.height / 2 + 26;
+    const heightOffset = this.battleUnit.sprite.height / 2 + 12;
     const abilityWidth = this.abilities[0].icon.width;
     const spaceBetween = 10;
 
@@ -211,4 +166,49 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
       }
     });
   }
+}
+
+// not using this yet
+export function highlightAbility(ability: Ability, scene: Phaser.Scene) {
+  if (!ability) {
+    throw Error("Couldnt find ability");
+  }
+  ability.shineFX?.setActive(true);
+  ability.overlay.setAlpha(0);
+  scene.tweens.add({
+    targets: ability?.container,
+    scale: 1.2,
+    duration: 200,
+    ease: "Bounce.easeOut",
+  });
+}
+
+// not using this yet
+export function unhighlightAbilities(abilities: Ability[], scene: Phaser.Scene) {
+  abilities.forEach((ability) => {
+    if (ability.hasUsed) {
+      ability.overlay.scaleY = 1;
+    }
+    ability?.shineFX?.setActive(false);
+    scene.tweens.add({
+      targets: ability?.container,
+      scale: 0.7,
+      duration: 200,
+      ease: "Bounce.easeOut",
+    });
+  });
+}
+
+// not using this yet
+export function restoreAbilities(abilities: Ability[], scene: Phaser.Scene) {
+  abilities.forEach((ability) => {
+    ability.hasUsed = false;
+    ability?.shineFX?.setActive(false);
+    scene.tweens.add({
+      targets: ability?.container,
+      scale: 1,
+      duration: 200,
+      ease: "Bounce.easeOut",
+    });
+  });
 }

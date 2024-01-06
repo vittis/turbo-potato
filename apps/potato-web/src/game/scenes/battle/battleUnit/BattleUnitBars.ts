@@ -1,6 +1,7 @@
 import { BattleUnit } from "./BattleUnit";
 
-export const BAR_WIDTH = 45;
+const SHOW_TEXT = true;
+const BAR_WIDTH = 45;
 
 export interface Bar {
   container: Phaser.GameObjects.Container;
@@ -24,6 +25,11 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
 
     this.hp = this.createBar("HP", unit, dataUnit);
     this.shield = this.createBar("SHIELD", unit, dataUnit);
+
+    if (!SHOW_TEXT) {
+      this.hp.text.alpha = 0;
+      this.shield.text.alpha = 0;
+    }
   }
 
   createBar(barType: "HP" | "SHIELD", unit: BattleUnit, dataUnit: any) {
@@ -75,9 +81,12 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     bar.setDepth(1);
     container.add(bar);
 
+    const textHpOffsetX = unit.owner === 0 ? 64 : -20;
+    const textShieldOffsetX = unit.owner === 0 ? -20 : 64;
+
     const text = unit.scene.add.text(
-      barType === "HP" ? bar.x + 12 : bar.x + 38,
-      bar.y + 17,
+      barType === "HP" ? bar.x + textHpOffsetX : bar.x + textShieldOffsetX,
+      bar.y,
       barType === "HP" ? dataUnit.stats.maxHp : dataUnit.stats.shield,
       {
         fontSize: "18px",
@@ -104,7 +113,7 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     return {
       container,
       bar,
-      border: undefined,
+      border,
       text,
       damageText: undefined,
     };

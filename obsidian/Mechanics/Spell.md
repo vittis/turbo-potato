@@ -16,6 +16,6 @@ Example Spells:
 # List of Spells
 
 ```dataview
-TABLE type
+TABLE source, type
 FROM #spell 
 ```

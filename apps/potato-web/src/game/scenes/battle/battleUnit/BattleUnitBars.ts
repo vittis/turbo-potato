@@ -11,113 +11,166 @@ export interface Bar {
 
 export class BattleUnitBars extends Phaser.GameObjects.Container {
   public hp: Bar;
-  //public shield: Bar;
+  public shield: Bar;
 
-  public battleUnit: BattleUnit;
+  public unit: BattleUnit;
   public dataUnit: any;
 
-  constructor(battleUnit: BattleUnit, scene: Phaser.Scene, dataUnit: any) {
+  constructor(unit: BattleUnit, scene: Phaser.Scene, dataUnit: any) {
     super(scene);
 
-    this.battleUnit = battleUnit;
+    this.unit = unit;
     this.dataUnit = dataUnit;
 
-    this.hp = this.createBar(battleUnit, dataUnit);
+    this.hp = this.createBar("HP", unit, dataUnit);
+    this.shield = this.createBar("SHIELD", unit, dataUnit);
   }
 
-  createBar(unit: BattleUnit, dataUnit: any) {
+  createBar(barType: "HP" | "SHIELD", unit: BattleUnit, dataUnit: any) {
     const spriteOffsetX = unit.owner === 0 ? -4 : 4;
 
-    const width = BAR_WIDTH;
+    const width =
+      barType === "HP" ? BAR_WIDTH : Math.min((dataUnit.stats.shield / dataUnit.stats.maxHp) * BAR_WIDTH, BAR_WIDTH);
     const height = 7;
     const borderWidth = 3;
-    const yOffset = 50 + 10 + 10;
+    const xOffset = (BAR_WIDTH - width) / 2;
+    const yOffset = 70;
 
-    const hpContainer = this.scene.add.container(0, 0);
+    const barColor = barType === "HP" ? 0xde3c45 : 0x3b72d9;
+    const borderColor = 0x232422;
+    const borderStrokeColor = 0x390908;
+    const textColor = barType === "HP" ? "#ff121d" : "#1236ff";
 
-    const hpBar = new Phaser.GameObjects.Rectangle(
+    const container = this.scene.add.container(0, 0);
+
+    let border;
+
+    if (barType === "HP") {
+      border = new Phaser.GameObjects.Rectangle(
+        unit.scene,
+        unit.sprite.x - width / 2 + spriteOffsetX - xOffset,
+        unit.sprite.y + yOffset,
+        width + borderWidth,
+        height + borderWidth,
+        borderColor,
+        0.75
+      );
+
+      border.setStrokeStyle(borderWidth, borderStrokeColor, 1);
+      border.setOrigin(0);
+      border.setDepth(1);
+      container.add(border);
+    }
+
+    const bar = new Phaser.GameObjects.Rectangle(
       unit.scene,
-      unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX,
+      unit.sprite.x + borderWidth / 2 - width / 2 + spriteOffsetX - xOffset,
       unit.sprite.y + yOffset + borderWidth / 2,
       width,
       height,
-      0xde3c45
+      barColor
     );
 
-    const hpBorder = new Phaser.GameObjects.Rectangle(
-      unit.scene,
-      unit.sprite.x - width / 2 + spriteOffsetX,
-      unit.sprite.y + yOffset,
-      width + borderWidth,
-      height + borderWidth,
-      0x232422,
-      0.75
+    bar.setOrigin(0);
+    bar.setDepth(1);
+    container.add(bar);
+
+    const text = unit.scene.add.text(
+      barType === "HP" ? bar.x + 12 : bar.x + 38,
+      bar.y + 17,
+      barType === "HP" ? dataUnit.stats.maxHp : dataUnit.stats.shield,
+      {
+        fontSize: "18px",
+        color: textColor,
+        fontFamily: "IM Fell DW Pica",
+        stroke: "#000000",
+        strokeThickness: 2,
+        fontStyle: "bold",
+        shadow: {
+          offsetX: 0,
+          offsetY: 1,
+          color: "#000",
+          blur: 0,
+          stroke: true,
+        },
+      }
     );
 
-    hpBorder.setStrokeStyle(borderWidth, 0x390908, 1);
+    text.setOrigin(0.5);
+    container.add(text);
 
-    hpBar.setOrigin(0);
-    hpBar.setDepth(1);
-    hpBorder.setOrigin(0);
-    hpBorder.setDepth(1);
-
-    const hpText = unit.scene.add.text(hpBar.x + 12, hpBar.y + 55, dataUnit.stats.maxHp, {
-      fontSize: "18px",
-      color: "#ff121d",
-      fontFamily: "IM Fell DW Pica",
-      stroke: "#000000",
-      strokeThickness: 2,
-      fontStyle: "bold",
-      shadow: {
-        offsetX: 0,
-        offsetY: 1,
-        color: "#000",
-        blur: 0,
-        stroke: true,
-      },
-    });
-
-    hpText.setOrigin(0.5);
-
-    hpContainer.add(hpBorder);
-    hpContainer.add(hpBar);
-    hpContainer.add(hpText);
-
-    unit.add(hpContainer);
+    unit.add(container);
 
     return {
-      container: hpContainer,
-      bar: hpBar,
-      border: hpBorder,
-      text: hpText,
+      container,
+      bar,
+      border: undefined,
+      text,
       damageText: undefined,
     };
   }
 
-  onReceiveDamage(unit: BattleUnit, event: any) {
+  onReceiveDamage(event: any) {
+    const damageTextColor = "#ff121d";
+
     const damageReceived = event.payload.payload.value;
 
-    const newHp = Math.max(0, unit.stats.hp - damageReceived);
+    let newHp = this.unit.stats.hp;
+    let newShield = this.unit.stats.shield;
 
-    const hasTakenHpDamage = newHp < unit.stats.hp;
+    if (newShield > 0) {
+      newShield -= damageReceived;
+      if (newShield < 0) {
+        newHp += newShield;
+        newShield = 0;
+      }
+    } else {
+      newHp = Math.max(newHp - damageReceived, 0);
+    }
 
-    console.log({ newHp, hasTakenHpDamage });
+    const hasTakenShieldDamage = newShield < this.unit.stats.shield;
+    const hasTakenHpDamage = newHp < this.unit.stats.hp;
 
     const textTargets = [] as Phaser.GameObjects.Text[];
 
+    if (hasTakenShieldDamage) {
+      textTargets.push(this.shield.text);
+      this.shield.text.setText(`${newShield}`);
+
+      if (newShield === 0) {
+        this.shield.bar.alpha = 0;
+      } else {
+        const newShieldBarValue = Math.min((newShield / this.unit.stats.maxHp) * BAR_WIDTH, BAR_WIDTH);
+
+        this.unit.scene.tweens.add({
+          targets: this.shield.bar,
+          width: newShieldBarValue <= 0 ? 0 : newShieldBarValue,
+          duration: 80,
+          ease: "Linear",
+        });
+      }
+    }
+
     if (hasTakenHpDamage) {
       textTargets.push(this.hp.text);
+      this.hp.text.setText(`${newHp}`);
+
+      if (newHp === 0) {
+        this.hp.bar.alpha = 0;
+      } else {
+        const newHpBarValue = (newHp / this.unit.stats.maxHp) * BAR_WIDTH;
+
+        this.unit.scene.tweens.add({
+          targets: this.hp.bar,
+          width: newHpBarValue <= 0 ? 0 : newHpBarValue,
+          duration: 80,
+          ease: "Linear",
+        });
+      }
     }
 
-    this.hp.text.setText(`${newHp}`);
-
-    if (newHp === 0) {
-      //this.hp.text.alpha = 0;
-      this.hp.bar.alpha = 0;
-    }
-
-    // hp and armor text POP animation
-    unit.scene.tweens.add({
+    // hp and shield text POP animation
+    this.unit.scene.tweens.add({
       targets: textTargets,
       scaleX: 1.25,
       scaleY: 1.25,
@@ -137,7 +190,7 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
 
     const damageText = this.scene.add.text(0, 30, "-" + damage, {
       fontSize: fontSizePx,
-      color: "#ff121d",
+      color: damageTextColor,
       fontFamily: "IM Fell DW Pica",
       stroke: "#000000",
       strokeThickness: 2,
@@ -157,7 +210,7 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     this.hp.container.add(damageText);
 
     // damage text going up
-    unit.scene.tweens.add({
+    this.unit.scene.tweens.add({
       targets: damageText,
       x: Phaser.Math.Between(-15, 15),
       y: damageText.y - 38 - Phaser.Math.Between(0, 10),
@@ -169,15 +222,6 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
       },
     });
 
-    const newHpBarValue = (newHp / unit.stats.maxHp) * BAR_WIDTH;
-
-    unit.scene.tweens.add({
-      targets: this.hp.bar,
-      width: newHpBarValue <= 0 ? 0 : newHpBarValue,
-      duration: 80,
-      ease: "Linear",
-    });
-
-    unit.stats = { ...unit.stats, hp: newHp }; //todo better stat tracking
+    this.unit.stats = { ...this.unit.stats, hp: newHp, shield: newShield }; //todo better stat tracking
   }
 }

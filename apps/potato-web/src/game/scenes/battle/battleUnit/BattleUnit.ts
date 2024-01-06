@@ -241,7 +241,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "DAMAGE") {
-      this.barsManager.onReceiveDamage(this, event);
+      this.barsManager.onReceiveDamage(event);
     }
 
     if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {

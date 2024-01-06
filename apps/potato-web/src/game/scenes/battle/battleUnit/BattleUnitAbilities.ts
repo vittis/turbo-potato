@@ -124,7 +124,7 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
 
   positionAbilities() {
     const breakRowThreshold = 4;
-    const heightOffset = this.battleUnit.sprite.height / 2 + 12;
+    const heightOffset = this.battleUnit.sprite.height / 2 + 26;
     const abilityWidth = this.abilities[0].icon.width;
     const spaceBetween = 10;
 

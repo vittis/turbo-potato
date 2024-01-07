@@ -5,22 +5,8 @@ import { useState } from "react";
 import { SideNavItems } from "./SideNavItems";
 import { AlertCircle, DoorClosed, Swords, Trophy, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUserStore } from "@/services/state/useUserStore";
 import { useAuth } from "@/services/state/useAuth";
-
-const accounts = [
-  {
-    label: "Mosquitao",
-    email: "mosquitao@gmail.com",
-    avatar:
-      "https://i.ytimg.com/vi/H2Y__-IhdKM/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGHIgSihGMA8=&rs=AOn4CLBQgwlWkUWjK3Z1h_f9GsDfwiw9iA",
-  },
-  {
-    label: "Paul",
-    email: "paulaodamassa@gmail.com",
-    avatar: "https://avatars.githubusercontent.com/u/29383947?v=4",
-  },
-];
+import { useUserStore } from "@/services/features/User/useUserStore";
 
 interface SideNavProps {
   defaultCollapsed: boolean;

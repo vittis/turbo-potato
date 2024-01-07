@@ -24,6 +24,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { queryClient } from "@/services/api/queryClient";
 import { api } from "@/services/api/http";
+import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
 
 const FormSchema = z.object({
   name: z.string().min(4, { message: "Name must be at least 4 characters" }).max(30, {
@@ -43,17 +44,9 @@ const FormSchema = z.object({
 
 interface CreateRoomDrawerProps {}
 
-async function createRoom(data) {
-  const response = await api.post("http://localhost:8080/api/rooms/create", data, {
-    withCredentials: true,
-    /* headers: {
-      "Content-Type": "application/json",
-    }, */
-  });
-  return response.data;
-}
-
 const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
+  const { createRoom, isLoading } = useLobbyMutations();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -65,17 +58,8 @@ const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
     },
   });
 
-  const { mutateAsync } = useMutation({
-    mutationFn: createRoom,
-    mutationKey: ["createRoom"],
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lobby"] });
-      queryClient.invalidateQueries({ queryKey: ["user", "rooms"] });
-    },
-  });
-
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    await mutateAsync(data);
+    await createRoom(data);
     setIsOpen(false);
     // todo toast
   }
@@ -142,7 +126,9 @@ const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
             />
 
             <DialogFooter>
-              <Button type="submit">Create</Button>
+              <Button disabled={isLoading} type="submit">
+                Create
+              </Button>
             </DialogFooter>
           </form>
         </Form>

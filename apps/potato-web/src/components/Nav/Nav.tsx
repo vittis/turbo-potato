@@ -3,7 +3,7 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Button } from "../ui/button";
 import { ThemeModeToggle } from "../ThemeModeToggle/ThemeModeToggle";
 import { useAuth } from "@/services/state/useAuth";
-import { useUserStore } from "@/services/state/useUserStore";
+import { useUserStore } from "@/services/features/User/useUserStore";
 
 const navItems = [
   {

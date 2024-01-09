@@ -1,12 +1,10 @@
 {
   "name": "Disarming Shot",
   "type": "ATTACK",
-  "tags": [
-    "WEAPON_ABILITY"
-  ],
+  "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
-  "baseDamage": 300,
-  "cooldown": 60,
+  "baseDamage": 40,
+  "cooldown": 100,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -15,7 +13,7 @@
       "payload": [
         {
           "name": "VULNERABLE",
-          "quantity": 15
+          "quantity": 5
         }
       ]
     }

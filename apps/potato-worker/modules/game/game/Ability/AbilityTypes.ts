@@ -19,7 +19,7 @@ export interface AbilityData {
   type: ABILITY_CATEGORY;
   tags: ABILITY_TAG[];
   target: TARGET_TYPE;
-  baseDamage: number;
+  baseDamage?: number;
   cooldown: number;
   effects: PossibleTriggerEffect[];
 }

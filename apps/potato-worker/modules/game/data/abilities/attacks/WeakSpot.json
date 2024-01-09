@@ -1,20 +1,19 @@
 {
   "name": "Weak Spot",
   "type": "ATTACK",
-  "tags": [
-    "USE_WEAPON_ABILITY"
-  ],
+  "tags": ["USE_WEAPON_ABILITY"],
   "target": "FURTHEST",
+  "baseDamage": 15,
   "cooldown": 60,
   "effects": [
     {
-      "type": "APPLY_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "target": "ATTACK_TARGET",
+      "target": "HIT_TARGET",
       "payload": [
         {
           "name": "SLOW",
-          "quantity": 10
+          "quantity": 20
         }
       ]
     }

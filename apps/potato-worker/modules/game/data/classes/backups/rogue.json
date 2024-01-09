@@ -7,11 +7,11 @@
         {
           "type": "GRANT_ABILITY",
           "payload": {
-            "name": "Quick Attack"
+            "name": "Quick attack"
           }
         }
       ],
-      "description": "Gain the Quick Attack attack"
+      "description": "Gain the Quick attack attack"
     },
     {
       "mods": [

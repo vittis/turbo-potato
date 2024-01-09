@@ -1,6 +1,7 @@
 import { BattleUnit } from "./BattleUnit";
 
 const SHOW_TEXT = true;
+const HIDE_TEXT_IF_ZERO = true;
 const BAR_WIDTH = 45;
 
 export interface Bar {
@@ -29,6 +30,8 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     if (!SHOW_TEXT) {
       this.hp.text.alpha = 0;
       this.shield.text.alpha = 0;
+    } else if (HIDE_TEXT_IF_ZERO) {
+      this.shield.text.alpha = 0;
     }
   }
 
@@ -36,7 +39,9 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     const spriteOffsetX = unit.owner === 0 ? -4 : 4;
 
     const width =
-      barType === "HP" ? BAR_WIDTH : Math.min((dataUnit.stats.shield / dataUnit.stats.maxHp) * BAR_WIDTH, BAR_WIDTH);
+      barType === "HP"
+        ? BAR_WIDTH
+        : Math.min((dataUnit.stats.shield / dataUnit.stats.maxHp) * BAR_WIDTH, BAR_WIDTH);
     const height = 7;
     const borderWidth = 3;
     const xOffset = (BAR_WIDTH - width) / 2;
@@ -149,7 +154,10 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
       if (newShield === 0) {
         this.shield.bar.alpha = 0;
       } else {
-        const newShieldBarValue = Math.min((newShield / this.unit.stats.maxHp) * BAR_WIDTH, BAR_WIDTH);
+        const newShieldBarValue = Math.min(
+          (newShield / this.unit.stats.maxHp) * BAR_WIDTH,
+          BAR_WIDTH
+        );
 
         this.unit.scene.tweens.add({
           targets: this.shield.bar,
@@ -194,7 +202,8 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
     const maxFontSize = 70;
 
     const damage = damageReceived;
-    const fontSize = ((damage - minDamage) / (maxDamage - minDamage)) * (maxFontSize - minFontSize) + minFontSize;
+    const fontSize =
+      ((damage - minDamage) / (maxDamage - minDamage)) * (maxFontSize - minFontSize) + minFontSize;
     const fontSizePx = `${fontSize.toFixed(0)}px`;
 
     const damageText = this.scene.add.text(0, 30, "-" + damage, {
@@ -230,6 +239,8 @@ export class BattleUnitBars extends Phaser.GameObjects.Container {
         damageText?.destroy();
       },
     });
+
+    if (HIDE_TEXT_IF_ZERO && newShield <= 0) this.shield.text.alpha = 0;
 
     this.unit.stats = { ...this.unit.stats, hp: newHp, shield: newShield }; //todo better stat tracking
   }

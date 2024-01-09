@@ -1,10 +1,10 @@
 {
-  "name": "Summon Boar",
+  "name": "Bastion Bond",
   "type": "SPELL",
-  "tags": ["SUMMON"],
-  "target": "STANDARD",
-  "baseDamage": 30,
-  "cooldown": 80,
+  "tags": ["BUFF"],
+  "target": "LOWEST_HEALTH_ALLY",
+  "baseDamage": 0,
+  "cooldown": 100,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -12,8 +12,8 @@
       "target": "HIT_TARGET",
       "payload": [
         {
-          "name": "VULNERABLE",
-          "quantity": 10
+          "name": "REGEN",
+          "quantity": 5
         }
       ]
     }

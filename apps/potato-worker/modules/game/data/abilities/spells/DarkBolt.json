@@ -1,0 +1,9 @@
+{
+  "name": "Dark Bolt",
+  "type": "SPELL",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 30,
+  "cooldown": 40,
+  "effects": []
+}

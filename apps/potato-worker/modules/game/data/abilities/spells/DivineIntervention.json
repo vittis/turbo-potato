@@ -1,0 +1,9 @@
+{
+  "name": "Divine Intervention",
+  "type": "SPELL",
+  "tags": [],
+  "target": "STANDARD",
+  "baseDamage": 0,
+  "cooldown": 40000,
+  "effects": []
+}

@@ -106,9 +106,10 @@ export class Ability {
       }
     );
 
-    const damage =
-      this.data.baseDamage +
-      (this.data.baseDamage * this.getDamageModifier(unit)) / 100;
+    const damage = this.data.baseDamage
+      ? this.data.baseDamage +
+        (this.data.baseDamage * this.getDamageModifier(unit)) / 100
+      : 0;
 
     const finalDamage = Math.max(
       1,

@@ -1,7 +1,7 @@
 {
-  "name": "Quick Attack",
+  "name": "Stab",
   "type": "ATTACK",
-  "tags": [],
+  "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
   "baseDamage": 15,
   "cooldown": 20,

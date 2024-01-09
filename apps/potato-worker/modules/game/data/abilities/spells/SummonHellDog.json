@@ -1,10 +1,10 @@
 {
-  "name": "Summon Boar",
+  "name": "Summon Hell Dog",
   "type": "SPELL",
   "tags": ["SUMMON"],
   "target": "STANDARD",
-  "baseDamage": 30,
-  "cooldown": 80,
+  "baseDamage": 15,
+  "cooldown": 60,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -12,8 +12,8 @@
       "target": "HIT_TARGET",
       "payload": [
         {
-          "name": "VULNERABLE",
-          "quantity": 10
+          "name": "SLOW",
+          "quantity": 5
         }
       ]
     }

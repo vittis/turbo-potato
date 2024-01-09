@@ -10,11 +10,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./styles/global.css";
 import { MainLayout } from "./pages/MainLayout";
 
-/* const game = new Phaser.Game(
+const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
     scene: [Battle],
   })
-); */
+);
 
 /* function onReady() {
    const canvas = document.querySelector("canvas");
@@ -34,8 +34,8 @@ game.events.on("ready", onReady); */
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <MainLayout />
-      {/* <App /> */}
+      {/* <MainLayout /> */}
+      <App />
     </ThemeProvider>
   </QueryClientProvider>
 );

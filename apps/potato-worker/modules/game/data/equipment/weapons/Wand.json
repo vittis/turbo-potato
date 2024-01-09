@@ -1,13 +1,11 @@
 {
   "name": "Wand",
-  "allowedSlots": [
-    "MAIN_HAND"
-  ],
+  "allowedSlots": ["MAIN_HAND"],
   "mods": [
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Empowering Strike"
+        "name": "Bastion Bond"
       }
     },
     {

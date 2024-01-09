@@ -8,7 +8,7 @@ export const AbilityDataSchema = z.object({
   type: z.nativeEnum(ABILITY_CATEGORY),
   tags: z.array(z.nativeEnum(ABILITY_TAG)),
   target: z.nativeEnum(TARGET_TYPE),
-  baseDamage: z.number(),
+  baseDamage: z.optional(z.number()),
   cooldown: z.number(),
   effects: TriggerEffectsSchema,
 }) satisfies z.ZodType<AbilityData>;

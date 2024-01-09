@@ -7,54 +7,6 @@
       "payload": {
         "name": "Empowering Strike"
       }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
-    },
-    {
-      "type": "GRANT_ABILITY",
-      "payload": {
-        "name": "Empowering Strike"
-      }
     }
   ],
   "effects": [

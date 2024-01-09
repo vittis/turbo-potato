@@ -1,10 +1,9 @@
 {
-  "name": "Summon Boar",
+  "name": "Ki Focus",
   "type": "SPELL",
-  "tags": ["SUMMON"],
-  "target": "STANDARD",
-  "baseDamage": 30,
-  "cooldown": 80,
+  "tags": ["BUFF"],
+  "target": "SELF",
+  "cooldown": 50,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -12,8 +11,8 @@
       "target": "HIT_TARGET",
       "payload": [
         {
-          "name": "VULNERABLE",
-          "quantity": 10
+          "name": "MULTISTRIKE",
+          "quantity": 1
         }
       ]
     }

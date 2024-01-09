@@ -6,9 +6,10 @@
   "cooldown": 80,
   "effects": [
     {
-      "type": "APPLY_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "statusEffectsApplied": [
+      "target": "HIT_TARGET",
+      "payload": [
         {
           "name": "FAST",
           "quantity": 10

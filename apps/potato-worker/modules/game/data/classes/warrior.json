@@ -1,0 +1,92 @@
+{
+  "name": "Warrior",
+  "hp": 100,
+  "base": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "ATTACK_DAMAGE_MODIFIER",
+            "value": 10
+          }
+        },
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "ATTACK_COOLDOWN_MODIFIER",
+            "value": -10
+          }
+        }
+      ],
+      "description": "Gain +10% Attack Damage Modifier and -10% Attack Cooldown Modifier"
+    }
+  ],
+  "utility": [],
+  "tree": [
+    {
+      "name": "Berserker",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Ki Focus"
+              }
+            }
+          ],
+          "description": "Gain Ki Focus Spell"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Solo Strength",
+                "tier": 1
+              }
+            }
+          ],
+          "description": "Gain 1 Solo Strength"
+        },
+        {
+          "tier": 2,
+          "req": 2,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Berserk",
+                "tier": 2
+              }
+            }
+          ],
+          "description": "Gain 2 Berserk"
+        }
+      ]
+    },
+    {
+      "name": "Vanguard",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Balanced Strike"
+              }
+            }
+          ],
+          "description": "Gain Balanced Strike attack"
+        }
+      ]
+    }
+  ]
+}

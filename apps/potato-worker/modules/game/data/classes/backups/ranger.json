@@ -7,7 +7,7 @@
         {
           "type": "GRANT_ABILITY",
           "payload": {
-            "name": "Thrust"
+            "name": "Weak Spot"
           }
         }
       ],

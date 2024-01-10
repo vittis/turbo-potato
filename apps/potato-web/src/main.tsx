@@ -1,9 +1,9 @@
-import React from "react";
+/* import React from "react"; */
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import Phaser from "phaser";
+/* import App from "./App"; */
+/* import Phaser from "phaser";
 import { PHASER_CONFIG } from "./game/config";
-import { Battle } from "./game/scenes/battle/BattleScene";
+import { Battle } from "./game/scenes/battle/BattleScene"; */
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./services/api/queryClient";
 import { ThemeProvider } from "@/components/theme-provider";

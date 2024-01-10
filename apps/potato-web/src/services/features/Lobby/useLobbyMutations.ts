@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "../../api/queryClient";
 import { api } from "../../api/http";
 import { toast } from "sonner";
 

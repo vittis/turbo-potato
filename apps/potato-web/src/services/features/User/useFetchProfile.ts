@@ -13,7 +13,6 @@ async function fetchProfile() {
 
 const useFetchProfile = () => {
   const setUserData = useUserStore((state) => state.setUserData);
-  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
   const removeUserData = useUserStore((state) => state.removeUserData);
 

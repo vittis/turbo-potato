@@ -9,7 +9,6 @@ import {
   Loader2Icon,
   LogOutIcon,
   MessageCircleIcon,
-  PlayCircleIcon,
   PlayIcon,
   PlusIcon,
   SwordsIcon,

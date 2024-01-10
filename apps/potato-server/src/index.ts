@@ -4,46 +4,19 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { Server as HTTPSServer } from "node:http";
 import { connectRedis, redisClient, redisSub } from "./redis";
 import { logger } from "hono/logger";
-import {
-  getCookie,
-  getSignedCookie,
-  setCookie,
-  setSignedCookie,
-  deleteCookie,
-} from "hono/cookie";
+import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
-import { nanoid } from "nanoid";
-import { EntityId, Schema, Repository } from "redis-om";
+import { Room, RoomRepository } from "./rooms/roomsRoutes";
+import rooms from "./rooms/roomsRoutes";
+import { uniqueNamesGenerator, starWars } from "unique-names-generator";
 
-interface Room {
-  id: string;
-  creatorId: string;
-  name: string;
-  members: string[];
-}
-
-const roomSchema = new Schema(
-  "room",
-  {
-    id: { type: "string" },
-    creatorId: { type: "string" },
-    name: { type: "string" },
-    members: { type: "string" },
-    capacity: { type: "number" },
-    createdAt: { type: "date", sortable: true },
-  },
-  { dataStructure: "HASH" }
-);
-
-const roomRepository = new Repository(roomSchema, redisClient);
-
-type Variables = {
+export type Variables = {
   session: any;
 };
 
 const APPID = process.env.APPID;
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -85,11 +58,15 @@ app.use("/api/*", async (c, next) => {
   await next();
 });
 
+app.route("/", rooms);
+
 app.post("/login", async (c) => {
   // You would typically validate user credentials here
   let randomUserId = Math.floor(Math.random() * 1000);
   const userData = {
-    name: `John-${randomUserId}`,
+    name: uniqueNamesGenerator({
+      dictionaries: [starWars],
+    }),
     userId: randomUserId,
   };
 
@@ -146,192 +123,12 @@ app.get("/api/chat/:channel", async (c) => {
   });
 });
 
-app.post("/api/rooms/:roomId/join", async (c) => {
-  const roomId = c.req.param("roomId");
-  const session = c.get("session");
-
-  const room = await roomRepository.fetch(roomId);
-
-  const userNumberOfRooms = await redisClient.sCard(
-    `user_rooms:${session.userId}`
-  );
-
-  if (!room.id || typeof room.members !== "string") {
-    return c.json({ error: "Room not found" }, 404);
-  }
-
-  if (userNumberOfRooms > 0) {
-    return c.json({ error: "You are already in a room" }, 400);
-  }
-
-  const userInfo = await redisClient.hGet("online_users_data", session.userId);
-  if (!userInfo) {
-    return c.json({ error: "User not found" }, 404);
-  }
-
-  const roomMembers = JSON.parse(room.members);
-  const newRoomMembers = [...roomMembers, JSON.parse(userInfo)];
-
-  room.members = JSON.stringify(newRoomMembers);
-
-  const updatedRoom = await roomRepository.save(room);
-
-  await redisClient.sAdd(`user_rooms:${session.userId}`, roomId);
-  redisClient.publish(
-    "user:update-rooms",
-    JSON.stringify({ type: "add-room", roomId, userId: session.userId })
-  );
-
-  redisClient.publish(
-    "lobby:update-room",
-    JSON.stringify({ room: updatedRoom })
-  );
-
-  return c.json({ room: updatedRoom });
-});
-
-app.post("/api/rooms/:roomId/leave", async (c) => {
-  const roomId = c.req.param("roomId");
-  const session = c.get("session");
-
-  const room = await roomRepository.fetch(roomId);
-  if (!room.id || typeof room.members !== "string") {
-    return c.json({ error: "Room not found" }, 404);
-  }
-
-  const roomMembers = JSON.parse(room.members);
-
-  const userNumberOfRooms = await redisClient.sCard(
-    `user_rooms:${session.userId}`
-  );
-
-  if (userNumberOfRooms === 0) {
-    return c.json({ error: "You are not in a room" }, 400);
-  }
-
-  if (!roomMembers.find((m: any) => m.id === session.userId)) {
-    return c.json({ error: "User is not a member of the room" }, 400);
-  }
-
-  const newMembers = roomMembers.filter((m: any) => m.id !== session.userId);
-
-  if (newMembers.length === 0) {
-    await roomRepository.remove(roomId);
-
-    await redisClient.sRem(`user_rooms:${session.userId}`, roomId);
-    redisClient.publish(
-      "user:update-rooms",
-      JSON.stringify({ type: "remove-room", roomId, userId: session.userId })
-    );
-
-    redisClient.publish("lobby:remove-room", JSON.stringify({ roomId }));
-
-    return c.json({ ok: true });
-  }
-
-  room.creatorId = newMembers?.[0]?.id;
-  room.members = JSON.stringify(newMembers);
-
-  const updatedRoom = await roomRepository.save(room);
-
-  await redisClient.sRem(`user_rooms:${session.userId}`, roomId);
-  redisClient.publish(
-    "user:update-rooms",
-    JSON.stringify({ type: "remove-room", roomId, userId: session.userId })
-  );
-
-  redisClient.publish(
-    "lobby:update-room",
-    JSON.stringify({ room: updatedRoom })
-  );
-
-  return c.json({ room: updatedRoom });
-});
-
-/* app.post("/api/rooms/:roomId/remove", async (c) => {
-  const session = c.get("session");
-
-  const roomId = c.req.param("roomId");
-  const room = await roomRepository.fetch(roomId);
-
-  if (room.creatorId !== session.userId) {
-    return c.json({ error: "You are not the room creator" }, 400);
-  }
-
-  await roomRepository.remove(roomId);
-
-  redisClient.publish("lobby:remove-room", JSON.stringify({ roomId }));
-
-  return c.json({ ok: true });
-}); */
-
-app.post("/api/rooms/create", async (c) => {
-  const session = c.get("session");
-  const body = await c.req.json();
-  const { name, description, capacity } = body;
-
-  const userNumberOfRooms = await redisClient.sCard(
-    `user_rooms:${session.userId}`
-  );
-
-  if (userNumberOfRooms > 0) {
-    return c.json({ error: "You are already in a room" }, 400);
-  }
-
-  const id = nanoid(8);
-
-  const userInfo = await redisClient.hGet("online_users_data", session.userId);
-
-  if (!userInfo) {
-    return c.json({ error: "User not found" }, 404);
-  }
-
-  const members = JSON.stringify([JSON.parse(userInfo)]);
-
-  const room = {
-    id,
-    name,
-    creatorId: session.userId,
-    members,
-    capacity,
-    description,
-    createdAt: new Date(),
-  };
-
-  const savedRoom = await roomRepository.save(id, room);
-
-  await redisClient.sAdd(`user_rooms:${session.userId}`, id);
-  redisClient.publish(
-    "user:update-rooms",
-    JSON.stringify({ type: "add-room", roomId: id, userId: session.userId })
-  );
-
-  redisClient.publish("lobby:create-room", JSON.stringify({ room: savedRoom }));
-
-  return c.json({ room: savedRoom });
-});
-
-app.get("/api/rooms", async (c) => {
-  const rooms = await roomRepository
-    .search()
-    .sortDescending("createdAt")
-    .return.all();
-
-  const roomsWithIds = rooms.map((room) => ({
-    id: room[EntityId],
-    ...room,
-  }));
-
-  return c.json({ rooms: roomsWithIds });
-});
-
 app.post("/api/chat/:channel/:message", async (c) => {
   const channel = c.req.param("channel");
   const msg = c.req.param("message");
   const finalMsg = `${c.get("session").name}: ${msg}`;
 
   const session = c.get("session");
-  console.log({ session });
 
   redisClient.rPush(
     `chat:${channel}:messages`,
@@ -373,7 +170,7 @@ const connectAll = async () => {
   await connectRedis();
 
   try {
-    await roomRepository.createIndex();
+    await RoomRepository.createIndex();
   } catch (error) {
     console.log(error);
   }
@@ -383,9 +180,7 @@ const connectAll = async () => {
     console.log("live-chat new: ", parsedMessage);
 
     wsConnections.forEach((c) => {
-      console.log(c.channels, parsedMessage.channel);
       if (!c.channels.includes(parsedMessage.channel)) return;
-      console.log("sending to socket");
       c.socket.send(JSON.stringify(parsedMessage));
     });
   });
@@ -440,7 +235,7 @@ const connectAll = async () => {
         c.socket.send(
           JSON.stringify({
             type: "room_removed",
-            id: roomId,
+            roomId: roomId,
           })
         );
       }
@@ -469,32 +264,10 @@ const connectAll = async () => {
       }
     });
   });
-
-  /* await redisSub.subscribe("join-room", (message) => {
-    const parsedMessage = JSON.parse(message);
-    console.group(parsedMessage);
-
-    console.log("here i am after join");
-    wsConnections.forEach((c) => {
-      console.log(c.userId, parsedMessage.userId);
-      if (c.userId === parsedMessage.userId) {
-        console.log("pushing the channel");
-        c.channels.push(`rooms:${parsedMessage.roomId}`);
-
-        redisClient.publish(
-          "live-chat",
-          JSON.stringify({
-            message: `${parsedMessage.userId} joined room ${parsedMessage.roomId}`,
-            channel: `rooms:${parsedMessage.roomId}`,
-          })
-        );
-      }
-    });
-  }); */
 };
 
 connectAll().then(() => {
-  const server = serve({ fetch: app.fetch, port: PORT }, (info) => {
+  const server = serve({ fetch: app.fetch, port: Number(PORT) }, (info) => {
     console.log(
       `${APPID} Listening on port ${info.port}  at ${info.address}: http://${info.address}:${info.port}. To access, check HAProxy config, probably http://${info.address}:8080`
     );
@@ -525,8 +298,8 @@ connectAll().then(() => {
 
     const isGlobal = channels.includes("global");
 
+    const name = urlParams.get("name");
     if (isGlobal) {
-      const name = urlParams.get("name");
       if (!name) {
         console.log("name not provided in Global, closing connection");
         ws.close();
@@ -550,17 +323,82 @@ connectAll().then(() => {
     ws.on("error", console.error);
 
     ws.on("message", (data) => {
-      console.log("on message", data);
+      if (channels.includes("chat") && channels.includes("lobby")) {
+        const msg = data?.toString();
+        if (!msg) return;
+        const finalMsg = `${name}^${msg}`;
+
+        console.log(req.url);
+
+        const timestamp = Date.now();
+
+        redisClient.rPush(
+          `chat:lobby:messages`,
+          JSON.stringify({
+            message: finalMsg,
+            timestamp,
+          })
+        );
+
+        redisClient.publish(
+          "live-chat",
+          JSON.stringify({
+            type: "chat_message",
+            message: finalMsg,
+            channel: "lobby",
+            timestamp,
+          })
+        );
+      }
     });
 
-    ws.on("close", () => {
+    ws.on("close", async () => {
+      wsConnections.splice(
+        wsConnections.findIndex((c) => c.userId === userId),
+        1
+      );
       if (isGlobal) {
-        redisClient
-          .multi()
-          .sRem("online_users", userId)
-          .hDel("online_users_data", userId)
-          .exec();
+        const userRooms = await redisClient.sMembers(`user_rooms:${userId}`);
+
+        if (!userRooms || userRooms?.length === 0) {
+          redisClient
+            .multi()
+            .sRem("online_users", userId)
+            .hDel("online_users_data", userId)
+            .exec();
+          return;
+        }
+        console.log("WILL REMOVE ROOM");
+        const roomId = userRooms[0];
+        await redisClient.sRem(`user_rooms:${userId}`, roomId);
+
+        const room = await RoomRepository.fetch(roomId);
+        if (!room || typeof room.members !== "string") return;
+
+        const roomMembers = JSON.parse(room.members);
+        const newMembers = roomMembers.filter((m: any) => m.id !== userId);
+
+        if (newMembers.length === 0) {
+          await RoomRepository.remove(roomId);
+          redisClient.publish(
+            "lobby:remove-room",
+            JSON.stringify({ roomId: roomId })
+          );
+          return;
+        }
+
+        room.creatorId = newMembers?.[0]?.id;
+        room.members = JSON.stringify(newMembers);
+
+        const updatedRoom = await RoomRepository.save(room);
+
+        redisClient.publish(
+          "lobby:update-room",
+          JSON.stringify({ room: updatedRoom })
+        );
       }
     });
   });
 });
+
+// todo extract members from room to: room_members:roomId -> centralized hash with all members. Update: not worth because of /rooms

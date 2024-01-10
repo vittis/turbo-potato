@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "../../api/queryClient";
 import { api } from "../../api/http";
+import { toast } from "sonner";
 
 async function joinRoom(id) {
   const res = await api.post(
-    `http://localhost:8080/api/rooms/${id}/join`,
+    `/api/rooms/${id}/join`,
     {},
     {
       withCredentials: true,
@@ -14,7 +15,7 @@ async function joinRoom(id) {
 }
 async function leaveRoom(id) {
   const res = await api.post(
-    `http://localhost:8080/api/rooms/${id}/leave`,
+    `/api/rooms/${id}/leave`,
     {},
     {
       withCredentials: true,
@@ -24,7 +25,7 @@ async function leaveRoom(id) {
 }
 
 async function createRoom(data) {
-  const res = await api.post("http://localhost:8080/api/rooms/create", data, {
+  const res = await api.post("/api/rooms/create", data, {
     withCredentials: true,
   });
   return res.data;
@@ -35,7 +36,7 @@ const useLobbyMutations = () => {
     mutationFn: joinRoom,
     mutationKey: ["join"],
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ["user", "rooms"] });
+      toast.success("Joined room successfully");
     },
   });
 
@@ -43,8 +44,7 @@ const useLobbyMutations = () => {
     mutationFn: leaveRoom,
     mutationKey: ["leave"],
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ["lobby"] });
-      // queryClient.invalidateQueries({ queryKey: ["user", "rooms"] });
+      toast.success("Leaved room successfully");
     },
   });
 
@@ -52,8 +52,7 @@ const useLobbyMutations = () => {
     mutationFn: createRoom,
     mutationKey: ["createRoom"],
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ["lobby"] });
-      // queryClient.invalidateQueries({ queryKey: ["user", "rooms"] });
+      toast.success("Created room successfully");
     },
   });
 

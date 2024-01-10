@@ -9,6 +9,8 @@ import {
   Loader2Icon,
   LogOutIcon,
   MessageCircleIcon,
+  PlayCircleIcon,
+  PlayIcon,
   PlusIcon,
   SwordsIcon,
   UsersIcon,
@@ -18,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { LobbyRoomUserRow } from "./LobbyRoomUserRow";
 import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
 import { useUserStore } from "@/services/features/User/useUserStore";
+import { toast } from "sonner";
 
 interface LobbyRoomMember {
   id: string;
@@ -48,14 +51,18 @@ const LobbyRoom = ({
   isInAnyRoom,
   listIsLoading,
 }: LobbyRoomProps) => {
+  console.log({ lastUpdated });
   const { joinRoom, leaveRoom, isLoading: mutationIsLoading } = useLobbyMutations();
   const userData = useUserStore((state) => state.userData);
 
-  const isInRoom = !!members.find((member) => member.id === userData?.userId);
+  const you = members.find((member) => member.id === userData?.userId);
+
+  const isInRoom = !!you;
   const isFull = members.length === maxMembers;
   const shouldShowJoinButton = !isFull && !isInAnyRoom;
   const hasMoreThan3Members = members.length >= 3;
   const type = maxMembers > 2 ? "Free for All" : "Duel";
+  const canStart = members.length >= 2 && you?.isCreator;
 
   const icon =
     type === "Duel" ? (
@@ -70,6 +77,7 @@ const LobbyRoom = ({
     await joinRoom(id);
   }
   async function onClickLeave() {
+    console.log("??");
     await leaveRoom(id);
   }
 
@@ -80,6 +88,12 @@ const LobbyRoom = ({
     if (b.id === userData?.userId) return 1; // You come second
     return 0; // Keep the rest in the same order
   });
+
+  function onClickStart() {
+    toast.warning("Not implemented yet", {
+      description: "This feature is not implemented yet",
+    });
+  }
 
   const JoinButton = () => (
     <Button
@@ -168,23 +182,13 @@ const LobbyRoom = ({
             {!isInRoom && (
               <div className="text-[12px] flex items-center gap-1 text-muted-foreground">
                 <ClockIcon className="h-3 w-3" />
-                <time dateTime="2008-02-14 20:00">{formatDistanceToNow(lastUpdated)} ago</time>
+                <time dateTime="2008-02-14 20:00">
+                  {formatDistanceToNow(new Date(lastUpdated))} ago
+                </time>
               </div>
             )}
             {isInRoom && (
               <>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="justify-between relative flex items-center px-2 h-[30px]"
-                    >
-                      <MessageCircleIcon className="w-4 text-sky-400" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Open in messages</TooltipContent>
-                </Tooltip>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <Button
@@ -203,6 +207,38 @@ const LobbyRoom = ({
                   </TooltipTrigger>
                   <TooltipContent>Leave</TooltipContent>
                 </Tooltip>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="justify-between relative flex items-center px-2 h-[30px]"
+                    >
+                      <MessageCircleIcon className="w-4 text-sky-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Open in messages</TooltipContent>
+                </Tooltip>
+                {!canStart && (
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        disabled={listIsLoading || mutationIsLoading}
+                        onClick={onClickStart}
+                        size="sm"
+                        variant="ghost"
+                        className="justify-between relative flex items-center px-2 h-[30px]"
+                      >
+                        {mutationIsLoading ? (
+                          <Loader2Icon className="w-4 animate-spin" />
+                        ) : (
+                          <PlayIcon className="animate-pulse w-4 text-emerald-400" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Start</TooltipContent>
+                  </Tooltip>
+                )}
               </>
             )}
           </div>

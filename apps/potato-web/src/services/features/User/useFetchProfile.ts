@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/http";
 import { useEffect } from "react";
 import { useUserStore } from "./useUserStore";
+import { toast } from "sonner";
 
 async function fetchProfile() {
-  const { data } = await api.get("http://localhost:8080/api/me/profile", {
+  const { data } = await api.get("/api/me/profile", {
     withCredentials: true,
   });
   return data;
@@ -12,6 +13,8 @@ async function fetchProfile() {
 
 const useFetchProfile = () => {
   const setUserData = useUserStore((state) => state.setUserData);
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
   const removeUserData = useUserStore((state) => state.removeUserData);
 
   const {
@@ -25,6 +28,7 @@ const useFetchProfile = () => {
 
   useEffect(() => {
     if (isSuccess) {
+      toast.success("Profile fetched successfully");
       setUserData(profileData.data);
     }
     if (isError) {

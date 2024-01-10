@@ -5,7 +5,7 @@ import { SOCKET_URL } from "@/services/api/websocket";
 import { queryClient } from "@/services/api/queryClient";
 
 const useLobbyRealtime = () => {
-  const { userData } = useUserStore();
+  const userData = useUserStore((state) => state.userData);
 
   const searchParams = useMemo(() => {
     if (!userData?.userId) return null;
@@ -18,6 +18,7 @@ const useLobbyRealtime = () => {
   useWebSocket(
     `${SOCKET_URL}/?${searchParams}`,
     {
+      share: true,
       onMessage: (event) => {
         const data = JSON.parse(event.data);
 
@@ -39,7 +40,7 @@ const useLobbyRealtime = () => {
           });
         }
         if (data.type === "room_removed") {
-          const roomId = data.room.id;
+          const roomId = data.roomId;
           queryClient.setQueryData(["lobby", "rooms"], (oldData: any) => {
             const updatedRooms = oldData.rooms.filter((room: any) => room.id !== roomId);
             return {

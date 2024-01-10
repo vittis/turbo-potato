@@ -9,6 +9,8 @@ import { queryClient } from "./services/api/queryClient";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./styles/global.css";
 import { MainLayout } from "./pages/MainLayout";
+import { Toaster } from "sonner";
+//import { Toaster } from "./components/ui/sonner";
 
 /* const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
@@ -36,6 +38,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <MainLayout />
       {/* <App /> */}
+      <Toaster theme="system" position="bottom-left" richColors closeButton />
     </ThemeProvider>
   </QueryClientProvider>
 );

@@ -15,10 +15,10 @@ export const LobbyRoomUserRow = ({
   isYou = false,
 }: LobbyRoomUserRow) => {
   const maxW = isCreator ? "max-w-[78px]" : "max-w-[95px]";
-  const textColor = isCreator
-    ? "dark:text-yellow-300 text-primary"
-    : isYou
+  const textColor = isYou
     ? "text-green-300"
+    : isCreator
+    ? "dark:text-yellow-300 text-primary"
     : "dark:text-stone-300";
 
   return (
@@ -45,11 +45,12 @@ export const LobbyRoomUserRow = ({
         </div>
       </div>
 
-      {isCreator ? (
-        <Crown className="w-3 fill-yellow-700 text-yellow-700 dark:fill-yellow-300 dark:text-yellow-300" />
-      ) : isYou ? (
-        <User className="w-3 fill-green-300 text-green-300" />
-      ) : null}
+      <div className="flex gap-2">
+        {isYou && <User className="w-3 fill-green-300 text-green-300" />}
+        {isCreator && (
+          <Crown className="w-3 fill-yellow-700 text-yellow-700 dark:fill-yellow-300 dark:text-yellow-300" />
+        )}
+      </div>
     </Button>
   );
 };

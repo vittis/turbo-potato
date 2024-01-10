@@ -3,9 +3,10 @@ import { useUserStore } from "../User/useUserStore";
 import useWebSocket from "react-use-websocket";
 import { SOCKET_URL } from "@/services/api/websocket";
 import { queryClient } from "@/services/api/queryClient";
+import { toast } from "sonner";
 
 const useGlobalConnection = () => {
-  const { userData } = useUserStore();
+  const userData = useUserStore((state) => state.userData);
 
   const searchParams = useMemo(() => {
     if (!userData?.userId) return null;
@@ -20,6 +21,18 @@ const useGlobalConnection = () => {
   useWebSocket(
     `${SOCKET_URL}/?${searchParams}`,
     {
+      onOpen: () => {
+        toast.success("Connected successfully to server");
+      },
+      onError: () => {
+        toast.success("Error connecting to server");
+      },
+      onClose: () => {
+        toast.warning("Disconnected from server");
+      },
+      onReconnectStop: () => {
+        toast.warning("Stopped reconnecting to server");
+      },
       onMessage: (event) => {
         const data = JSON.parse(event.data);
         const type = data?.type;

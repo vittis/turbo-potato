@@ -8,7 +8,7 @@
     {
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "target": "HIT_TARGET",
+      "target": "STANDARD",
       "payload": [
         {
           "name": "POISON",

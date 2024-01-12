@@ -7,11 +7,11 @@
   "effects": [
     {
       "type": "STATUS_EFFECT",
-      "trigger": "ON_HIT",
-      "target": "HIT_TARGET",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
       "payload": [
         {
-          "name": "VULNERABLE",
+          "name": "STURDY",
           "quantity": 20
         }
       ]

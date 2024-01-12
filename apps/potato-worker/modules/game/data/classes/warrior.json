@@ -1,27 +1,7 @@
 {
   "name": "Warrior",
   "hp": 100,
-  "base": [
-    {
-      "mods": [
-        {
-          "type": "GRANT_BASE_STAT",
-          "payload": {
-            "stat": "ATTACK_DAMAGE_MODIFIER",
-            "value": 10
-          }
-        },
-        {
-          "type": "GRANT_BASE_STAT",
-          "payload": {
-            "stat": "ATTACK_COOLDOWN_MODIFIER",
-            "value": -10
-          }
-        }
-      ],
-      "description": "Gain +10% Attack Damage Modifier and -10% Attack Cooldown Modifier"
-    }
-  ],
+  "base": [],
   "utility": [],
   "tree": [
     {

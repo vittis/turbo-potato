@@ -51,6 +51,23 @@ export class Ability {
   use(unit: Unit): UseAbilityEvent {
     const targets = this.getTargets(unit);
 
+    // TODO fix abilities with no target
+    if (targets.length === 0) {
+      const noTargetEvent: UseAbilityEvent = {
+        type: EVENT_TYPE.USE_ABILITY,
+        actorId: unit.id,
+        step: unit.currentStep,
+        payload: {
+          id: this.id,
+          name: this.data.name,
+          targetsId: [],
+          subEvents: [],
+        },
+      };
+
+      return noTargetEvent;
+    }
+
     const statusSubEvents: SubEvent[] = [];
 
     const targetHasVulnerable = targets[0].statusEffects.some(
@@ -106,11 +123,41 @@ export class Ability {
       }
     );
 
+    const onUseGrantStatusEffects = this.data.effects.filter(
+      (effect) =>
+        effect.trigger === TRIGGER.ON_USE &&
+        effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT
+    ) as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+
+    const onUseStatusSubEvents: SubEvent[] = onUseGrantStatusEffects.map(
+      (effect) => {
+        const target =
+          effect.target === "HIT_TARGET"
+            ? targets[0]
+            : unit.bm.getTarget(unit, effect.target)[0];
+
+        return {
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+            targetsId: [target.id], // todo move effect target logic somewhere else
+            payload: [
+              {
+                name: effect.payload[0].name, // todo loop?
+                quantity: effect.payload[0].quantity as number,
+              },
+            ],
+          },
+        };
+      }
+    );
+
     const damage = this.data.baseDamage
       ? this.data.baseDamage +
         (this.data.baseDamage * this.getDamageModifier(unit)) / 100
       : 0;
 
+    // TODO remove min damage 1
     const finalDamage = Math.max(
       1,
       Math.round(
@@ -138,6 +185,7 @@ export class Ability {
             },
           },
           ...onHitStatusSubEvents,
+          ...onUseStatusSubEvents,
           ...statusSubEvents,
         ],
       },
@@ -166,7 +214,8 @@ export class Ability {
   getTargets(unit: Unit) {
     const targets = unit.bm.getTarget(unit, this.data.target);
     if (targets.length === 0 || targets[0] === undefined) {
-      throw Error(`Couldnt find target for ${this.data.name}`);
+      //throw Error(`Couldnt find target for ${this.data.name}`);
+      console.log(`Couldnt find target for ${this.data.name}`);
     }
 
     return targets;

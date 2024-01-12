@@ -3,13 +3,12 @@
   "type": "SPELL",
   "tags": ["BUFF"],
   "target": "ADJACENT_ALLIES",
-  "baseDamage": 0,
   "cooldown": 120,
   "effects": [
     {
       "type": "STATUS_EFFECT",
-      "trigger": "ON_HIT",
-      "target": "HIT_TARGET",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
       "payload": [
         {
           "name": "REGEN",

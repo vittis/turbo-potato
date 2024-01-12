@@ -3,7 +3,7 @@
   "type": "ATTACK",
   "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
-  "baseDamage": 50,
+  "baseDamage": 40,
   "cooldown": 50,
   "effects": []
 }

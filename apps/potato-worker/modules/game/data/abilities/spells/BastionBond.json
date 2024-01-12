@@ -3,13 +3,12 @@
   "type": "SPELL",
   "tags": ["BUFF"],
   "target": "LOWEST_HEALTH_ALLY",
-  "baseDamage": 0,
   "cooldown": 100,
   "effects": [
     {
       "type": "STATUS_EFFECT",
-      "trigger": "ON_HIT",
-      "target": "HIT_TARGET",
+      "trigger": "ON_USE",
+      "target": "LOWEST_HEALTH_ALLY",
       "payload": [
         {
           "name": "REGEN",

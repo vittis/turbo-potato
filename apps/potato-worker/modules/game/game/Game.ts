@@ -104,16 +104,53 @@ export class Game {
     unit10.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit10.setClass(new Class(Classes.Warlock));
 
-    this.boardManager.addToBoard(unit1);
+    /* this.boardManager.addToBoard(unit1);
     this.boardManager.addToBoard(unit2);
     this.boardManager.addToBoard(unit9);
     this.boardManager.addToBoard(unit10);
     this.boardManager.addToBoard(unit3);
-    this.boardManager.addToBoard(unit7);
+    this.boardManager.addToBoard(unit7); */
     /* this.boardManager.addToBoard(unit4);
     this.boardManager.addToBoard(unit5);
     this.boardManager.addToBoard(unit6);
     this.boardManager.addToBoard(unit8); */
+
+    const unitA = new Unit(OWNER.TEAM_ONE, POSITION.TOP_MID, this.boardManager);
+    unitA.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unitA.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unitA.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+    unitA.setClass(new Class(Classes.Warrior));
+
+    const unitB = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
+    unitB.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unitB.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unitB.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+    unitB.setClass(new Class(Classes.Warrior));
+
+    const unitC = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_BACK,
+      this.boardManager
+    );
+    unitC.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unitC.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unitC.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+    unitC.setClass(new Class(Classes.Warrior));
+
+    const unitD = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_BACK,
+      this.boardManager
+    );
+    unitD.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unitD.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
+    unitD.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
+    unitD.setClass(new Class(Classes.Warrior));
+
+    this.boardManager.addToBoard(unitA);
+    this.boardManager.addToBoard(unitB);
+    this.boardManager.addToBoard(unitC);
+    this.boardManager.addToBoard(unitD);
   }
 
   startGame() {

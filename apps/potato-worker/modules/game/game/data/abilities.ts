@@ -11,7 +11,7 @@ import * as EmpoweringStrike from "../../data/abilities/attacks/EmpoweringStrike
 import * as LongShot from "../../data/abilities/attacks/LongShot.json";
 import * as PhalanxFury from "../../data/abilities/attacks/PhalanxFury.json";
 import * as Powershot from "../../data/abilities/attacks/Powershot.json";
-import * as QuickAttack from "../../data/abilities/attacks/Powershot.json";
+import * as QuickAttack from "../../data/abilities/attacks/QuickAttack.json";
 import * as Slash from "../../data/abilities/attacks/Slash.json";
 import * as Stab from "../../data/abilities/attacks/Stab.json";
 import * as Thrust from "../../data/abilities/attacks/Thrust.json";

@@ -2,7 +2,7 @@
   "name": "Powershot",
   "type": "ATTACK",
   "tags": ["USE_WEAPON_ABILITY"],
-  "target": "STANDARD_ROW",
+  "target": "HIT_TARGET",
   "baseDamage": 25,
   "cooldown": 100,
   "effects": []

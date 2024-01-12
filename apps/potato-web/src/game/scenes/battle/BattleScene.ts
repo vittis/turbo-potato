@@ -3,7 +3,12 @@ import { BattleUnit } from "./battleUnit/BattleUnit";
 import { queryClient } from "../../../services/api/queryClient";
 import { useGameStore } from "../../../services/state/game";
 import { preloadBattle, setupBattle } from "./BattleSetup";
-import { Ability, highlightAbility, restoreAbilities, unhighlightAbilities } from "./battleUnit/BattleUnitAbilities";
+import {
+  Ability,
+  highlightAbility,
+  restoreAbilities,
+  unhighlightAbilities,
+} from "./battleUnit/BattleUnitAbilities";
 
 // todo: reuse from server
 enum EVENT_TYPE {
@@ -185,7 +190,9 @@ export class Battle extends Phaser.Scene {
       let onStart;
 
       if (event.type === "USE_ABILITY") {
-        const useAbilityEventsOnThisStep = eventsOnThisStep.filter((e) => e.step === step && e.type === "USE_ABILITY");
+        const useAbilityEventsOnThisStep = eventsOnThisStep.filter(
+          (e) => e.step === step && e.type === "USE_ABILITY"
+        );
         const allAbilitiesOfAllUnits = this.units.reduce((acc, unit) => {
           return [...acc, ...unit.abilitiesManager.abilities];
         }, [] as Ability[]);
@@ -203,12 +210,16 @@ export class Battle extends Phaser.Scene {
             });
           } else {
             // more than one ability used in the step
-            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            const abilityUsed = allAbilitiesOfAllUnits.find(
+              (ability) => ability.id === event.payload.id
+            ) as Ability;
             abilityUsed.hasUsed = true;
             unhighlightAbilities([abilityUsed], this);
             const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
             const areAllAbilitiesUsed = allAbilitiesUsedIds.every((abilityId) => {
-              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+              const abilityUsed = allAbilitiesOfAllUnits.find(
+                (ability) => ability.id === abilityId
+              ) as Ability;
               return abilityUsed.hasUsed;
             });
             if (areAllAbilitiesUsed) {
@@ -220,7 +231,9 @@ export class Battle extends Phaser.Scene {
         };
         onStart = () => {
           if (useAbilityEventsOnThisStep.length === 1) {
-            const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === event.payload.id) as Ability;
+            const abilityUsed = allAbilitiesOfAllUnits.find(
+              (ability) => ability.id === event.payload.id
+            ) as Ability;
             highlightAbility(abilityUsed, this);
             unhighlightAbilities(
               allAbilitiesOfAllUnits.filter((a) => a.id !== abilityUsed.id),
@@ -238,7 +251,9 @@ export class Battle extends Phaser.Scene {
             const allAbilitiesUsedIds = useAbilityEventsOnThisStep.map((e) => e.payload.id);
 
             allAbilitiesUsedIds.forEach((abilityId) => {
-              const abilityUsed = allAbilitiesOfAllUnits.find((ability) => ability.id === abilityId) as Ability;
+              const abilityUsed = allAbilitiesOfAllUnits.find(
+                (ability) => ability.id === abilityId
+              ) as Ability;
 
               if (!abilityUsed.hasUsed) {
                 highlightAbility(abilityUsed, this);
@@ -267,16 +282,6 @@ export class Battle extends Phaser.Scene {
         };
       }
 
-      if (event.type === "CAST_SKILL") {
-        this.board.bringToTop(unit);
-
-        this.isPlayingEventAnimation = true;
-        this.pauseTimeEvents();
-        onEnd = () => {
-          onEndAnimation();
-        };
-      }
-
       // todo is this necessary: test with more than one death
       if (event.type === "FAINT") {
         this.board.bringToTop(unit);
@@ -299,7 +304,10 @@ export class Battle extends Phaser.Scene {
 
   shouldStartFromBeginning() {
     const lastTimeEventIndex = this.timeEventsHistory.length - 1;
-    return this.timeEventsHistory.length === 0 || this.timeEventsHistory[lastTimeEventIndex].getRemaining() <= 0;
+    return (
+      this.timeEventsHistory.length === 0 ||
+      this.timeEventsHistory[lastTimeEventIndex].getRemaining() <= 0
+    );
   }
 
   initializeUnits(firstFrame: any) {

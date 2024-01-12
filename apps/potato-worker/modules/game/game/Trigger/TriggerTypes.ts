@@ -5,6 +5,7 @@ import { DamagePayload } from "../Event/EventTypes";
 export enum TRIGGER {
   BATTLE_START = "BATTLE_START",
   ON_HIT = "ON_HIT",
+  ON_USE = "ON_USE",
   ON_WEAPON_HIT = "ON_WEAPON_HIT",
   ALLY_FAINT = "ALLY_FAINT",
   ENEMY_FAINT = "ENEMY_FAINT",

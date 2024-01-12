@@ -109,6 +109,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     allUnits?: BattleUnit[];
   }) {
     console.log("playing ", event.type, event.trigger);
+
     if (event.type === "FAINT") {
       const onFinishAnimation = () => {
         this.setVisible(false);
@@ -123,10 +124,8 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
       this.currentAnimation = deathTween;
     }
-
     if (event.type === "TRIGGER_EFFECT") {
-      const target = targets?.[0];
-      if (!target) {
+      if (!targets) {
         throw new Error("Trigger Effect target is undefined");
       }
 
@@ -135,7 +134,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
         ) as StepEvent;
         if (receiveDamageEvent) {
-          target.playEvent({ event: receiveDamageEvent });
+          targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
         }
 
         const statusEffectEvents = event.subEvents?.filter(
@@ -148,7 +147,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
             targetIds.forEach((targetId) => {
               const target = allUnits?.find((unit) => unit.id === targetId);
               if (!target) {
-                throw Error(`Trying to apply status effect: cCouldnt find target with id: ${targetId}`);
+                throw Error(
+                  `Trying to apply status effect: cCouldnt find target with id: ${targetId}`
+                );
               }
               target.playEvent({ event: statusEffectEvent });
             });
@@ -160,9 +161,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         if (onEnd) onEnd();
       };
 
+      // TODO set animationTarget based on target type
+      const animationTarget = targets?.[0];
+
       const { triggerEffectTweenChain } = createTriggerEffectAnimation({
         unit: this,
-        target,
+        target: animationTarget,
         trigger: event?.trigger || "",
         onImpactPoint,
         onFinishAnimation,
@@ -172,11 +176,12 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     }
 
     if (event.type === "USE_ABILITY") {
-      const abilityUsed = this.abilitiesManager.abilities.find((ability) => ability.id === event.payload.id) as Ability;
+      const abilityUsed = this.abilitiesManager.abilities.find(
+        (ability) => ability.id === event.payload.id
+      ) as Ability;
 
-      const target = targets?.[0];
-      if (!target) {
-        throw new Error("Attack target is undefined");
+      if (targets === undefined || targets?.length === 0) {
+        throw new Error("Ability target is undefined");
       }
 
       const onStartAnimation = () => {
@@ -193,7 +198,7 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
         ) as StepEvent;
         if (receiveDamageEvent) {
-          target.playEvent({ event: receiveDamageEvent });
+          targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
         }
 
         const statusEffectEvents = event.payload.subEvents?.filter(
@@ -206,7 +211,9 @@ export class BattleUnit extends Phaser.GameObjects.Container {
             targetIds.forEach((targetId) => {
               const target = allUnits?.find((unit) => unit.id === targetId);
               if (!target) {
-                throw Error(`Trying to apply status effect: cCouldnt find target with id: ${targetId}`);
+                throw Error(
+                  `Trying to apply status effect: cCouldnt find target with id: ${targetId}`
+                );
               }
               target.playEvent({ event: statusEffectEvent });
             });
@@ -214,10 +221,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
         }
       };
 
+      // TODO set mainTarget based on target type
+      const mainTarget = targets?.[0];
+
       onStartAnimation();
       const { attackTweenChain } = createAttackAnimation({
         unit: this,
-        target,
+        mainTarget,
+        targets,
         onImpactPoint,
         onFinishAnimation,
       });
@@ -237,7 +248,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
             quantity: statusEffect.quantity * -1,
           });
         } else {
-          this.statusEffectsManager.addStatusEffect({ name: statusEffect.name, quantity: statusEffect.quantity });
+          this.statusEffectsManager.addStatusEffect({
+            name: statusEffect.name,
+            quantity: statusEffect.quantity,
+          });
         }
       });
     }

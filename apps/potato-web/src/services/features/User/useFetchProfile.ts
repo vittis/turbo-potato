@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/http";
 import { useEffect } from "react";
 import { useUserStore } from "./useUserStore";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 async function fetchProfile() {
   const { data } = await api.get("/api/me/profile", {

@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { LobbyRoomUserRow } from "./LobbyRoomUserRow";
 import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
 import { useUserStore } from "@/services/features/User/useUserStore";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 interface LobbyRoomMember {
   id: string;
@@ -89,9 +89,7 @@ const LobbyRoom = ({
   });
 
   function onClickStart() {
-    toast.warning("Not implemented yet", {
-      description: "This feature is not implemented yet",
-    });
+    toast.warning("This feature is not implemented yet");
   }
 
   const JoinButton = () => (

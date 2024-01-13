@@ -3,7 +3,7 @@ import { useEffect, useMemo } from "react";
 import { api } from "../../api/http";
 import { useUserStore } from "../User/useUserStore";
 import { useLobbyRealtime } from "./useLobbyRealtime";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 async function fetchLobbyRooms() {
   const { data } = await api.get("/api/rooms", { withCredentials: true });

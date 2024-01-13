@@ -9,8 +9,8 @@ import { queryClient } from "./services/api/queryClient";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./styles/global.css";
 import { MainLayout } from "./pages/MainLayout";
-import { Toaster } from "sonner";
-//import { Toaster } from "./components/ui/sonner";
+import "react-toastify/dist/ReactToastify.min.css";
+import { Flip, ToastContainer } from "react-toastify";
 
 /* const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
@@ -36,9 +36,23 @@ game.events.on("ready", onReady); */
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ToastContainer
+        toastClassName="border"
+        theme="dark"
+        containerId="B"
+        position="top-center"
+        transition={Flip}
+        closeButton={false}
+      />
+      <ToastContainer
+        position="bottom-left"
+        theme="dark"
+        toastClassName="border"
+        /*  newestOnTop */ stacked
+        /* hideProgressBar */
+      />
       <MainLayout />
       {/* <App /> */}
-      <Toaster theme="system" position="bottom-left" richColors closeButton />
     </ThemeProvider>
   </QueryClientProvider>
 );

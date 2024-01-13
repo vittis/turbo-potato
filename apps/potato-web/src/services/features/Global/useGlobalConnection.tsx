@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUserStore } from "../User/useUserStore";
 import useWebSocket from "react-use-websocket";
 import { SOCKET_URL } from "@/services/api/websocket";
 import { queryClient } from "@/services/api/queryClient";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 const useGlobalConnection = () => {
+  const [isConnected, setConnected] = useState(false);
   const userData = useUserStore((state) => state.userData);
 
   const searchParams = useMemo(() => {
@@ -18,20 +19,37 @@ const useGlobalConnection = () => {
     return params.toString(); // userId=id&channels=global&channels=user
   }, [userData]);
 
+  useEffect(() => {
+    toast.dismiss({ containerId: "B" });
+    if (!isConnected) {
+      toast.warning("You're not connected. Sign in?", {
+        position: "top-center",
+        containerId: "B",
+        autoClose: false,
+      });
+    } else {
+      toast.success("Connected successfully to server", {
+        position: "top-center",
+        containerId: "B",
+      });
+    }
+  }, [isConnected]);
+
   useWebSocket(
     `${SOCKET_URL}/?${searchParams}`,
     {
+      share: true,
       onOpen: () => {
-        toast.success("Connected successfully to server");
+        setConnected(true);
       },
       onError: () => {
-        toast.success("Error connecting to server");
+        setConnected(false);
       },
       onClose: () => {
-        toast.warning("Disconnected from server");
+        setConnected(false);
       },
       onReconnectStop: () => {
-        toast.warning("Stopped reconnecting to server");
+        console.log("on reconnect stop");
       },
       onMessage: (event) => {
         const data = JSON.parse(event.data);
@@ -55,7 +73,7 @@ const useGlobalConnection = () => {
         }
       },
     },
-    userData.userId !== ""
+    !!searchParams
   );
 
   return null;

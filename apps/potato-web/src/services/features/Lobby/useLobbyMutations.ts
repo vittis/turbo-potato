@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../api/http";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 async function joinRoom(id) {
   const res = await api.post(

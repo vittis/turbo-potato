@@ -25,7 +25,8 @@ app.use("*", prettyJSON()); // With options: prettyJSON({ space: 4 })
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://thepotate.netlify.app",
+    /* origin: "http://localhost:5173", */
     credentials: true,
   })
 );
@@ -87,8 +88,8 @@ app.post("/login", async (c) => {
   // Set the session ID as a cookie
   setCookie(c, "sId", sessionId, {
     httpOnly: true,
-    sameSite: "Lax",
-    secure: false,
+    sameSite: "None",
+    secure: true,
   });
 
   return c.json({ ok: true });

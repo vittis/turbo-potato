@@ -7,15 +7,12 @@
   "cooldown": 40,
   "effects": [
     {
-      "type": "STATUS_EFFECT",
+      "type": "SHIELD",
       "trigger": "ON_HIT",
       "target": "SELF",
-      "payload": [
-        {
-          "name": "STURDY",
-          "quantity": 10
-        }
-      ]
+      "payload": {
+        "value": 20
+      }
     }
   ]
 }

@@ -155,6 +155,40 @@ export class BattleUnit extends Phaser.GameObjects.Container {
             });
           });
         }
+
+        const shieldEvents = event.payload.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+        ) as StepEvent[];
+        if (shieldEvents.length > 0) {
+          shieldEvents.forEach((shieldEvent) => {
+            const targetIds = shieldEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply shield: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: shieldEvent });
+            });
+          });
+        }
+
+        const healEvents = event.payload.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+        ) as StepEvent[];
+        if (healEvents.length > 0) {
+          healEvents.forEach((healEvent) => {
+            const targetIds = healEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply heal: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: healEvent });
+            });
+          });
+        }
       };
 
       const onFinishAnimation = () => {
@@ -219,6 +253,40 @@ export class BattleUnit extends Phaser.GameObjects.Container {
             });
           });
         }
+
+        const shieldEvents = event.payload.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+        ) as StepEvent[];
+        if (shieldEvents.length > 0) {
+          shieldEvents.forEach((shieldEvent) => {
+            const targetIds = shieldEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply shield: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: shieldEvent });
+            });
+          });
+        }
+
+        const healEvents = event.payload.subEvents?.filter(
+          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+        ) as StepEvent[];
+        if (healEvents.length > 0) {
+          healEvents.forEach((healEvent) => {
+            const targetIds = healEvent.payload.targetsId as string[];
+
+            targetIds.forEach((targetId) => {
+              const target = allUnits?.find((unit) => unit.id === targetId);
+              if (!target) {
+                throw Error(`Trying to apply heal: cCouldnt find target with id: ${targetId}`);
+              }
+              target.playEvent({ event: healEvent });
+            });
+          });
+        }
       };
 
       // TODO set mainTarget based on target type
@@ -254,6 +322,14 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           });
         }
       });
+    }
+
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "SHIELD") {
+      this.barsManager.onReceiveShield(event);
+    }
+
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "HEAL") {
+      this.barsManager.onReceiveHeal(event);
     }
   }
 

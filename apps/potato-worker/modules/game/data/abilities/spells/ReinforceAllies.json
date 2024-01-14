@@ -6,15 +6,12 @@
   "cooldown": 100,
   "effects": [
     {
-      "type": "STATUS_EFFECT",
+      "type": "SHIELD",
       "trigger": "ON_USE",
       "target": "ADJACENT_ALLIES",
-      "payload": [
-        {
-          "name": "STURDY",
-          "quantity": 20
-        }
-      ]
+      "payload": {
+        "value": 20
+      }
     }
   ]
 }

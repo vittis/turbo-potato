@@ -11,7 +11,7 @@
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Summon Rabbit"
+        "name": "Blessed Beacon"
       }
     }
   ],

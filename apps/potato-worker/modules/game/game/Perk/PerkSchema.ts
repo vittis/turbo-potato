@@ -28,8 +28,27 @@ const DamageTriggerEffect = z.object({
   payload: z.object({ value: z.number() }),
 });
 
+const ShieldTriggerEffect = z.object({
+  type: z.literal(TRIGGER_EFFECT_TYPE.SHIELD),
+  trigger: z.nativeEnum(TRIGGER),
+  target: z.nativeEnum(TARGET_TYPE),
+  payload: z.object({ value: z.number() }),
+});
+
+const HealTriggerEffect = z.object({
+  type: z.literal(TRIGGER_EFFECT_TYPE.HEAL),
+  trigger: z.nativeEnum(TRIGGER),
+  target: z.nativeEnum(TARGET_TYPE),
+  payload: z.object({ value: z.number() }),
+});
+
 export const TriggerEffectsSchema = z.array(
-  z.union([StatusTriggerEffect, DamageTriggerEffect])
+  z.union([
+    StatusTriggerEffect,
+    DamageTriggerEffect,
+    ShieldTriggerEffect,
+    HealTriggerEffect,
+  ])
 );
 
 export const PerkDataSchema = z.object({

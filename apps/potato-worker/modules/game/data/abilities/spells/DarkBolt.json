@@ -5,5 +5,14 @@
   "target": "STANDARD",
   "baseDamage": 30,
   "cooldown": 40,
-  "effects": []
+  "effects": [
+    {
+      "type": "HEAL",
+      "trigger": "ON_HIT",
+      "target": "SELF",
+      "payload": {
+        "value": 5
+      }
+    }
+  ]
 }

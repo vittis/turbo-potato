@@ -1,6 +1,6 @@
 import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
-import { DamagePayload } from "../Event/EventTypes";
+import { DamagePayload, HealPayload, ShieldPayload } from "../Event/EventTypes";
 
 export enum TRIGGER {
   BATTLE_START = "BATTLE_START",
@@ -15,6 +15,8 @@ export enum TRIGGER {
 export enum TRIGGER_EFFECT_TYPE {
   STATUS_EFFECT = "STATUS_EFFECT",
   DAMAGE = "DAMAGE",
+  SHIELD = "SHIELD",
+  HEAL = "HEAL",
 }
 
 export interface StatusEffectPayload {
@@ -25,6 +27,8 @@ export interface StatusEffectPayload {
 export type TriggerEffectPayloadMap = {
   [TRIGGER_EFFECT_TYPE.DAMAGE]: DamagePayload;
   [TRIGGER_EFFECT_TYPE.STATUS_EFFECT]: StatusEffectPayload[];
+  [TRIGGER_EFFECT_TYPE.SHIELD]: ShieldPayload;
+  [TRIGGER_EFFECT_TYPE.HEAL]: HealPayload;
 };
 
 export interface TriggerEffect<T extends TRIGGER_EFFECT_TYPE> {
@@ -36,4 +40,6 @@ export interface TriggerEffect<T extends TRIGGER_EFFECT_TYPE> {
 
 export type PossibleTriggerEffect =
   | TriggerEffect<TRIGGER_EFFECT_TYPE.DAMAGE>
-  | TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>;
+  | TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>
+  | TriggerEffect<TRIGGER_EFFECT_TYPE.SHIELD>
+  | TriggerEffect<TRIGGER_EFFECT_TYPE.HEAL>;

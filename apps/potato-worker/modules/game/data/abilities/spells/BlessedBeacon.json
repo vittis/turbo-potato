@@ -15,6 +15,14 @@
           "quantity": 5
         }
       ]
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "payload": {
+        "value": 10
+      }
     }
   ]
 }

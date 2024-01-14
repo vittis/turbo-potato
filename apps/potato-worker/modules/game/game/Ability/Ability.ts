@@ -107,17 +107,17 @@ export class Ability {
             ? targets[0]
             : unit.bm.getTarget(unit, effect.target)[0];
 
+        const payloadStatusEffects = effect.payload.map((statusEffect) => ({
+          name: statusEffect.name,
+          quantity: statusEffect.quantity as number,
+        }));
+
         return {
           type: SUBEVENT_TYPE.INSTANT_EFFECT,
           payload: {
             type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
             targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: [
-              {
-                name: effect.payload[0].name, // todo loop?
-                quantity: effect.payload[0].quantity as number,
-              },
-            ],
+            payload: [...payloadStatusEffects],
           },
         };
       }
@@ -136,30 +136,77 @@ export class Ability {
             ? targets[0]
             : unit.bm.getTarget(unit, effect.target)[0];
 
+        const payloadStatusEffects = effect.payload.map((statusEffect) => ({
+          name: statusEffect.name,
+          quantity: statusEffect.quantity as number,
+        }));
+
         return {
           type: SUBEVENT_TYPE.INSTANT_EFFECT,
           payload: {
             type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
             targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: [
-              {
-                name: effect.payload[0].name, // todo loop?
-                quantity: effect.payload[0].quantity as number,
-              },
-            ],
+            payload: payloadStatusEffects,
           },
         };
       }
     );
+
+    const onEffectGrantShield = this.data.effects.filter(
+      (effect) => effect.type === TRIGGER_EFFECT_TYPE.SHIELD
+    );
+
+    const onEffectShieldSubEvents: SubEvent[] = onEffectGrantShield.map(
+      (event) => {
+        const target =
+          event.target === "HIT_TARGET"
+            ? targets[0]
+            : unit.bm.getTarget(unit, event.target)[0];
+
+        return {
+          type: SUBEVENT_TYPE.INSTANT_EFFECT,
+          payload: {
+            type: INSTANT_EFFECT_TYPE.SHIELD,
+            targetsId: [target.id], // todo move effect target logic somewhere else
+            payload: {
+              // @ts-ignore
+              value: event?.payload?.value,
+            },
+          },
+        };
+      }
+    );
+
+    const onEffectGrantHeal = this.data.effects.filter(
+      (effect) => effect.type === TRIGGER_EFFECT_TYPE.HEAL
+    );
+
+    const onEffectHealSubEvents: SubEvent[] = onEffectGrantHeal.map((event) => {
+      const target =
+        event.target === "HIT_TARGET"
+          ? targets[0]
+          : unit.bm.getTarget(unit, event.target)[0];
+
+      return {
+        type: SUBEVENT_TYPE.INSTANT_EFFECT,
+        payload: {
+          type: INSTANT_EFFECT_TYPE.HEAL,
+          targetsId: [target.id], // todo move effect target logic somewhere else
+          payload: {
+            // @ts-ignore
+            value: event?.payload?.value,
+          },
+        },
+      };
+    });
 
     const damage = this.data.baseDamage
       ? this.data.baseDamage +
         (this.data.baseDamage * this.getDamageModifier(unit)) / 100
       : 0;
 
-    // TODO remove min damage 1
     const finalDamage = Math.max(
-      1,
+      0,
       Math.round(
         damage - (damage * targets[0].stats.damageReductionModifier) / 100
       )
@@ -187,6 +234,8 @@ export class Ability {
           ...onHitStatusSubEvents,
           ...onUseStatusSubEvents,
           ...statusSubEvents,
+          ...onEffectShieldSubEvents,
+          ...onEffectHealSubEvents,
         ],
       },
     };

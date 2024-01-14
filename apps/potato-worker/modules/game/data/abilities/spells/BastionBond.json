@@ -15,6 +15,14 @@
           "quantity": 5
         }
       ]
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_USE",
+      "target": "LOWEST_HEALTH_ALLY",
+      "payload": {
+        "value": 30
+      }
     }
   ]
 }

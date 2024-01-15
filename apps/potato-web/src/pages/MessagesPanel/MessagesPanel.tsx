@@ -8,12 +8,16 @@ import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import { ChatBubble } from "./ChatBubble";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useChatMessages } from "@/services/features/Messages/useChatMessages";
+import { useUserStore } from "@/services/features/User/useUserStore";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const mockChatNavItems = [
   {
     name: "Lobby",
   },
-  {
+  /* {
     name: "Test Room",
   },
   {
@@ -30,21 +34,37 @@ const mockChatNavItems = [
   },
   {
     name: "Settings",
-  },
+  }, */
 ];
+
+type Inputs = {
+  message: string;
+};
 
 interface MessagesPanelProps {
   defaultSize: number;
 }
 
 const MessagesPanel = ({ defaultSize }: MessagesPanelProps) => {
+  const userData = useUserStore((state) => state.userData);
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
+  const { sendChatMessage, messages } = useChatMessages({ channel: "lobby" });
+
   const chatBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
-  }, [chatBoxRef.current]);
+  }, [chatBoxRef.current, messages]);
+
+  const { register, handleSubmit, reset } = useForm<Inputs>({ defaultValues: { message: "" } });
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    sendChatMessage(data.message);
+    reset();
+  };
 
   return (
     <>
@@ -87,15 +107,28 @@ const MessagesPanel = ({ defaultSize }: MessagesPanelProps) => {
             </ScrollArea>
           </div>
           <Separator />
-
-          <ScrollArea ref={chatBoxRef} className="h-full px-3.5 pb-0">
-            <ScrollBar orientation="vertical" />
-            {Array.from({ length: 30 }).map((_, index) => (
-              <ChatBubble key={index} />
-            ))}
-          </ScrollArea>
+          <TooltipProvider delayDuration={0}>
+            <ScrollArea ref={chatBoxRef} className="h-full px-3.5 pb-0">
+              <ScrollBar orientation="vertical" />
+              {messages.map((message) => (
+                <ChatBubble
+                  key={message.timestamp}
+                  sender={message.sender}
+                  message={message.message}
+                  timestamp={message.timestamp}
+                  isFromMe={message.sender === userData.name}
+                />
+              ))}
+            </ScrollArea>
+          </TooltipProvider>
           <div className="px-3.5 pb-3">
-            <Input placeholder="Send message" />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <Input
+                disabled={!isLoggedIn}
+                {...register("message", { required: true })}
+                placeholder={isLoggedIn ? "Send message" : "Sign in to view and send messages"}
+              />
+            </form>
           </div>
         </div>
       </ResizablePanel>

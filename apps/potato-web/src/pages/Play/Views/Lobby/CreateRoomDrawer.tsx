@@ -20,10 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { queryClient } from "@/services/api/queryClient";
-import { api } from "@/services/api/http";
 import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
 
 const FormSchema = z.object({

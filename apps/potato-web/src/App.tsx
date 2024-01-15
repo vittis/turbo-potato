@@ -2,7 +2,6 @@ import { CSSProperties, useMemo } from "react";
 import { useGameStore } from "./services/state/game";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBattleSetup } from "./game/scenes/battle/BattleScene";
-import { WebSocketClient } from "./WebSocketClient_recent_old";
 
 function App() {
   const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();

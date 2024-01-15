@@ -3,14 +3,15 @@ import { useEffect, useMemo } from "react";
 import { api } from "../../api/http";
 import { useUserStore } from "../User/useUserStore";
 import { useLobbyRealtime } from "./useLobbyRealtime";
+import { toast } from "react-toastify";
 
 async function fetchLobbyRooms() {
-  const { data } = await api.get("http://localhost:8080/api/rooms", { withCredentials: true });
+  const { data } = await api.get("/api/rooms", { withCredentials: true });
   return data;
 }
 
 async function fetchUserRooms() {
-  const { data } = await api.get("http://localhost:8080/api/me/rooms", { withCredentials: true });
+  const { data } = await api.get("/api/me/rooms", { withCredentials: true });
   return data;
 }
 
@@ -35,6 +36,7 @@ const useLobbyQueries = (): LobbyData => {
     queryKey: ["lobby", "rooms"],
     queryFn: fetchLobbyRooms,
     enabled: isLoggedIn,
+    refetchInterval: 15000,
   });
 
   const {
@@ -47,15 +49,14 @@ const useLobbyQueries = (): LobbyData => {
     queryKey: ["user", "rooms"],
     queryFn: fetchUserRooms,
     enabled: isLoggedIn,
+    refetchInterval: 15000,
   });
-
-  console.log(userRoomsData);
 
   const allRooms = useMemo(
     () =>
       roomsData?.rooms?.map((room) => ({
         ...room,
-        members: JSON.parse(room.members),
+        members: room.members ? JSON.parse(room.members) : [],
       })) || [],
     [roomsData]
   );
@@ -74,10 +75,10 @@ const useLobbyQueries = (): LobbyData => {
   );
 
   useEffect(() => {
-    if (userRoomsIsError || userRoomsIsError) {
-      console.log("Error fetching lobby rooms data");
+    if ((userRoomsIsError || userRoomsIsError) && !isLoading) {
+      toast.error("Error fetching lobby rooms data");
     }
-  }, [roomsIsSuccess, userRoomsIsSuccess]);
+  }, [roomsIsSuccess, userRoomsIsSuccess, isLoading]);
 
   return { allRooms, allRoomsExceptUserRoom, userRoom, isLoading };
 };

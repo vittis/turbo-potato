@@ -1,26 +1,30 @@
-export const ChatBubble = () => {
-  const random = Math.random();
-  const isPaul = random > 0.5;
-  return (
-    <div className={`chat ${isPaul ? "chat-start" : "chat-end"}`}>
-      <div className="chat-image avatar">
-        <div className="w-8 rounded-full">
-          <img
-            alt="Tailwind CSS chat bubble component"
-            src={
-              isPaul
-                ? "https://avatars.githubusercontent.com/u/29383947?v=4"
-                : "https://i.ytimg.com/vi/H2Y__-IhdKM/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGHIgSihGMA8=&rs=AOn4CLBQgwlWkUWjK3Z1h_f9GsDfwiw9iA"
-            }
-          />
-        </div>
-      </div>
-      <div className="chat-header">
-        <span className="opacity-50">{isPaul ? "Paul" : "Mosquitao"} </span>
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
-        <time className="text-xs opacity-50 ml-1 text-muted-foreground">12:45</time>
+export const ChatBubble = ({ sender, message, isFromMe, timestamp }) => {
+  return (
+    <Tooltip>
+      <div className={`chat ${isFromMe ? "chat-end" : "chat-start"}`}>
+        <div className="chat-image avatar">
+          <div className="w-8 h-8 rounded-full dark:bg-stone-800 bg-zinc-800 dark:text-accent-foreground text-primary-foreground flex items-center justify-center text-xl text-center">
+            {sender?.[0]?.toUpperCase()}{" "}
+          </div>
+        </div>
+        <div className="chat-header">
+          <span className="opacity-50">{sender}</span>
+
+          <TooltipTrigger asChild>
+            <time className="text-xs opacity-50 ml-1 text-muted-foreground">
+              {format(new Date(timestamp), "HH:mm")}
+            </time>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="flex items-center gap-4">
+            {formatDistanceToNow(new Date(timestamp))} ago
+          </TooltipContent>
+        </div>
+        <div className="chat-bubble">{message}</div>
       </div>
-      <div className="chat-bubble">{isPaul ? "Call me paul" : "Como assim my paul?"}</div>
-    </div>
+    </Tooltip>
   );
 };

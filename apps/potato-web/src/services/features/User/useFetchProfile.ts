@@ -15,6 +15,7 @@ const useFetchProfile = () => {
   const setUserData = useUserStore((state) => state.setUserData);
 
   const removeUserData = useUserStore((state) => state.removeUserData);
+  const userData = useUserStore((state) => state.userData);
 
   const {
     data: profileData,
@@ -31,7 +32,10 @@ const useFetchProfile = () => {
       setUserData(profileData.data);
     }
     if (isError) {
-      removeUserData();
+      if (!!userData.userId) {
+        removeUserData();
+        console.log("doin");
+      }
     }
   }, [isSuccess, profileData, isError, removeUserData, setUserData]);
 

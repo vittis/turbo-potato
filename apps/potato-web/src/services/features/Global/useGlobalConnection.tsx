@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useUserStore } from "../User/useUserStore";
-import useWebSocket from "react-use-websocket";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { SOCKET_URL } from "@/services/api/websocket";
 import { queryClient } from "@/services/api/queryClient";
-import { toast } from "react-toastify";
+import { Id, ToastOptions, toast } from "react-toastify";
+import { WifiOffIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const useGlobalConnection = () => {
-  const [isConnected, setConnected] = useState(false);
   const userData = useUserStore((state) => state.userData);
+  const [toastId, setToastId] = useState<Id | undefined>();
 
   const searchParams = useMemo(() => {
     if (!userData?.userId) return null;
@@ -19,38 +21,18 @@ const useGlobalConnection = () => {
     return params.toString(); // userId=id&channels=global&channels=user
   }, [userData]);
 
-  useEffect(() => {
-    toast.dismiss({ containerId: "B" });
-    if (!isConnected) {
-      toast.warning("You're not connected. Sign in?", {
-        position: "top-center",
-        containerId: "B",
-        autoClose: false,
-      });
-    } else {
-      toast.success("Connected successfully to server", {
-        position: "top-center",
-        containerId: "B",
-      });
-    }
-  }, [isConnected]);
-
-  useWebSocket(
+  const { readyState } = useWebSocket(
     `${SOCKET_URL}/?${searchParams}`,
     {
       share: true,
-      onOpen: () => {
-        setConnected(true);
+      /* onOpen: () => {
       },
       onError: () => {
-        setConnected(false);
       },
       onClose: () => {
-        setConnected(false);
       },
       onReconnectStop: () => {
-        console.log("on reconnect stop");
-      },
+      }, */
       onMessage: (event) => {
         const data = JSON.parse(event.data);
         const type = data?.type;
@@ -76,7 +58,76 @@ const useGlobalConnection = () => {
     !!searchParams
   );
 
-  return null;
-};
+  /* useEffect(() => {
+    const connectionStatus = {
+      [ReadyState.CONNECTING]: "Connecting",
+      [ReadyState.OPEN]: "Open",
+      [ReadyState.CLOSING]: "Closing",
+      [ReadyState.CLOSED]: "Closed",
+      [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+    }[readyState];
 
+    const options: ToastOptions = {
+      className: "w-max px-4 border border-zinc-800 !bg-pattern-gradient-error",
+      icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+      position: "top-center",
+      containerId: "B",
+      autoClose: false,
+    };
+
+    if (!toastId) {
+      const id = toast.warning("Awaiting connection status...", options);
+      setToastId(id);
+      return;
+    }
+
+    switch (readyState) {
+      case ReadyState.UNINSTANTIATED:
+        toast.update(toastId, {
+          ...options,
+          render: connectionStatus,
+          icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+        });
+        break;
+      case ReadyState.CONNECTING:
+        toast.update(toastId, {
+          ...options,
+          render: connectionStatus,
+          icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+        });
+        break;
+      case ReadyState.OPEN:
+        toast.update(toastId, {
+          ...options,
+          render: connectionStatus,
+          icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+        });
+        break;
+      case ReadyState.CLOSING:
+        toast.update(toastId, {
+          ...options,
+          render: connectionStatus,
+          icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+        });
+        break;
+      case ReadyState.CLOSED:
+        toast.update(toastId, {
+          ...options,
+          render: connectionStatus,
+          icon: () => <WifiOffIcon className="pb-1 w-6 text-yellow-500" />,
+        });
+        break;
+    }
+  }, [readyState, toastId]); */
+
+  return { readyState };
+};
 export { useGlobalConnection };
+/* ReadyState.
+const connectionStatus = {
+  [ReadyState.CONNECTING]: "Connecting",
+  [ReadyState.OPEN]: "Open",
+  [ReadyState.CLOSING]: "Closing",
+  [ReadyState.CLOSED]: "Closed",
+  [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+}[readyState]; */

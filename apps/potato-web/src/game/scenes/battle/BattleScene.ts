@@ -173,12 +173,12 @@ export class Battle extends Phaser.Scene {
       }
     };
 
-    const hasFaintEvent = eventsOnThisStep.find(
+    /* const hasFaintEvent = eventsOnThisStep.find(
       (event) => event.type === "TRIGGER_EFFECT" && event.trigger === "SELF_FAINT"
-    );
+    ); */
     console.log(eventsOnThisStep);
 
-    eventsOnThisStep.forEach((event, index) => {
+    eventsOnThisStep.forEach((event) => {
       const unit = this.units.find((unit) => unit.id === event.actorId);
       if (!unit) {
         throw Error(`couldnt find unit id: ${event.actorId}`);

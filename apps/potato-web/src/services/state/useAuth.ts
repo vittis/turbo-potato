@@ -4,12 +4,12 @@ import { queryClient } from "../api/queryClient";
 import { useUserStore } from "../features/User/useUserStore";
 
 async function loginMutation() {
-  const { data } = await api.post("http://localhost:8080/login", {}, { withCredentials: true });
+  const { data } = await api.post("/login", {}, { withCredentials: true });
   return data;
 }
 
 async function logoutMutation() {
-  const { data } = await api.post("http://localhost:8080/logout", {}, { withCredentials: true });
+  const { data } = await api.post("/logout", {}, { withCredentials: true });
   return data;
 }
 

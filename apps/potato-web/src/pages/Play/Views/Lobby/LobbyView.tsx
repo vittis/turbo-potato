@@ -5,12 +5,15 @@ import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateRoomDrawer } from "./CreateRoomDrawer";
 import RoomsView from "./RoomsView";
+import { useUserStore } from "@/services/features/User/useUserStore";
 
 interface LobbyViewProps {
   defaultSize: number;
 }
 
 const LobbyView = ({ defaultSize }: LobbyViewProps) => {
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
   return (
     <ResizablePanel defaultSize={defaultSize} minSize={30}>
       <div className="flex flex-col h-full">
@@ -45,7 +48,10 @@ const LobbyView = ({ defaultSize }: LobbyViewProps) => {
           </div>
         </form>
 
-        <RoomsView />
+        {isLoggedIn && <RoomsView />}
+        {!isLoggedIn && (
+          <h1 className="px-4 mt-2 text-muted-foreground">Sign in to browse rooms</h1>
+        )}
       </div>
     </ResizablePanel>
   );

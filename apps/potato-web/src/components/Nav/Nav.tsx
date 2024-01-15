@@ -31,7 +31,7 @@ const navItems = [
 
 export function Nav() {
   const userData = useUserStore((state) => state.userData);
-  const { login, logout } = useAuth();
+  const { login, logout, loginIsPending, logoutIsPending } = useAuth();
 
   return (
     <div className="relative flex">
@@ -55,11 +55,13 @@ export function Nav() {
       </ScrollArea>
       <div className="grow flex justify-end gap-4">
         {!userData?.name ? (
-          <Button onClick={() => login()}>Sign In</Button>
+          <Button disabled={loginIsPending} onClick={() => login()}>
+            Sign In
+          </Button>
         ) : (
           <div className="">
             Logged as <span className="text-primary mr-2">{userData.name}</span>{" "}
-            <Button onClick={() => logout()} variant="destructive">
+            <Button disabled={logoutIsPending} onClick={() => logout()} variant="destructive">
               Sign Out
             </Button>
           </div>

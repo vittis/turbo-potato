@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react";
 import { LobbyRoom } from "./LobbyRoom/LobbyRoom";
 
 const RoomsView = () => {
-  // const isLoggedIn = useUserStore((state) => state.isLoggedIn);
   const { userRoom, allRoomsExceptUserRoom, isLoading } = useLobbyQueries();
 
   return (

@@ -64,7 +64,7 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
               )}
             </Button>
           ) : (
-            <Button variant="ghost" onClick={() => login()} disabled={loginIsPending}>
+            <Button disabled={loginIsPending} variant="ghost" onClick={() => login()}>
               Sign in
             </Button>
           )}

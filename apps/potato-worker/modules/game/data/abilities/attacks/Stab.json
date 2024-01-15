@@ -1,9 +1,9 @@
 {
-  "name": "Long Shot",
+  "name": "Stab",
   "type": "ATTACK",
   "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
-  "baseDamage": 40,
-  "cooldown": 50,
+  "baseDamage": 15,
+  "cooldown": 20,
   "effects": []
 }

@@ -6,14 +6,12 @@
   "cooldown": 100,
   "effects": [
     {
-      "type": "APPLY_STATUS_EFFECT",
-      "trigger": "ON_HIT",
-      "statusEffectsApplied": [
-        {
-          "name": "SHIELD",
-          "quantity": 20
-        }
-      ]
+      "type": "SHIELD",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "payload": {
+        "value": 20
+      }
     }
   ]
 }

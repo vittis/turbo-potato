@@ -4,5 +4,6 @@
   "tags": [],
   "target": "STANDARD",
   "baseDamage": 15,
-  "cooldown": 20
+  "cooldown": 20,
+  "effects": []
 }

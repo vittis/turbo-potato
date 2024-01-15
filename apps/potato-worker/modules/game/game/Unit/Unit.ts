@@ -220,6 +220,7 @@ export class Unit {
           throw Error("applySubEvents: No targets for status effect");
         }
 
+        // TODO tem q pegar todos os targets
         const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
 
         subEvent.payload.payload.forEach((statusEffect) => {
@@ -236,6 +237,16 @@ export class Unit {
         target.statsManager.recalculateStatsFromStatusEffects(
           target.statusEffects
         );
+      }
+
+      if (subEvent.payload.type === INSTANT_EFFECT_TYPE.SHIELD) {
+        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
+        target.receiveShield(subEvent.payload.payload.value);
+      }
+
+      if (subEvent.payload.type === INSTANT_EFFECT_TYPE.HEAL) {
+        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
+        target.receiveHeal(subEvent.payload.payload.value);
       }
     });
   }
@@ -260,15 +271,28 @@ export class Unit {
       if (newShield < 0) {
         // If the armor is now depleted, apply any remaining damage to the unit's HP
         newHp += newShield;
+        newHp += newShield;
         newShield = 0;
       }
     } else {
-      newHp -= Math.round(finalDamage);
+      newHp = Math.max(newHp - finalDamage, 0);
     }
 
     this.stats = { ...this.stats, hp: newHp, shield: newShield };
 
     this.statsManager.recalculateStatsFromStatusEffects(this.statusEffects);
+  }
+
+  receiveShield(shieldAmount: number) {
+    const newShield = this.stats.shield + shieldAmount;
+
+    this.stats.shield = newShield;
+  }
+
+  receiveHeal(healAmount: number) {
+    const newHp = Math.min(this.stats.hp + healAmount, this.stats.maxHp);
+
+    this.stats.hp = newHp;
   }
 
   onDeath() {

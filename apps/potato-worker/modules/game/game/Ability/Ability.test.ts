@@ -2,7 +2,7 @@ import { BoardManager, OWNER, POSITION } from "../BoardManager";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 import { TRIGGER_EFFECT_TYPE, TriggerEffect } from "../Trigger/TriggerTypes";
 import { Unit } from "../Unit/Unit";
-import { Attacks } from "../data";
+import { Abilities } from "../data";
 import { Ability, VULNERABLE_LOSS_PER_HIT } from "./Ability";
 
 function setupBoard() {
@@ -20,7 +20,7 @@ describe("Ability", () => {
       it("should generate main event info", () => {
         const { unit1, unit2 } = setupBoard();
 
-        const ability = new Ability(Attacks.Thrust);
+        const ability = new Ability(Abilities.Thrust);
         const event = ability.use(unit1);
 
         expect(event.actorId).toBe(unit1.id);
@@ -31,7 +31,7 @@ describe("Ability", () => {
       it("should generate DAMAGE subEvent", () => {
         const { unit1, unit2 } = setupBoard();
 
-        const ability = new Ability(Attacks.Thrust);
+        const ability = new Ability(Abilities.Thrust);
         const event = ability.use(unit1);
 
         expect(event.payload.subEvents).toHaveLength(1);
@@ -50,7 +50,7 @@ describe("Ability", () => {
       it("should generate STATUS_EFFECT subEvent", () => {
         const { unit1, unit2 } = setupBoard();
 
-        const ability = new Ability(Attacks.DisarmingShot);
+        const ability = new Ability(Abilities.DisarmingShot);
         const event = ability.use(unit1);
 
         expect(event.payload.subEvents).toHaveLength(2);
@@ -80,7 +80,7 @@ describe("Ability", () => {
           quantity: 10,
         });
 
-        const ability = new Ability(Attacks.DisarmingShot);
+        const ability = new Ability(Abilities.DisarmingShot);
         const event = ability.use(unit1);
 
         expect(event.payload.subEvents).toHaveLength(3); // Damage, VULNERABLE, VULNERABLE loss
@@ -104,7 +104,7 @@ describe("Ability", () => {
           quantity: 2,
         });
 
-        const ability = new Ability(Attacks.DisarmingShot);
+        const ability = new Ability(Abilities.DisarmingShot);
         const event = ability.use(unit1);
 
         expect(event.payload.subEvents).toHaveLength(3); // Damage, VULNERABLE, VULNERABLE loss
@@ -124,7 +124,7 @@ describe("Ability", () => {
       it("should generate STATUS_EFFECT subEvent", () => {
         const { unit1 } = setupBoard();
 
-        const ability = new Ability(Attacks.EmpoweringStrike);
+        const ability = new Ability(Abilities.EmpoweringStrike);
         const event = ability.use(unit1);
 
         expect(event.payload.subEvents).toHaveLength(2);

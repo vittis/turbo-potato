@@ -1,6 +1,8 @@
 import { GAME_LOOP_SPEED } from "../BattleScene";
 import { BattleUnit } from "./BattleUnit";
 
+const ABILITY_ICON_SIZE = 28;
+
 export interface Ability {
   id: string;
   name: string;
@@ -28,7 +30,10 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
     this.abilities = dataUnit.abilities.map((ability: any) => {
       const abilityContainer = scene.add.container(0, 0);
 
-      const icon = scene.add.image(0, 0, `ability_${ability.data.name.toLowerCase().replace(/\s/g, "_")}`);
+      const texture = `ability_${ability.data.name.toLowerCase().replace(/\s/g, "_")}`;
+
+      const icon = scene.add.image(0, 0, scene.textures.exists(texture) ? texture : "paul");
+      icon.setSize(ABILITY_ICON_SIZE, ABILITY_ICON_SIZE);
 
       const shineFX = icon.preFX?.addShine(2);
       shineFX?.setActive(false);
@@ -93,7 +98,9 @@ export class BattleUnitAbilities extends Phaser.GameObjects.Container {
       const rowWidth = rowAmount * abilityWidth + (rowAmount - 1) * spaceBetween;
 
       const x =
-        (isOnTopRow ? index : index - topRowAmount) * (abilityWidth + spaceBetween) - rowWidth / 2 + abilityWidth / 2;
+        (isOnTopRow ? index : index - topRowAmount) * (abilityWidth + spaceBetween) -
+        rowWidth / 2 +
+        abilityWidth / 2;
 
       const y = heightOffset + (isOnTopRow ? 0 : abilityWidth + spaceBetween);
 

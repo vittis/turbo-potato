@@ -1,0 +1,198 @@
+{
+  "name": "Paladin",
+  "hp": 120,
+  "base": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY",
+          "payload": {
+            "name": "Blessed Beacon"
+          }
+        }
+      ],
+      "description": "Gain the Blessed Beacon spell"
+    }
+  ],
+  "utility": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_PERK",
+          "payload": {
+            "name": "Fallen Guardian",
+            "tier": 1
+          }
+        }
+      ],
+      "description": "Gain 1 Fallen Guardian"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_PERK",
+          "payload": {
+            "name": "Vengeful Legacy",
+            "tier": 1
+          }
+        }
+      ],
+      "description": "Gain 1 Vengeful Legacy"
+    }
+  ],
+  "tree": [
+    {
+      "name": "Warden",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Iron Heart",
+                "tier": 1
+              }
+            }
+          ],
+          "description": "Gain 1 Iron Heart"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Blessed Beacon",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "FAST",
+                      "target": "SELF",
+                      "value": 5
+                    },
+                    {
+                      "name": "FOCUS",
+                      "target": "SELF",
+                      "value": 5
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Blessed Beacon also gives 5 FAST and 5 FOCUS to self"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Break Will",
+                "tier": 1
+              }
+            }
+          ],
+          "description": "Gain the Break Will spell"
+        },
+        {
+          "tier": 2,
+          "req": 2,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Vitality Boost"
+              }
+            }
+          ],
+          "description": "Gain 2 Vitality Boost"
+        }
+      ]
+    },
+    {
+      "name": "Bastion",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Bastion Bond"
+              }
+            }
+          ],
+          "description": "Gain the Bastion Bond spell"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Blessed Beacon",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "STURDY",
+                      "target": "FRONT_ALLY",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Blessed Beacon also gives 10 STURDY to front ally"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Blessed Beacon",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "ATTACK_POWER",
+                      "target": "BACK_ALLY",
+                      "value": 5
+                    },
+                    {
+                      "name": "SPELL_POTENCY",
+                      "target": "BACK_ALLY",
+                      "value": 5
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Blessed Beacon also gives 5 ATTACK POWER and 5 SPELL POTENCY to back ally"
+        },
+        {
+          "tier": 2,
+          "req": 3,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Divine Intervention"
+              }
+            }
+          ],
+          "description": "Gain the Divine Intervention spell"
+        }
+      ]
+    }
+  ]
+}

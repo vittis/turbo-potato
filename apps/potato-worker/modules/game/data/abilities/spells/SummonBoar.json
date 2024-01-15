@@ -7,11 +7,12 @@
   "cooldown": 80,
   "effects": [
     {
-      "type": "APPLY_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "statusEffectsApplied": [
+      "target": "STANDARD",
+      "payload": [
         {
-          "name": "STUN",
+          "name": "VULNERABLE",
           "quantity": 10
         }
       ]

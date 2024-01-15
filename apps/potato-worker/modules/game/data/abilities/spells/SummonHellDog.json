@@ -1,19 +1,19 @@
 {
-  "name": "Weak Spot",
-  "type": "ATTACK",
-  "tags": ["USE_WEAPON_ABILITY"],
-  "target": "FURTHEST",
+  "name": "Summon Hell Dog",
+  "type": "SPELL",
+  "tags": ["SUMMON"],
+  "target": "STANDARD",
   "baseDamage": 15,
   "cooldown": 60,
   "effects": [
     {
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "target": "FURTHEST",
+      "target": "STANDARD",
       "payload": [
         {
           "name": "SLOW",
-          "quantity": 20
+          "quantity": 5
         }
       ]
     }

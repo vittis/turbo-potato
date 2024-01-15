@@ -282,16 +282,6 @@ export class Battle extends Phaser.Scene {
         };
       }
 
-      if (event.type === "CAST_SKILL") {
-        this.board.bringToTop(unit);
-
-        this.isPlayingEventAnimation = true;
-        this.pauseTimeEvents();
-        onEnd = () => {
-          onEndAnimation();
-        };
-      }
-
       // todo is this necessary: test with more than one death
       if (event.type === "FAINT") {
         this.board.bringToTop(unit);

@@ -33,7 +33,7 @@ export class StatsManager {
     return {
       maxHp: this.stats.maxHp + this.statsFromMods.maxHp,
       hp: this.stats.hp,
-      shield: this.statsFromMods.shield,
+      shield: this.stats.shield + this.statsFromMods.shield,
       attackDamageModifier:
         this.statsFromMods.attackDamageModifier +
         this.statsFromStatusEffects.attackDamageModifier,

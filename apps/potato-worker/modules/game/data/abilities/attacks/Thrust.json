@@ -1,11 +1,9 @@
 {
   "name": "Thrust",
   "type": "ATTACK",
-  "tags": [
-    "WEAPON_ABILITY"
-  ],
+  "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
-  "baseDamage": 30,
-  "cooldown": 10,
+  "baseDamage": 40,
+  "cooldown": 40,
   "effects": []
 }

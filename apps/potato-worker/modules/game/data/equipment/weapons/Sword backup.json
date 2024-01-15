@@ -1,18 +1,20 @@
 {
-  "name": "Wand",
-  "allowedSlots": ["MAIN_HAND"],
+  "name": "Sword",
+  "allowedSlots": [
+    "MAIN_HAND",
+    "OFF_HAND"
+  ],
   "mods": [
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Bastion Bond"
+        "name": "Slash"
       }
     },
     {
       "type": "GRANT_PERK",
       "payload": {
-        "name": "Desperate Will",
-        "tier": 1
+        "name": "Desperate Will"
       }
     }
   ],

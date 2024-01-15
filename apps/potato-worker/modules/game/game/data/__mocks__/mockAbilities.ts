@@ -1,4 +1,4 @@
-export const MockAttacks = {
+export const MockAbilities = {
   Thrust: {
     name: "Thrust",
     type: "ATTACK",

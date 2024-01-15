@@ -15,7 +15,13 @@ export function createWiggleAnimation(unit: BattleUnit) {
   });
 }
 
-export function createDeathAnimation({ unit, onFinishAnimation }: { unit: BattleUnit; onFinishAnimation: Function }) {
+export function createDeathAnimation({
+  unit,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  onFinishAnimation: Function;
+}) {
   const deathTween = unit.scene.tweens.add({
     targets: unit.sprite,
     alpha: 0,
@@ -35,20 +41,27 @@ export function createDeathAnimation({ unit, onFinishAnimation }: { unit: Battle
 
 export function createAttackAnimation({
   unit,
-  target,
+  mainTarget,
+  targets,
   onImpactPoint,
   onFinishAnimation,
 }: {
   unit: BattleUnit;
-  target: BattleUnit;
+  mainTarget: BattleUnit;
+  targets: BattleUnit[];
   onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
   // const unitGlowFx = unit.sprite.preFX?.addGlow(0xeeee00, 2);
 
-  const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
+  //const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
+
+  const targetsGlowFx = targets.map((target) => {
+    return target.sprite.preFX?.addGlow(0xff0000, 0);
+  });
+
   unit.scene.tweens.add({
-    targets: targetGlowFx,
+    targets: targetsGlowFx,
     outerStrength: 2,
     duration: 260 * animationSpeed,
   });
@@ -96,10 +109,10 @@ export function createAttackAnimation({
         delay: 100 * animationSpeed,
         alpha: 1,
         x: {
-          from: target.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
-          to: target.startingX - DISTANCE_TO_ENEMY,
+          from: mainTarget.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
+          to: mainTarget.startingX - DISTANCE_TO_ENEMY,
         },
-        y: { from: target.startingY, to: target.startingY },
+        y: { from: mainTarget.startingY, to: mainTarget.startingY },
         duration: 200 * animationSpeed,
         onStart: () => {
           // start bouncing
@@ -116,17 +129,17 @@ export function createAttackAnimation({
       // attack (pushback)
       {
         delay: 200 * animationSpeed,
-        x: target.startingX - PUSHBACK_DISTANCE,
+        x: mainTarget.startingX - PUSHBACK_DISTANCE,
         duration: 125 * animationSpeed,
         yoyo: true,
         ease: Phaser.Math.Easing.Bounce.InOut,
         onYoyo: () => {
           onImpactPoint();
-          targetGlowFx?.destroy();
+          targetsGlowFx?.forEach((targetGlowFx) => targetGlowFx?.destroy());
 
           // particle burst
-          const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
-          const xOffset = target.owner === 0 ? -12 : 12;
+          const angle = mainTarget.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
+          const xOffset = mainTarget.owner === 0 ? -12 : 12;
           const rect = new Phaser.Geom.Line(xOffset, -20, xOffset, 40);
           const emitter = unit.scene.add.particles(xOffset, 15, "square", {
             angle: angle,
@@ -141,19 +154,19 @@ export function createAttackAnimation({
             scale: 0.7,
           });
           // todo: better way to positionate emitter without using .add
-          target.add(emitter);
-          // target.bringToTop(target.sprite);
+          mainTarget.add(emitter);
+          // mainTarget.bringToTop(mainTarget.sprite);
 
           // receive damage pushback
-          target.sprite.setTint(0xde3c45);
-          target.scene.tweens.add({
-            targets: target,
-            x: target.owner === 0 ? target.x - 4 : target.x + 4,
+          mainTarget.sprite.setTint(0xde3c45);
+          mainTarget.scene.tweens.add({
+            targets: mainTarget,
+            x: mainTarget.owner === 0 ? mainTarget.x - 4 : mainTarget.x + 4,
             duration: 150 * animationSpeed,
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
-              target.sprite.clearTint();
+              mainTarget.sprite.clearTint();
               unit.sprite.setFlipX(unit.owner === 0 ? false : true);
             },
           });
@@ -164,10 +177,10 @@ export function createAttackAnimation({
         delay: 100 * animationSpeed,
         alpha: 0,
         x: {
-          from: target.startingX - DISTANCE_TO_ENEMY,
-          to: target.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
+          from: mainTarget.startingX - DISTANCE_TO_ENEMY,
+          to: mainTarget.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
         },
-        y: { from: target.startingY, to: target.startingY },
+        y: { from: mainTarget.startingY, to: mainTarget.startingY },
         duration: 200 * animationSpeed,
         onStart: () => {
           // start bouncing

@@ -23,6 +23,15 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
 }
 
 export function loadAssets(scene: Phaser.Scene) {
+  scene.load.image("paul", "assets/paul.png");
+
+  // Abilities
+  scene.load.image("ability_thrust", "assets/abilities/thrust.png");
+  scene.load.image("ability_disarming_shot", "assets/abilities/disarming_shot.png");
+  scene.load.image("ability_slash", "assets/abilities/slash.png");
+  scene.load.image("ability_empowering_strike", "assets/abilities/empowering_strike.png");
+
+  // Status Effects
   scene.load.image("statusEffect_attack_power", "assets/status_effects/attack_power.png");
   scene.load.image("statusEffect_fast", "assets/status_effects/fast.png");
   scene.load.image("statusEffect_focus", "assets/status_effects/focus.png");
@@ -35,11 +44,6 @@ export function loadAssets(scene: Phaser.Scene) {
   scene.load.image("statusEffect_taunt", "assets/status_effects/taunt.png");
   scene.load.image("statusEffect_thorn", "assets/status_effects/thorn.png");
   scene.load.image("statusEffect_vulnerable", "assets/status_effects/vulnerable.png");
-
-  scene.load.image("ability_thrust", "assets/abilities/thrust.png");
-  scene.load.image("ability_disarming_shot", "assets/abilities/disarming_shot.png");
-  scene.load.image("ability_slash", "assets/abilities/slash.png");
-  scene.load.image("ability_empowering_strike", "assets/abilities/empowering_strike.png");
 
   // Unit
   scene.load.spritesheet("unit", "assets/unit.png", {

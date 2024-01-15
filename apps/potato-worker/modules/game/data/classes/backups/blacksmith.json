@@ -12,6 +12,18 @@
         }
       ],
       "description": "Gain the Reinforce Allies spell"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "DAMAGE_REDUCTION",
+            "value": 10
+          }
+        }
+      ],
+      "description": "Gain 10% Damage Reduction"
     }
   ],
   "utility": [
@@ -21,8 +33,17 @@
           "type": "GRANT_ABILITY_MODIFIER",
           "payload": {
             "name": "Reinforce Allies",
-            "nodeName": "Reinforce Self",
-            "unique": true
+            "modifiers": {
+              "target": [
+                {
+                  "name": "ADJACENT_ALLIES",
+                  "remove": true
+                },
+                {
+                  "name": "SELF"
+                }
+              ]
+            }
           }
         }
       ],
@@ -55,14 +76,14 @@
             "modifiers": {
               "trigger": [
                 {
-                  "name": "DEATH"
+                  "name": "FAINT"
                 }
               ]
             }
           }
         }
       ],
-      "description": "DEATH: Trigger Reinforce Allies"
+      "description": "FAINT: Trigger Reinforce Allies"
     }
   ],
   "tree": [
@@ -81,7 +102,7 @@
                   "status_effect": [
                     {
                       "name": "FAST",
-                      "target": "ADJACENT_UNITS",
+                      "target": "ADJACENT_ALLIES",
                       "value": 5
                     }
                   ]
@@ -89,7 +110,7 @@
               }
             }
           ],
-          "description": "Reinforce Allies also gives 5 FAST to adjacents allies"
+          "description": "Reinforce Allies also gives 5 FAST to adjacent allies"
         },
         {
           "tier": 1,
@@ -103,17 +124,17 @@
                   "status_effect": [
                     {
                       "name": "ATTACK_POWER",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 10
                     },
                     {
                       "name": "SPELL_POTENCY",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 10
                     },
                     {
                       "name": "FAST",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 10
                     }
                   ]
@@ -135,7 +156,7 @@
                   "status_effect": [
                     {
                       "name": "MULTISTRIKE",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 1
                     }
                   ]
@@ -162,7 +183,7 @@
                   "status_effect": [
                     {
                       "name": "SHIELD",
-                      "target": "ADJACENT_UNITS",
+                      "target": "ADJACENT_ALLIES",
                       "value": 15
                     }
                   ]
@@ -170,7 +191,7 @@
               }
             }
           ],
-          "description": "Reinforce Allies also gives gives 15 more SHIELD to adjacents allies"
+          "description": "Reinforce Allies also gives 15 more SHIELD to adjacent allies"
         },
         {
           "tier": 1,
@@ -184,12 +205,12 @@
                   "status_effect": [
                     {
                       "name": "STURDY",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 10
                     },
                     {
                       "name": "SHIELD",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 20
                     }
                   ]
@@ -211,12 +232,12 @@
                   "status_effect": [
                     {
                       "name": "TAUNT",
-                      "target": "FRONT_UNIT",
+                      "target": "FRONT_ALLY",
                       "value": 2
                     },
                     {
-                      "name": "THORNS",
-                      "target": "FRONT_UNIT",
+                      "name": "THORN",
+                      "target": "FRONT_ALLY",
                       "value": 25
                     }
                   ]

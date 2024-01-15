@@ -1,0 +1,28 @@
+{
+  "name": "Bastion Bond",
+  "type": "SPELL",
+  "tags": ["BUFF"],
+  "target": "LOWEST_HEALTH_ALLY",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_USE",
+      "target": "LOWEST_HEALTH_ALLY",
+      "payload": [
+        {
+          "name": "REGEN",
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_USE",
+      "target": "LOWEST_HEALTH_ALLY",
+      "payload": {
+        "value": 30
+      }
+    }
+  ]
+}

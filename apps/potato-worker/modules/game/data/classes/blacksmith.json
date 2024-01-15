@@ -5,9 +5,9 @@
     {
       "mods": [
         {
-          "type": "GRANT_BASE",
+          "type": "GRANT_ABILITY",
           "payload": {
-            "name": "Slash"
+            "name": "Reinforce Allies"
           }
         }
       ],
@@ -119,7 +119,7 @@
                   "status_effect": [
                     {
                       "name": "FAST",
-                      "target": "ADJACENT_UNITS",
+                      "target": "ADJACENT_ALLIES",
                       "value": 5
                     }
                   ]
@@ -200,7 +200,7 @@
                   "status_effect": [
                     {
                       "name": "SHIELD",
-                      "target": "ADJACENT_UNITS",
+                      "target": "ADJACENT_ALLIES",
                       "value": 15
                     }
                   ]

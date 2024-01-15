@@ -1,9 +1,9 @@
 {
-  "name": "Long Shot",
+  "name": "Phalanx Fury",
   "type": "ATTACK",
   "tags": ["WEAPON_ABILITY"],
-  "target": "STANDARD",
+  "target": "STANDARD_ROW",
   "baseDamage": 40,
-  "cooldown": 50,
+  "cooldown": 40,
   "effects": []
 }

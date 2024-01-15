@@ -1,9 +1,9 @@
 {
-  "name": "Careful Preparation",
+  "name": "Ki Focus",
   "type": "SPELL",
-  "tags": [],
+  "tags": ["BUFF"],
   "target": "SELF",
-  "cooldown": 100,
+  "cooldown": 50,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -12,7 +12,7 @@
       "payload": [
         {
           "name": "MULTISTRIKE",
-          "quantity": 3
+          "quantity": 1
         }
       ]
     }

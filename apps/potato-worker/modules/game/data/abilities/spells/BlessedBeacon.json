@@ -1,9 +1,9 @@
 {
-  "name": "Summon Crab",
+  "name": "Blessed Beacon",
   "type": "SPELL",
-  "tags": ["SUMMON"],
+  "tags": ["BUFF"],
   "target": "ADJACENT_ALLIES",
-  "cooldown": 80,
+  "cooldown": 120,
   "effects": [
     {
       "type": "STATUS_EFFECT",
@@ -11,14 +11,18 @@
       "target": "ADJACENT_ALLIES",
       "payload": [
         {
-          "name": "STURDY",
-          "quantity": 5
-        },
-        {
-          "name": "THORN",
+          "name": "REGEN",
           "quantity": 5
         }
       ]
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "payload": {
+        "value": 10
+      }
     }
   ]
 }

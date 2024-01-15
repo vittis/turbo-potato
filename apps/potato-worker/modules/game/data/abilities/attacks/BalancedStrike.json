@@ -1,0 +1,18 @@
+{
+  "name": "Balanced Strike",
+  "type": "ATTACK",
+  "tags": ["WEAPON_ABILITY"],
+  "target": "STANDARD",
+  "baseDamage": 20,
+  "cooldown": 40,
+  "effects": [
+    {
+      "type": "SHIELD",
+      "trigger": "ON_HIT",
+      "target": "SELF",
+      "payload": {
+        "value": 20
+      }
+    }
+  ]
+}

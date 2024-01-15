@@ -1,0 +1,9 @@
+{
+  "name": "Break Will",
+  "type": "ATTACK",
+  "tags": ["WEAPON_ABILITY"],
+  "target": "STANDARD_COLUMN",
+  "baseDamage": 10,
+  "cooldown": 70,
+  "effects": []
+}

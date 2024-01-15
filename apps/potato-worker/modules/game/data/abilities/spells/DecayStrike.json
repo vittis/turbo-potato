@@ -6,12 +6,13 @@
   "cooldown": 30,
   "effects": [
     {
-      "type": "APPLY_STATUS_EFFECT",
+      "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
-      "statusEffectsApplied": [
+      "target": "STANDARD",
+      "payload": [
         {
           "name": "POISON",
-          "quantity": 3
+          "quantity": 5
         }
       ]
     }

@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { ThemeModeToggle } from "../ThemeModeToggle/ThemeModeToggle";
 import { useAuth } from "@/services/state/useAuth";
 import { useUserStore } from "@/services/features/User/useUserStore";
-import { useEffect } from "react";
 import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
 import { ReadyState } from "react-use-websocket";
 import { WifiIcon, WifiOffIcon } from "lucide-react";

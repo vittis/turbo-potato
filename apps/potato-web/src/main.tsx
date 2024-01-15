@@ -51,6 +51,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         position="bottom-left"
         theme="dark"
         toastClassName="border"
+        draggablePercent={30}
         /*  newestOnTop */ stacked
         /* hideProgressBar */
       />

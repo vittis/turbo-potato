@@ -4,6 +4,7 @@
 
 @layer base {
   body {
+    height: 100svh;
     height: 100vh;
   }
 

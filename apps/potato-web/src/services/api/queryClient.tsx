@@ -26,7 +26,7 @@ const queryClient = new QueryClient({
           error?.response?.data?.message || error?.response?.data?.error || error?.message
         }`,
         {
-          icon: () => <AlertCircleIcon />,
+          icon: () => <AlertCircleIcon className="w-6 text-red-500" />,
         }
       );
     },

@@ -4,6 +4,10 @@ import { Button } from "../ui/button";
 import { ThemeModeToggle } from "../ThemeModeToggle/ThemeModeToggle";
 import { useAuth } from "@/services/state/useAuth";
 import { useUserStore } from "@/services/features/User/useUserStore";
+import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
+import { ReadyState } from "react-use-websocket";
+import { WifiIcon, WifiOffIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 const navItems = [
   {
@@ -33,6 +37,19 @@ export function Nav() {
   const userData = useUserStore((state) => state.userData);
   const { login, logout, loginIsPending, logoutIsPending } = useAuth();
 
+  const { readyState } = useGlobalConnection();
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
+  const notConnected = readyState !== ReadyState.OPEN;
+  const Icon = notConnected ? WifiOffIcon : WifiIcon;
+
   return (
     <div className="relative flex">
       <ScrollArea className="max-w-[100%] lg:max-w-none">
@@ -53,7 +70,7 @@ export function Nav() {
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      <div className="grow flex justify-end gap-4">
+      <div className="grow flex justify-end gap-4 items-center">
         {!userData?.name ? (
           <Button disabled={loginIsPending} onClick={() => login()}>
             Sign In
@@ -66,6 +83,21 @@ export function Nav() {
             </Button>
           </div>
         )}
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex gap-2 w-max !bg-pattern-gradient-error rounded-md text-muted-foreground">
+                <Icon
+                  className={cn(
+                    "pb-1 w-6",
+                    notConnected ? "text-yellow-500 animate-pulse" : "text-green-500"
+                  )}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="flex items-center gap-4">{connectionStatus}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <ThemeModeToggle />
       </div>
     </div>

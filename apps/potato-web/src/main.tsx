@@ -11,6 +11,9 @@ import "./styles/global.css";
 import { MainLayout } from "./pages/MainLayout";
 import "react-toastify/dist/ReactToastify.min.css";
 import { Flip, ToastContainer } from "react-toastify";
+/* import App from "./App";
+import { PHASER_CONFIG } from "./game/config";
+import { Battle } from "./game/scenes/battle/BattleScene"; */
 
 /* const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
@@ -48,6 +51,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         position="bottom-left"
         theme="dark"
         toastClassName="border"
+        draggablePercent={30}
         /*  newestOnTop */ stacked
         /* hideProgressBar */
       />

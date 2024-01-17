@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { WebSocketServer, WebSocket } from "ws";
@@ -25,7 +26,7 @@ app.use("*", prettyJSON()); // With options: prettyJSON({ space: 4 })
 app.use(
   "*",
   cors({
-    origin: "https://thepotate.netlify.app",
+    origin: process.env.FRONTEND_URL || "",
     /* origin: "http://localhost:5173", */
     credentials: true,
   })
@@ -170,11 +171,11 @@ app.get("/api/me/rooms", async (c) => {
 const connectAll = async () => {
   await connectRedis();
 
-  try {
+  /* try {
     await RoomRepository.createIndex();
   } catch (error) {
     console.log(error);
-  }
+  } */
 
   await redisSub.subscribe("live-chat", (message) => {
     const parsedMessage = JSON.parse(message);
@@ -369,7 +370,6 @@ connectAll().then(() => {
             .exec();
           return;
         }
-        console.log("WILL REMOVE ROOM");
         const roomId = userRooms[0];
         await redisClient.sRem(`user_rooms:${userId}`, roomId);
 

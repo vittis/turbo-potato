@@ -5,13 +5,13 @@
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Decay Strike"
+        "name": "Stab"
       }
     },
     {
       "type": "GRANT_ABILITY",
       "payload": {
-        "name": "Blessed Beacon"
+        "name": "Reinforce Allies"
       }
     }
   ],

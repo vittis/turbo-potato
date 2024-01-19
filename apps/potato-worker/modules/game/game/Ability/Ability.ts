@@ -9,6 +9,7 @@ import {
   SubEvent,
 } from "../Event/EventTypes";
 import {
+  PossibleTriggerEffect,
   TRIGGER,
   TRIGGER_EFFECT_TYPE,
   TriggerEffect,
@@ -68,148 +69,18 @@ export class Ability {
       return noTargetEvent;
     }
 
-    const statusSubEvents: SubEvent[] = [];
+    const abilitySubEvents: SubEvent[] = [];
 
-    const targetHasVulnerable = targets[0].statusEffects.some(
-      (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+    this.onUse(
+      abilitySubEvents,
+      unit,
+      this.data.effects.filter((effect) => effect.trigger === TRIGGER.ON_USE)
     );
 
-    if (targetHasVulnerable) {
-      const vulnerableQuantity = targets[0].statusEffects.find(
-        (effect) => effect.name === STATUS_EFFECT.VULNERABLE
-      )?.quantity as number;
-
-      statusSubEvents.push({
-        type: SUBEVENT_TYPE.INSTANT_EFFECT,
-        payload: {
-          type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-          targetsId: [targets[0].id], // todo not only [0]
-          payload: [
-            {
-              name: STATUS_EFFECT.VULNERABLE,
-              quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
-            },
-          ],
-        },
-      });
-    }
-
-    const onHitGrantStatusEffects = this.data.effects.filter(
-      (effect) =>
-        effect.trigger === TRIGGER.ON_HIT &&
-        effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT
-    ) as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
-
-    const onHitStatusSubEvents: SubEvent[] = onHitGrantStatusEffects.map(
-      (effect) => {
-        const target =
-          effect.target === "HIT_TARGET"
-            ? targets[0]
-            : unit.bm.getTarget(unit, effect.target)[0];
-
-        const payloadStatusEffects = effect.payload.map((statusEffect) => ({
-          name: statusEffect.name,
-          quantity: statusEffect.quantity as number,
-        }));
-
-        return {
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-            targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: [...payloadStatusEffects],
-          },
-        };
-      }
-    );
-
-    const onUseGrantStatusEffects = this.data.effects.filter(
-      (effect) =>
-        effect.trigger === TRIGGER.ON_USE &&
-        effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT
-    ) as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
-
-    const onUseStatusSubEvents: SubEvent[] = onUseGrantStatusEffects.map(
-      (effect) => {
-        const target =
-          effect.target === "HIT_TARGET"
-            ? targets[0]
-            : unit.bm.getTarget(unit, effect.target)[0];
-
-        const payloadStatusEffects = effect.payload.map((statusEffect) => ({
-          name: statusEffect.name,
-          quantity: statusEffect.quantity as number,
-        }));
-
-        return {
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-            targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: payloadStatusEffects,
-          },
-        };
-      }
-    );
-
-    const onEffectGrantShield = this.data.effects.filter(
-      (effect) => effect.type === TRIGGER_EFFECT_TYPE.SHIELD
-    );
-
-    const onEffectShieldSubEvents: SubEvent[] = onEffectGrantShield.map(
-      (event) => {
-        const target =
-          event.target === "HIT_TARGET"
-            ? targets[0]
-            : unit.bm.getTarget(unit, event.target)[0];
-
-        return {
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.SHIELD,
-            targetsId: [target.id], // todo move effect target logic somewhere else
-            payload: {
-              // @ts-ignore
-              value: event?.payload?.value,
-            },
-          },
-        };
-      }
-    );
-
-    const onEffectGrantHeal = this.data.effects.filter(
-      (effect) => effect.type === TRIGGER_EFFECT_TYPE.HEAL
-    );
-
-    const onEffectHealSubEvents: SubEvent[] = onEffectGrantHeal.map((event) => {
-      const target =
-        event.target === "HIT_TARGET"
-          ? targets[0]
-          : unit.bm.getTarget(unit, event.target)[0];
-
-      return {
-        type: SUBEVENT_TYPE.INSTANT_EFFECT,
-        payload: {
-          type: INSTANT_EFFECT_TYPE.HEAL,
-          targetsId: [target.id], // todo move effect target logic somewhere else
-          payload: {
-            // @ts-ignore
-            value: event?.payload?.value,
-          },
-        },
-      };
-    });
-
-    const damage = this.data.baseDamage
-      ? this.data.baseDamage +
-        (this.data.baseDamage * this.getDamageModifier(unit)) / 100
-      : 0;
-
-    const finalDamage = Math.max(
-      0,
-      Math.round(
-        damage - (damage * targets[0].stats.damageReductionModifier) / 100
-      )
+    this.onHit(
+      abilitySubEvents,
+      unit,
+      this.data.effects.filter((effect) => effect.trigger === TRIGGER.ON_HIT)
     );
 
     const useAbilityEvent: UseAbilityEvent = {
@@ -220,23 +91,7 @@ export class Ability {
         id: this.id,
         name: this.data.name,
         targetsId: targets.map((t) => t?.id),
-        subEvents: [
-          {
-            type: SUBEVENT_TYPE.INSTANT_EFFECT,
-            payload: {
-              type: INSTANT_EFFECT_TYPE.DAMAGE,
-              targetsId: targets.map((t) => t?.id),
-              payload: {
-                value: finalDamage,
-              },
-            },
-          },
-          ...onHitStatusSubEvents,
-          ...onUseStatusSubEvents,
-          ...statusSubEvents,
-          ...onEffectShieldSubEvents,
-          ...onEffectHealSubEvents,
-        ],
+        subEvents: abilitySubEvents,
       },
     };
 
@@ -268,5 +123,170 @@ export class Ability {
     }
 
     return targets;
+  }
+
+  onUse(
+    abilitySubEvents: SubEvent[],
+    unit: Unit,
+    effects: PossibleTriggerEffect[]
+  ) {
+    effects.forEach((effect) => {
+      if (effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
+        abilitySubEvents.push(
+          this.createSubEventDamage(abilitySubEvents, unit, effect)
+        );
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.HEAL) {
+        abilitySubEvents.push(this.createSubEventHeal(unit, effect));
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.SHIELD) {
+        abilitySubEvents.push(this.createSubEventShield(unit, effect));
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
+        abilitySubEvents.push(this.createSubEventStatusEffect(unit, effect));
+      }
+    });
+  }
+
+  onHit(
+    abilitySubEvents: SubEvent[],
+    unit: Unit,
+    effects: PossibleTriggerEffect[]
+  ) {
+    effects.forEach((effect) => {
+      if (effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
+        abilitySubEvents.push(
+          this.createSubEventDamage(abilitySubEvents, unit, effect)
+        );
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.HEAL) {
+        abilitySubEvents.push(this.createSubEventHeal(unit, effect));
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.SHIELD) {
+        abilitySubEvents.push(this.createSubEventShield(unit, effect));
+      } else if (effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
+        abilitySubEvents.push(this.createSubEventStatusEffect(unit, effect));
+      }
+    });
+  }
+
+  createSubEventDamage(
+    abilitySubEvents: SubEvent[],
+    unit: Unit,
+    effect: TriggerEffect<TRIGGER_EFFECT_TYPE.DAMAGE>
+  ) {
+    const targets = unit.bm.getTarget(unit, effect.target);
+
+    const targetHasVulnerable = targets[0].statusEffects.some(
+      (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+    );
+
+    if (targetHasVulnerable) {
+      abilitySubEvents.push(this.createSubEventVulnerable(targets));
+    }
+
+    const damage =
+      effect.payload.value +
+      (effect.payload.value * this.getDamageModifier(unit)) / 100;
+
+    const finalDamage = Math.max(
+      0,
+      Math.round(
+        damage - (damage * targets[0].stats.damageReductionModifier) / 100
+      )
+    );
+
+    const subEvent = {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.DAMAGE,
+        targetsId: targets.map((t) => t?.id),
+        payload: {
+          value: finalDamage,
+        },
+      },
+    };
+
+    return subEvent as SubEvent;
+  }
+
+  createSubEventHeal(
+    unit: Unit,
+    effect: TriggerEffect<TRIGGER_EFFECT_TYPE.HEAL>
+  ) {
+    const targets = unit.bm.getTarget(unit, effect.target);
+
+    const subEvent = {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.HEAL,
+        targetsId: targets.map((t) => t?.id),
+        payload: {
+          value: effect.payload.value,
+        },
+      },
+    };
+
+    return subEvent as SubEvent;
+  }
+
+  createSubEventShield(
+    unit: Unit,
+    effect: TriggerEffect<TRIGGER_EFFECT_TYPE.SHIELD>
+  ) {
+    const targets = unit.bm.getTarget(unit, effect.target);
+
+    const subEvent = {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.SHIELD,
+        targetsId: targets.map((t) => t?.id),
+        payload: {
+          value: effect.payload.value,
+        },
+      },
+    };
+
+    return subEvent as SubEvent;
+  }
+
+  createSubEventStatusEffect(
+    unit: Unit,
+    effect: TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>
+  ) {
+    const targets = unit.bm.getTarget(unit, effect.target);
+
+    const payloadStatusEffects = effect.payload.map((statusEffect) => ({
+      name: statusEffect.name,
+      quantity: statusEffect.quantity,
+    }));
+
+    const subEvent = {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+        targetsId: targets.map((t) => t?.id),
+        payload: [...payloadStatusEffects],
+      },
+    };
+
+    return subEvent as SubEvent;
+  }
+
+  createSubEventVulnerable(targets: Unit[]) {
+    const vulnerableQuantity = targets[0].statusEffects.find(
+      (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+    )?.quantity as number;
+
+    const subEvent = {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+        targetsId: [targets[0].id], // todo not only [0]
+        payload: [
+          {
+            name: STATUS_EFFECT.VULNERABLE,
+            quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
+          },
+        ],
+      },
+    };
+
+    return subEvent as SubEvent;
   }
 }

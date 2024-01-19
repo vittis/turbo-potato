@@ -3,9 +3,16 @@
   "type": "ATTACK",
   "tags": ["USE_WEAPON_ABILITY"],
   "target": "FURTHEST",
-  "baseDamage": 15,
   "cooldown": 60,
   "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "FURTHEST",
+      "payload": {
+        "value": 15
+      }
+    },
     {
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",

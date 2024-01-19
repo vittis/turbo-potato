@@ -3,9 +3,16 @@
   "type": "ATTACK",
   "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD",
-  "baseDamage": 20,
   "cooldown": 60,
   "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "payload": {
+        "value": 20
+      }
+    },
     {
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",

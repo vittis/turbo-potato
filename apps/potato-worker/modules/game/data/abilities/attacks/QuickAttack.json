@@ -3,7 +3,15 @@
   "type": "ATTACK",
   "tags": [],
   "target": "STANDARD",
-  "baseDamage": 15,
   "cooldown": 20,
-  "effects": []
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "payload": {
+        "value": 15
+      }
+    }
+  ]
 }

@@ -3,9 +3,16 @@
   "type": "SPELL",
   "tags": ["SUMMON"],
   "target": "STANDARD",
-  "baseDamage": 30,
   "cooldown": 80,
   "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "payload": {
+        "value": 30
+      }
+    },
     {
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",

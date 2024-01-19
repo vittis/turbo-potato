@@ -3,7 +3,15 @@
   "type": "ATTACK",
   "tags": ["USE_WEAPON_ABILITY"],
   "target": "HIT_TARGET",
-  "baseDamage": 25,
   "cooldown": 100,
-  "effects": []
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "HIT_TARGET",
+      "payload": {
+        "value": 25
+      }
+    }
+  ]
 }

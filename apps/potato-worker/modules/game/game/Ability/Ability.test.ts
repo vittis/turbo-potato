@@ -9,9 +9,11 @@ function setupBoard() {
   const bm = new BoardManager();
   const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
   const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
+  const unit3 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_MID, bm);
   bm.addToBoard(unit1);
   bm.addToBoard(unit2);
-  return { bm, unit1, unit2 };
+  bm.addToBoard(unit3);
+  return { bm, unit1, unit2, unit3 };
 }
 
 describe("Ability", () => {
@@ -34,13 +36,16 @@ describe("Ability", () => {
         const ability = new Ability(Abilities.Thrust);
         const event = ability.use(unit1);
 
+        const effects = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.DAMAGE>[];
+
         expect(event.payload.subEvents).toHaveLength(1);
         expect(event.payload.subEvents[0]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "DAMAGE",
             targetsId: [unit2.id],
-            payload: { value: ability.data.baseDamage },
+            payload: { value: effects[0].payload.value },
           },
         });
       });
@@ -55,8 +60,8 @@ describe("Ability", () => {
 
         expect(event.payload.subEvents).toHaveLength(2);
 
-        const effects = ability.data
-          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+        const effectVulnerable = ability.data
+          .effects[1] as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>;
 
         expect(event.payload.subEvents[1]).toEqual({
           type: "INSTANT_EFFECT",
@@ -66,7 +71,7 @@ describe("Ability", () => {
             payload: [
               {
                 name: "VULNERABLE",
-                quantity: effects[0].payload[0].quantity,
+                quantity: effectVulnerable.payload[0].quantity,
               },
             ],
           },
@@ -83,9 +88,9 @@ describe("Ability", () => {
         const ability = new Ability(Abilities.DisarmingShot);
         const event = ability.use(unit1);
 
-        expect(event.payload.subEvents).toHaveLength(3); // Damage, VULNERABLE, VULNERABLE loss
+        expect(event.payload.subEvents).toHaveLength(3); // VULNERABLE loss, DAMAGE, VULNERABLE
 
-        expect(event.payload.subEvents[2]).toEqual({
+        expect(event.payload.subEvents[0]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
@@ -107,9 +112,9 @@ describe("Ability", () => {
         const ability = new Ability(Abilities.DisarmingShot);
         const event = ability.use(unit1);
 
-        expect(event.payload.subEvents).toHaveLength(3); // Damage, VULNERABLE, VULNERABLE loss
+        expect(event.payload.subEvents).toHaveLength(3); // VULNERABLE loss, DAMAGE, VULNERABLE
 
-        expect(event.payload.subEvents[2]).toEqual({
+        expect(event.payload.subEvents[0]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
@@ -129,8 +134,8 @@ describe("Ability", () => {
 
         expect(event.payload.subEvents).toHaveLength(2);
 
-        const effects = ability.data
-          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+        const effectAttackPower = ability.data
+          .effects[1] as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>;
 
         expect(event.payload.subEvents[1]).toEqual({
           type: "INSTANT_EFFECT",
@@ -140,9 +145,77 @@ describe("Ability", () => {
             payload: [
               {
                 name: "ATTACK_POWER",
-                quantity: effects[0].payload[0].quantity,
+                quantity: effectAttackPower.payload[0].quantity,
               },
             ],
+          },
+        });
+      });
+    });
+
+    describe("Reinforce Allies (Apply SHIELD on ADJACENT_ALLIES on use)", () => {
+      it("should generate SHIELD subEvent", () => {
+        const { unit1, unit3 } = setupBoard();
+
+        const ability = new Ability(Abilities.ReinforceAllies);
+        const event = ability.use(unit1);
+
+        const effects = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.SHIELD>[];
+
+        expect(event.actorId).toBe(unit1.id);
+        expect(event.payload.name).toBe(ability.data.name);
+        expect(event.payload.targetsId).toEqual([unit3.id]);
+        expect(event.payload.subEvents[0]).toEqual({
+          type: "INSTANT_EFFECT",
+          payload: {
+            type: "SHIELD",
+            targetsId: [unit3.id],
+            payload: {
+              value: effects[0].payload.value,
+            },
+          },
+        });
+        //expect(unit3.stats.shield).toBe(effects[0].payload.value);
+      });
+    });
+
+    describe("Blessed Beacon (Apply HEAL and REGEN on ADJACENT_ALLIES on use)", () => {
+      it("should generate HEAL and REGEN subEvents", () => {
+        const { unit1, unit3 } = setupBoard();
+
+        const ability = new Ability(Abilities.BlessedBeacon);
+        const event = ability.use(unit1);
+
+        const effectsStatusEffect = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.STATUS_EFFECT>[];
+        const effectsHeal = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.HEAL>[];
+
+        expect(event.actorId).toBe(unit1.id);
+        expect(event.payload.name).toBe(ability.data.name);
+        expect(event.payload.targetsId).toEqual([unit3.id]);
+        expect(event.payload.subEvents[0]).toEqual({
+          type: "INSTANT_EFFECT",
+          payload: {
+            type: "STATUS_EFFECT",
+            targetsId: [unit3.id],
+            payload: [
+              {
+                name: "REGEN",
+                quantity: effectsStatusEffect[0].payload[0].quantity,
+              },
+            ],
+          },
+        });
+        expect(event.payload.subEvents[1]).toEqual({
+          type: "INSTANT_EFFECT",
+          payload: {
+            type: "HEAL",
+            targetsId: [unit3.id],
+            payload: {
+              value: effectsHeal[1].payload.value,
+            },
           },
         });
       });

@@ -3,7 +3,15 @@
   "type": "ATTACK",
   "tags": ["WEAPON_ABILITY"],
   "target": "STANDARD_COLUMN",
-  "baseDamage": 10,
   "cooldown": 70,
-  "effects": []
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD_COLUMN",
+      "payload": {
+        "value": 10
+      }
+    }
+  ]
 }

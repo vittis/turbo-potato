@@ -3,9 +3,16 @@
   "type": "SPELL",
   "tags": [],
   "target": "STANDARD",
-  "baseDamage": 30,
   "cooldown": 40,
   "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "payload": {
+        "value": 30
+      }
+    },
     {
       "type": "HEAL",
       "trigger": "ON_HIT",

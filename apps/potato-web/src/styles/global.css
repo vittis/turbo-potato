@@ -6,6 +6,12 @@
   body {
     height: 100svh;
     height: 100vh;
+    touch-action: none;
+  }
+
+  #game {
+    position: absolute;
+    z-index: 0;
   }
 
   #root {

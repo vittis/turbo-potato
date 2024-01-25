@@ -1,10 +1,13 @@
 import { CSSProperties, useMemo } from "react";
-import { useGameStore } from "./services/state/game";
+import { useGameState } from "./services/state/useGameState";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBattleSetup } from "./game/scenes/battle/BattleScene";
+import { Button } from "./components/ui/button";
+import { useSetupState } from "./services/state/useSetupState";
 
 function App() {
-  const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameStore();
+  const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameState();
+  const onClickReady = useSetupState((state) => state.onClickReady);
 
   const { data } = useQuery({
     queryKey: ["game/battle/setup"],
@@ -30,6 +33,7 @@ function App() {
   return (
     <>
       <div className="absolute top-10 w-full flex justify-center">
+        <Button onClick={onClickReady}>go to battle</Button>
         <button
           onClick={() => {
             setIsGamePaused(!isGamePaused);

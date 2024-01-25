@@ -22,20 +22,20 @@ describe("Run Game", () => {
 
     const stepItEnded = eventHistory[eventHistory.length - 1].step;
 
-    expect(eventHistory.at(eventHistory.length - 1)?.step).toBe(stepItEnded);
-    expect(eventHistory.at(eventHistory.length - 1)).toHaveProperty(
+    expect(eventHistory?.[eventHistory.length - 1]?.step).toBe(stepItEnded);
+    expect(eventHistory?.[eventHistory.length - 1]).toHaveProperty(
       "type",
       "FAINT"
     );
-    expect(eventHistory.at(eventHistory.length - 2)).toHaveProperty(
+    expect(eventHistory?.[eventHistory.length - 2]).toHaveProperty(
       "type",
       "FAINT"
     );
-    expect(eventHistory.at(eventHistory.length - 3)).toHaveProperty(
+    expect(eventHistory?.[eventHistory.length - 3]).toHaveProperty(
       "type",
       "USE_ABILITY"
     );
-    expect(eventHistory.at(eventHistory.length - 3)?.step).toBe(stepItEnded);
+    expect(eventHistory?.[eventHistory.length - 3]?.step).toBe(stepItEnded);
   });
 
   describe("EVENTS", () => {
@@ -102,7 +102,7 @@ describe("Run Game", () => {
       ).toHaveLength(1);
     });
 
-    it.only("generate SELF_FAINT events (From LAST WORDS (from wand))", () => {
+    it("generate SELF_FAINT events (From LAST WORDS (from wand))", () => {
       const bm = new BoardManager();
 
       const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.BOT_BACK, bm);
@@ -123,8 +123,6 @@ describe("Run Game", () => {
       bm.addToBoard(unit4);
 
       const { eventHistory } = runGame(bm);
-
-      console.log(eventHistory);
 
       expect(
         eventHistory.filter(

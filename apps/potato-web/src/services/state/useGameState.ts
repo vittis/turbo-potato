@@ -8,7 +8,7 @@ interface GameState {
   setIsGamePaused: (isGameRunning: boolean) => void;
 }
 
-const useGameStore = create<GameState>()(
+const useGameState = create<GameState>()(
   subscribeWithSelector((set) => ({
     selectedEntity: null,
     isGamePaused: true,
@@ -17,4 +17,4 @@ const useGameStore = create<GameState>()(
   }))
 );
 
-export { useGameStore };
+export { useGameState };

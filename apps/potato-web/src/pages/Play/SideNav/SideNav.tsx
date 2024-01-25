@@ -5,7 +5,7 @@ import { useState } from "react";
 import { SideNavItems } from "./SideNavItems";
 import { AlertCircle, DoorClosed, Swords, Trophy, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/services/state/useAuth";
+import { useAuth } from "@/services/features/User/useAuth";
 import { useUserStore } from "@/services/features/User/useUserStore";
 
 interface SideNavProps {

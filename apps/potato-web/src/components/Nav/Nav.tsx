@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Button } from "../ui/button";
 import { ThemeModeToggle } from "../ThemeModeToggle/ThemeModeToggle";
-import { useAuth } from "@/services/state/useAuth";
+import { useAuth } from "@/services/features/User/useAuth";
 import { useUserStore } from "@/services/features/User/useUserStore";
 import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
 import { ReadyState } from "react-use-websocket";
@@ -51,7 +51,7 @@ export function Nav() {
   const Icon = notConnected ? WifiOffIcon : WifiIcon;
 
   return (
-    <div className="relative flex">
+    <div className="relative flex z-20">
       <ScrollArea className="max-w-[100%] lg:max-w-none">
         <div className={cn("mb-4 flex items-center")}>
           {navItems.map((navItem, index) => (

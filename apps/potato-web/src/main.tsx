@@ -11,15 +11,18 @@ import "./styles/global.css";
 import { MainLayout } from "./pages/MainLayout";
 import "react-toastify/dist/ReactToastify.min.css";
 import { Flip, ToastContainer } from "react-toastify";
-/* import App from "./App";
+import App from "./App";
 import { PHASER_CONFIG } from "./game/config";
-import { Battle } from "./game/scenes/battle/BattleScene"; */
+import { Battle } from "./game/scenes/battle/BattleScene";
+import { Setup } from "./game/scenes/setup/SetupScene";
+import { SetupView } from "./pages/Setup/SetupView";
+import { SetupViewTest } from "./pages/Setup/SetupView_tests";
 
-/* const game = new Phaser.Game(
+const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
-    scene: [Battle],
+    scene: [Battle, Setup],
   })
-); */
+);
 
 /* function onReady() {
    const canvas = document.querySelector("canvas");
@@ -52,11 +55,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         theme="dark"
         toastClassName="border"
         draggablePercent={30}
-        /*  newestOnTop */ stacked
-        /* hideProgressBar */
+        stacked
+        hideProgressBar={false}
       />
-      <MainLayout />
-      {/* <App /> */}
+      {/* <SetupViewTest /> */}
+      {/* <SetupView /> */}
+      {/* <MainLayout /> */}
+      <App />
     </ThemeProvider>
   </QueryClientProvider>
 );

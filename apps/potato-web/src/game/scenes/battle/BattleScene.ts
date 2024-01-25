@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { BattleUnit } from "./battleUnit/BattleUnit";
 import { queryClient } from "../../../services/api/queryClient";
-import { useGameStore } from "../../../services/state/game";
+import { useGameState } from "../../../services/state/useGameState";
 import { preloadBattle, setupBattle } from "./BattleSetup";
 import {
   Ability,
@@ -56,7 +56,7 @@ export class Battle extends Phaser.Scene {
   isPlayingEventAnimation = false;
 
   constructor() {
-    super("GameScene");
+    super("BattleScene");
   }
 
   preload() {
@@ -94,7 +94,7 @@ export class Battle extends Phaser.Scene {
         this.initializeUnits(this.firstStep);
       });
 
-    useGameStore.subscribe(
+    useGameState.subscribe(
       (state) => state.selectedEntity,
       (selectedEntity) => {
         this.units.forEach((unit) => {
@@ -107,7 +107,7 @@ export class Battle extends Phaser.Scene {
       }
     );
 
-    useGameStore.subscribe(
+    useGameState.subscribe(
       (state) => state.isGamePaused,
       (isGamePaused) => {
         this.isGamePaused = isGamePaused;
@@ -153,7 +153,7 @@ export class Battle extends Phaser.Scene {
             }
             const isLastStep = step === this.totalSteps;
             if (isLastStep) {
-              useGameStore.getState().setIsGamePaused(true);
+              useGameState.getState().setIsGamePaused(true);
             }
           };
           event.unit.playEvent({ ...event, onEnd });
@@ -167,7 +167,7 @@ export class Battle extends Phaser.Scene {
 
           const isLastStep = step === this.totalSteps;
           if (isLastStep) {
-            useGameStore.getState().setIsGamePaused(true);
+            useGameState.getState().setIsGamePaused(true);
           }
         }
       }

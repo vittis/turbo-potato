@@ -1,4 +1,4 @@
-import { useGameStore } from "../../../../services/state/game";
+import { useGameState } from "../../../../services/state/useGameState";
 import { BattleUnit } from "./BattleUnit";
 
 export function setupUnitPointerEvents(unit: BattleUnit) {
@@ -6,9 +6,9 @@ export function setupUnitPointerEvents(unit: BattleUnit) {
 
   unit.sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
     if (!unit.isSelected) {
-      useGameStore.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
+      useGameState.getState().setSelectedEntity(`${unit.owner}${unit.boardPosition}`);
     } else {
-      useGameStore.getState().setSelectedEntity(null);
+      useGameState.getState().setSelectedEntity(null);
     }
   });
 

@@ -4,6 +4,9 @@ export const PHASER_CONFIG = {
   type: Phaser.AUTO,
   parent: "game",
   backgroundColor: "#47aba9",
+  /* dom: {
+    createContainer: true,
+  }, */
   transparent: true,
   //pixelArt: true,
   antialias: true,
@@ -16,7 +19,7 @@ export const PHASER_CONFIG = {
       },
    }, */
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     parent: "game",
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: window.innerWidth,

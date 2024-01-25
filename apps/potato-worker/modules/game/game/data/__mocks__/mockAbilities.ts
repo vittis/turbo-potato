@@ -10,6 +10,7 @@ export const MockAbilities = {
         type: "DAMAGE",
         trigger: "ON_HIT",
         target: "STANDARD",
+        conditions: [],
         payload: {
           value: 20,
         },
@@ -27,6 +28,7 @@ export const MockAbilities = {
         type: "DAMAGE",
         trigger: "ON_HIT",
         target: "STANDARD",
+        conditions: [],
         payload: {
           value: 20,
         },
@@ -44,6 +46,7 @@ export const MockAbilities = {
         type: "DAMAGE",
         trigger: "ON_HIT",
         target: "STANDARD",
+        conditions: [],
         payload: {
           value: 40,
         },
@@ -52,6 +55,7 @@ export const MockAbilities = {
         type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "STANDARD",
+        conditions: [],
         payload: [
           {
             name: "VULNERABLE",
@@ -72,6 +76,7 @@ export const MockAbilities = {
         type: "DAMAGE",
         trigger: "ON_HIT",
         target: "STANDARD",
+        conditions: [],
         payload: {
           value: 20,
         },
@@ -80,6 +85,7 @@ export const MockAbilities = {
         type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "SELF",
+        conditions: [],
         payload: [
           {
             name: "ATTACK_POWER",
@@ -100,6 +106,7 @@ export const MockAbilities = {
         type: "SHIELD",
         trigger: "ON_USE",
         target: "ADJACENT_ALLIES",
+        conditions: [],
         payload: {
           value: 20,
         },
@@ -117,6 +124,7 @@ export const MockAbilities = {
         type: "STATUS_EFFECT",
         trigger: "ON_USE",
         target: "ADJACENT_ALLIES",
+        conditions: [],
         payload: [
           {
             name: "REGEN",
@@ -128,6 +136,7 @@ export const MockAbilities = {
         type: "HEAL",
         trigger: "ON_USE",
         target: "ADJACENT_ALLIES",
+        conditions: [],
         payload: {
           value: 10,
         },

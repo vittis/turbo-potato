@@ -9,6 +9,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "ON_USE",
       "target": "SELF",
+      "conditions": [],
       "payload": [
         {
           "name": "MULTISTRIKE",

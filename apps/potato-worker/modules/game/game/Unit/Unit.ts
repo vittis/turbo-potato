@@ -164,8 +164,14 @@ export class Unit {
       unitClass.data.name
     );
 
-    // todo add perks
-    // todo add triggers effects
+    const grantedPerks = unitClass.getPerks();
+    this.perkManager.addPerksFromSource(grantedPerks, unitClass.data.name);
+    grantedPerks.forEach((perk) => {
+      this.triggerManager.addTriggerEffectsFromSource(
+        perk.getTriggerEffects(),
+        perk.id
+      );
+    });
   }
 
   serialize() {

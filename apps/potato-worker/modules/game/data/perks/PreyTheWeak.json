@@ -18,6 +18,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
+      "conditions": [],
       "payload": [
         {
           "name": "VULNERABLE",

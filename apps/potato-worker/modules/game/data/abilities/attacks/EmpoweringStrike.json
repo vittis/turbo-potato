@@ -1,7 +1,9 @@
 {
   "name": "Empowering Strike",
   "type": "ATTACK",
-  "tags": ["WEAPON_ABILITY"],
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
   "target": "STANDARD",
   "cooldown": 60,
   "effects": [
@@ -9,6 +11,7 @@
       "type": "DAMAGE",
       "trigger": "ON_HIT",
       "target": "STANDARD",
+      "conditions": [],
       "payload": {
         "value": 20
       }
@@ -17,6 +20,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "SELF",
+      "conditions": [],
       "payload": [
         {
           "name": "ATTACK_POWER",
@@ -28,6 +32,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "STANDARD",
+      "conditions": [],
       "payload": [
         {
           "name": "VULNERABLE",

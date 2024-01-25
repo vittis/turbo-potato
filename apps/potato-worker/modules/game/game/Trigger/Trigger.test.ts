@@ -18,6 +18,7 @@ const effectsMock: PossibleTriggerEffect[] = [
     type: TRIGGER_EFFECT_TYPE.STATUS_EFFECT,
     trigger: TRIGGER.ON_HIT,
     target: TARGET_TYPE.HIT_TARGET,
+    conditions: [],
     payload: [
       {
         name: STATUS_EFFECT.VULNERABLE,
@@ -29,6 +30,7 @@ const effectsMock: PossibleTriggerEffect[] = [
     type: TRIGGER_EFFECT_TYPE.STATUS_EFFECT,
     trigger: TRIGGER.BATTLE_START,
     target: TARGET_TYPE.SELF,
+    conditions: [],
     payload: [
       {
         name: STATUS_EFFECT.ATTACK_POWER,
@@ -77,6 +79,7 @@ describe("Triggers", () => {
         type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "HIT_TARGET",
+        conditions: [],
         payload: [
           {
             name: "VULNERABLE",

@@ -1,6 +1,12 @@
 {
   "name": "Longbow",
-  "allowedSlots": [
+  "tags": [
+    "WEAPON",
+    "TWO_HANDED",
+    "PHYSICAL",
+    "RANGED"
+  ],
+  "slots": [
     "MAIN_HAND"
   ],
   "mods": [

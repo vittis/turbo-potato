@@ -12,6 +12,18 @@
         }
       ],
       "description": "Gain the Weak Spot attack"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_PERK",
+          "payload": {
+            "name": "Ranged Proficiency",
+            "tier": 1
+          }
+        }
+      ],
+      "description": "Gain the Ranged Proficiency perk"
     }
   ],
   "utility": [

@@ -1,7 +1,9 @@
 {
   "name": "Disarming Shot",
   "type": "ATTACK",
-  "tags": ["WEAPON_ABILITY"],
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
   "target": "HIT_TARGET",
   "cooldown": 100,
   "effects": [
@@ -9,6 +11,7 @@
       "type": "DAMAGE",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
+      "conditions": [],
       "payload": {
         "value": 40
       }
@@ -17,6 +20,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "ON_HIT",
       "target": "HIT_TARGET",
+      "conditions": [],
       "payload": [
         {
           "name": "VULNERABLE",

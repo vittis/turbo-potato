@@ -1,6 +1,7 @@
 {
   "name": "Short Spear",
-  "allowedSlots": [
+  "tags": [],
+  "slots": [
     "MAIN_HAND"
   ],
   "mods": [

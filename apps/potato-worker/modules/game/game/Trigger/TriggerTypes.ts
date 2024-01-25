@@ -1,6 +1,7 @@
 import { TARGET_TYPE } from "../Target/TargetTypes";
 import { STATUS_EFFECT } from "../StatusEffect/StatusEffectTypes";
 import { DamagePayload, HealPayload, ShieldPayload } from "../Event/EventTypes";
+import { EQUIPMENT_SLOT, EQUIPMENT_TAG } from "../Equipment/EquipmentTypes";
 
 export enum TRIGGER {
   BATTLE_START = "BATTLE_START",
@@ -19,6 +20,42 @@ export enum TRIGGER_EFFECT_TYPE {
   HEAL = "HEAL",
 }
 
+export enum EFFECT_CONDITION_TYPE {
+  POSITION = "POSITION",
+  EQUIPMENT = "EQUIPMENT",
+}
+
+export enum BOARD_POSITION {
+  FRONT = "FRONT",
+  BACK = "BACK",
+  ISOLATED = "ISOLATED",
+}
+
+interface EffectCondition<T extends EFFECT_CONDITION_TYPE> {
+  type: T;
+  payload: TriggerConditionPayloadMap[T];
+}
+
+type PossibleEffectConditions =
+  | EffectCondition<EFFECT_CONDITION_TYPE.POSITION>
+  | EffectCondition<EFFECT_CONDITION_TYPE.EQUIPMENT>;
+
+type TriggerConditionPayloadMap = {
+  [EFFECT_CONDITION_TYPE.POSITION]: EffectConditionPositionPayload;
+  [EFFECT_CONDITION_TYPE.EQUIPMENT]: EffectConditionEquipmentPayload;
+};
+
+interface EffectConditionPositionPayload {
+  target: TARGET_TYPE;
+  position: BOARD_POSITION;
+}
+
+interface EffectConditionEquipmentPayload {
+  target: TARGET_TYPE;
+  slots: EQUIPMENT_SLOT[]; // is OR
+  tags: EQUIPMENT_TAG[]; // is AND
+}
+
 export interface StatusEffectPayload {
   name: STATUS_EFFECT;
   quantity: number | "DYNAMIC";
@@ -35,6 +72,7 @@ export interface TriggerEffect<T extends TRIGGER_EFFECT_TYPE> {
   type: T;
   trigger: TRIGGER;
   target?: TARGET_TYPE;
+  conditions: PossibleEffectConditions[];
   payload: TriggerEffectPayloadMap[T];
 }
 

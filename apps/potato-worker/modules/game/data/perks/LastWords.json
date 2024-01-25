@@ -18,6 +18,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "SELF_FAINT",
       "target": "ALL_ALLIES",
+      "conditions": [],
       "payload": [
         {
           "name": "STURDY",

@@ -4,6 +4,8 @@ import { getAbilitiesInstancesFromMods } from "../Ability/AbilityUtils";
 import { Ability } from "../Ability/Ability";
 import { Mod, MOD_TYPE } from "../Mods/ModsTypes";
 import { filterStatsMods } from "../Stats/StatsUtils";
+import { getPerksInstancesFromMods } from "../Perk/PerkUtils";
+import { Perk } from "../Perk/Perk";
 
 export class Class {
   data: ClassData;
@@ -32,5 +34,11 @@ export class Class {
 
       return [...acc, ...abilitiesOfNode];
     }, [] as Ability[]);
+  }
+
+  getPerks() {
+    return this.data.base.reduce((acc, node) => {
+      return [...acc, ...getPerksInstancesFromMods(node.mods)];
+    }, [] as Perk[]);
   }
 }

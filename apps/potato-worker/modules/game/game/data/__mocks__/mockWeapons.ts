@@ -3,7 +3,8 @@ import { EquipmentData } from "../../Equipment/EquipmentTypes";
 export const MockWeapons = {
   Shortbow: {
     name: "Shortbow",
-    allowedSlots: ["MAIN_HAND"],
+    tags: ["RANGED", "PHYSICAL"],
+    slots: ["MAIN_HAND"],
     mods: [
       {
         type: "GRANT_ABILITY",
@@ -11,12 +12,19 @@ export const MockWeapons = {
           name: "Disarming Shot",
         },
       },
+      /* {
+        type: "GRANT_PERK",
+        payload: {
+          name: "Ranged Proficiency",
+        },
+      }, */
     ],
     effects: [],
   } as EquipmentData,
   ShortSpear: {
     name: "Short Spear",
-    allowedSlots: ["MAIN_HAND"],
+    tags: [],
+    slots: ["MAIN_HAND"],
     mods: [
       {
         type: "GRANT_ABILITY",
@@ -28,7 +36,7 @@ export const MockWeapons = {
         type: "GRANT_BASE_STAT",
         payload: {
           stat: "ATTACK_DAMAGE",
-          value: 5,
+          value: 10,
         },
       },
       {
@@ -43,7 +51,8 @@ export const MockWeapons = {
   } as EquipmentData,
   Sword: {
     name: "Sword",
-    allowedSlots: ["MAIN_HAND", "OFF_HAND"],
+    tags: [],
+    slots: ["MAIN_HAND", "OFF_HAND"],
     mods: [
       {
         type: "GRANT_ABILITY",
@@ -58,12 +67,20 @@ export const MockWeapons = {
           tier: 1,
         },
       },
+      {
+        type: "GRANT_PERK",
+        payload: {
+          name: "Berserk",
+          tier: 1,
+        },
+      },
     ],
     effects: [],
   } as EquipmentData,
   Axe: {
     name: "Axe",
-    allowedSlots: ["MAIN_HAND"],
+    tags: [],
+    slots: ["MAIN_HAND"],
     mods: [
       {
         type: "GRANT_ABILITY",
@@ -77,6 +94,7 @@ export const MockWeapons = {
         type: "STATUS_EFFECT",
         trigger: "ON_HIT",
         target: "HIT_TARGET",
+        conditions: [],
         payload: [
           {
             name: "VULNERABLE",
@@ -88,6 +106,7 @@ export const MockWeapons = {
         type: "STATUS_EFFECT",
         trigger: "BATTLE_START",
         target: "SELF",
+        conditions: [],
         payload: [
           {
             name: "VULNERABLE",
@@ -103,6 +122,7 @@ export const MockWeapons = {
         type: "DAMAGE",
         trigger: "BATTLE_START",
         target: "SELF",
+        conditions: [],
         payload: {
           value: 50,
         },
@@ -111,7 +131,8 @@ export const MockWeapons = {
   } as EquipmentData,
   Wand: {
     name: "Wand",
-    allowedSlots: ["MAIN_HAND"],
+    tags: [],
+    slots: ["MAIN_HAND"],
     mods: [
       {
         type: "GRANT_ABILITY",

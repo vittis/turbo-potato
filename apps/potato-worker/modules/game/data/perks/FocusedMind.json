@@ -28,6 +28,7 @@
       "type": "STATUS_EFFECT",
       "trigger": "BATTLE_START",
       "target": "SELF",
+      "conditions": [],
       "payload": [
         {
           "name": "FOCUS",

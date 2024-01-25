@@ -137,9 +137,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
         }
 
-        const statusEffectEvents = event.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
-        ) as StepEvent[];
+        const statusEffectEvents =
+          (event.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+          ) as StepEvent[]) || [];
         if (statusEffectEvents.length > 0) {
           statusEffectEvents.forEach((statusEffectEvent) => {
             const targetIds = statusEffectEvent.payload.targetsId as string[];
@@ -156,9 +157,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           });
         }
 
-        const shieldEvents = event.payload.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
-        ) as StepEvent[];
+        const shieldEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+          ) as StepEvent[]) || [];
+        console.log(shieldEvents);
         if (shieldEvents.length > 0) {
           shieldEvents.forEach((shieldEvent) => {
             const targetIds = shieldEvent.payload.targetsId as string[];
@@ -173,9 +176,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           });
         }
 
-        const healEvents = event.payload.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
-        ) as StepEvent[];
+        const healEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+          ) as StepEvent[]) || [];
         if (healEvents.length > 0) {
           healEvents.forEach((healEvent) => {
             const targetIds = healEvent.payload.targetsId as string[];
@@ -228,16 +232,17 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       };
 
       const onImpactPoint = () => {
-        const receiveDamageEvent = event.payload.subEvents?.find(
+        const receiveDamageEvent = event.payload?.subEvents?.find(
           (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
         ) as StepEvent;
         if (receiveDamageEvent) {
           targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
         }
 
-        const statusEffectEvents = event.payload.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
-        ) as StepEvent[];
+        const statusEffectEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+          ) as StepEvent[]) || [];
         if (statusEffectEvents.length > 0) {
           statusEffectEvents.forEach((statusEffectEvent) => {
             const targetIds = statusEffectEvent.payload.targetsId as string[];
@@ -254,9 +259,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           });
         }
 
-        const shieldEvents = event.payload.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
-        ) as StepEvent[];
+        const shieldEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+          ) as StepEvent[]) || [];
         if (shieldEvents.length > 0) {
           shieldEvents.forEach((shieldEvent) => {
             const targetIds = shieldEvent.payload.targetsId as string[];
@@ -271,9 +277,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
           });
         }
 
-        const healEvents = event.payload.subEvents?.filter(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
-        ) as StepEvent[];
+        const healEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+          ) as StepEvent[]) || [];
         if (healEvents.length > 0) {
           healEvents.forEach((healEvent) => {
             const targetIds = healEvent.payload.targetsId as string[];

@@ -15,6 +15,7 @@ export const MockPerks = {
         type: "STATUS_EFFECT",
         trigger: "BATTLE_START",
         target: "SELF",
+        conditions: [],
         payload: [
           {
             name: "FOCUS",
@@ -42,6 +43,7 @@ export const MockPerks = {
         type: "STATUS_EFFECT",
         trigger: "ALLY_FAINT",
         target: "SELF",
+        conditions: [],
         payload: [
           {
             name: "ATTACK_POWER",
@@ -69,9 +71,83 @@ export const MockPerks = {
         type: "STATUS_EFFECT",
         trigger: "SELF_FAINT",
         target: "ALL_ALLIES",
+        conditions: [],
         payload: [
           {
             name: "STURDY",
+            quantity: "DYNAMIC",
+          },
+        ],
+      },
+    ],
+  } as PerkData,
+  Berserk: {
+    name: "Berserk",
+    type: "TIER_SCALE",
+    tiers: [
+      {
+        name: "ATTACK_POWER",
+        values: [5, 10, 15, 20, 30],
+      },
+      {
+        name: "VULNERABLE",
+        values: [5, 10, 15, 20, 30],
+      },
+    ],
+    effects: [
+      {
+        type: "STATUS_EFFECT",
+        trigger: "BATTLE_START",
+        target: "SELF",
+        conditions: [
+          {
+            type: "POSITION",
+            payload: {
+              target: "SELF",
+              position: "FRONT",
+            },
+          },
+        ],
+        payload: [
+          {
+            name: "ATTACK_POWER",
+            quantity: "DYNAMIC",
+          },
+          {
+            name: "VULNERABLE",
+            quantity: "DYNAMIC",
+          },
+        ],
+      },
+    ],
+  } as PerkData,
+  RangedProficiency: {
+    name: "Ranged Proficiency",
+    type: "TIER_SCALE",
+    tiers: [
+      {
+        name: "FAST",
+        values: [5, 10, 15, 20, 30],
+      },
+    ],
+    effects: [
+      {
+        type: "STATUS_EFFECT",
+        trigger: "BATTLE_START",
+        target: "SELF",
+        conditions: [
+          {
+            type: "EQUIPMENT",
+            payload: {
+              target: "SELF",
+              slots: ["MAIN_HAND", "OFF_HAND"],
+              tags: ["PHYSICAL", "RANGED"],
+            },
+          },
+        ],
+        payload: [
+          {
+            name: "FAST",
             quantity: "DYNAMIC",
           },
         ],

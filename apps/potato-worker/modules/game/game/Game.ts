@@ -7,7 +7,7 @@ import {
   sortAndExecuteEvents,
 } from "./Event/EventUtils";
 import { Class } from "./Class/Class";
-import { Classes, Weapons, Chests, Heads } from "./data";
+import { Classes, Weapons } from "./data";
 import { PossibleEvent } from "./Event/EventTypes";
 import { TRIGGER } from "./Trigger/TriggerTypes";
 
@@ -24,16 +24,11 @@ export class Game {
     );
     unit1.setClass(new Class(Classes.Paladin));
     unit1.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-    unit1.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit1.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
     unit2.setClass(new Class(Classes.Blacksmith));
 
     unit2.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-
-    unit2.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit2.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit3 = new Unit(
       OWNER.TEAM_ONE,
@@ -41,19 +36,13 @@ export class Game {
       this.boardManager
     );
     unit3.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
-    unit3.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit3.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit3.setClass(new Class(Classes.Ranger));
 
     const unit4 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
     unit4.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-    unit4.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit4.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit5 = new Unit(OWNER.TEAM_TWO, POSITION.BOT_MID, this.boardManager);
     unit5.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-    unit5.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit5.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit6 = new Unit(
       OWNER.TEAM_TWO,
@@ -61,8 +50,6 @@ export class Game {
       this.boardManager
     );
     unit6.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-    unit6.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit6.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
 
     const unit7 = new Unit(
       OWNER.TEAM_TWO,
@@ -70,8 +57,6 @@ export class Game {
       this.boardManager
     );
     unit7.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
-    unit7.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit7.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit7.setClass(new Class(Classes.Warrior));
 
     const unit8 = new Unit(
@@ -80,8 +65,6 @@ export class Game {
       this.boardManager
     );
     unit8.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
-    unit8.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit8.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit8.setClass(new Class(Classes.Warrior));
 
     const unit9 = new Unit(
@@ -90,8 +73,6 @@ export class Game {
       this.boardManager
     );
     unit9.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-    unit9.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit9.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit9.setClass(new Class(Classes.Rogue));
 
     const unit10 = new Unit(
@@ -100,8 +81,6 @@ export class Game {
       this.boardManager
     );
     unit10.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
-    unit10.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unit10.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unit10.setClass(new Class(Classes.Warlock));
 
     /* this.boardManager.addToBoard(unit1);
@@ -115,17 +94,21 @@ export class Game {
     this.boardManager.addToBoard(unit6);
     this.boardManager.addToBoard(unit8); */
 
-    const unitA = new Unit(OWNER.TEAM_ONE, POSITION.TOP_MID, this.boardManager);
-    unitA.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-    unitA.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unitA.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
-    unitA.setClass(new Class(Classes.Warrior));
+    const unitA = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    unitA.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unitA.setClass(new Class(Classes.Ranger));
 
-    const unitB = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
+    const unitB = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
     unitB.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
-    unitB.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unitB.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
-    unitB.setClass(new Class(Classes.Warrior));
+    unitB.setClass(new Class(Classes.Blacksmith));
 
     const unitC = new Unit(
       OWNER.TEAM_TWO,
@@ -133,8 +116,6 @@ export class Game {
       this.boardManager
     );
     unitC.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-    unitC.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unitC.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unitC.setClass(new Class(Classes.Warrior));
 
     const unitD = new Unit(
@@ -143,8 +124,6 @@ export class Game {
       this.boardManager
     );
     unitD.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
-    unitD.equip(new Equipment(Chests.LeatherShirt), EQUIPMENT_SLOT.CHEST);
-    unitD.equip(new Equipment(Heads.LeatherHat), EQUIPMENT_SLOT.HEAD);
     unitD.setClass(new Class(Classes.Warrior));
 
     this.boardManager.addToBoard(unitA);

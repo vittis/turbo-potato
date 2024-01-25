@@ -1,5 +1,5 @@
 {
-  "name": "Desperate Will",
+  "name": "Berserk",
   "type": "TIER_SCALE",
   "tiers": [
     {
@@ -13,9 +13,9 @@
       ]
     },
     {
-      "name": "STURDY",
+      "name": "VULNERABLE",
       "values": [
-        90,
+        5,
         10,
         15,
         20,
@@ -26,16 +26,24 @@
   "effects": [
     {
       "type": "STATUS_EFFECT",
-      "trigger": "ALLY_FAINT",
-      "target": "ALL_ALLIES",
-      "conditions": [],
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "conditions": [
+        {
+          "type": "POSITION",
+          "payload": {
+            "target": "SELF",
+            "position": "FRONT"
+          }
+        }
+      ],
       "payload": [
         {
           "name": "ATTACK_POWER",
           "quantity": "DYNAMIC"
         },
         {
-          "name": "STURDY",
+          "name": "VULNERABLE",
           "quantity": "DYNAMIC"
         }
       ]

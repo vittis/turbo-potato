@@ -8,6 +8,11 @@ import {
 } from "../Event/EventTypes";
 import { Unit } from "../Unit/Unit";
 import {
+  isEquipmentConditionValid,
+  isPositionConditionValid,
+} from "./ConditionUtils";
+import {
+  EFFECT_CONDITION_TYPE,
   PossibleTriggerEffect,
   TRIGGER,
   TRIGGER_EFFECT_TYPE,
@@ -53,6 +58,33 @@ export class TriggerManager {
     let subEvents: SubEvent[] = [];
 
     triggerEffects.forEach((activeEffect) => {
+      let canUseEffect = true;
+
+      if (activeEffect.effect.conditions.length > 0) {
+        activeEffect.effect.conditions.forEach((condition) => {
+          if (condition.type === EFFECT_CONDITION_TYPE.POSITION) {
+            canUseEffect = isPositionConditionValid(
+              bm,
+              unit,
+              condition.payload.target,
+              condition.payload.position
+            );
+          } else if (condition.type === EFFECT_CONDITION_TYPE.EQUIPMENT) {
+            canUseEffect = isEquipmentConditionValid(
+              bm,
+              unit,
+              condition.payload.target,
+              condition.payload.slots,
+              condition.payload.tags
+            );
+          }
+        });
+      }
+
+      if (!canUseEffect) {
+        return;
+      }
+
       const targets = bm.getTarget(unit, activeEffect.effect.target);
 
       if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {

@@ -9,6 +9,7 @@
       "type": "DAMAGE",
       "trigger": "ON_HIT",
       "target": "STANDARD",
+      "conditions": [],
       "payload": {
         "value": 15
       }

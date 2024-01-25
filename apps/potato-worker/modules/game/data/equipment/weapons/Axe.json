@@ -1,6 +1,9 @@
 {
   "name": "Axe",
-  "allowedSlots": ["MAIN_HAND"],
+  "tags": [],
+  "slots": [
+    "MAIN_HAND"
+  ],
   "mods": [
     {
       "type": "GRANT_ABILITY",

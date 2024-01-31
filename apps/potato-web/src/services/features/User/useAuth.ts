@@ -8,6 +8,10 @@ async function loginMutation() {
   return data;
 }
 
+async function registerMutation(userInfo) {
+  const { data } = await api.post("/register", userInfo, { withCredentials: true });
+  return data;
+}
 async function logoutMutation() {
   const { data } = await api.post("/logout", {}, { withCredentials: true });
   return data;
@@ -33,7 +37,7 @@ const useAuth = () => {
     },
   });
 
-  return { login, loginIsPending, logout, logoutIsPending };
+  return { login, loginIsPending, logout, logoutIsPending, registerMutation };
 };
 
 export { useAuth };

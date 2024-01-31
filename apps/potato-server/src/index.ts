@@ -11,10 +11,11 @@ import { prettyJSON } from "hono/pretty-json";
 import { Room, RoomRepository } from "./rooms/roomsRoutes";
 import rooms from "./rooms/roomsRoutes";
 import { uniqueNamesGenerator, starWars } from "unique-names-generator";
-import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcrypt';
+import { createClient } from "@supabase/supabase-js";
+import bcrypt from "bcrypt";
+import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 
-const saltRounds = 10
+const saltRounds = 10;
 
 export type Variables = {
   session: any;
@@ -23,8 +24,16 @@ export type Variables = {
 const APPID = process.env.APPID;
 const PORT = process.env.PORT || 8080;
 
-const supabase = createClient('https://kkvhdzvbelevktmrjwsg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrdmhkenZiZWxldmt0bXJqd3NnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY1NTYwNzUsImV4cCI6MjAyMjEzMjA3NX0.mCg4LVaF2pXfrQpA9SRet-qBpogMJiU0k6BJmrS2KPg')
+const SECRET_KEY: Secret = "potato";
 
+interface CustomRequest extends Request {
+  token: string | JwtPayload;
+}
+
+const supabase = createClient(
+  "https://kkvhdzvbelevktmrjwsg.supabase.co",
+  process.env.SUPABASE_KEY
+);
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -33,47 +42,44 @@ app.use("*", prettyJSON()); // With options: prettyJSON({ space: 4 })
 app.use(
   "*",
   cors({
-    origin: process.env.FRONTEND_URL || "",
-    /* origin: "http://localhost:5173", */
+    /* origin: process.env.FRONTEND_URL || "", */
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
 
-app.get('/users', async (c, next) => {
-  const { data, error } = await supabase
-  .from('user')
-  .select();
+app.get("/users", async (c, next) => {
+  const { data, error } = await supabase.from("user").select();
 
   return c.json({ data });
-})
+});
 
-app.post('/register', async (c, next) => {
-  const body = await c.req.json()
-  body.password = await bcrypt.hash(body.password, saltRounds)
+app.post("/register", async (c, next) => {
+  const body = await c.req.json();
+  body.password = await bcrypt.hash(body.password, saltRounds);
 
-  if(!body || !body.username || !body.password || !body.email){
+  if (!body || !body.username || !body.password || !body.email) {
     return c.json({ error: "You need to provide all info" }, 422);
-  } 
-
-  const { data, error} = await supabase
-    .from('user')
-    .select()
-    .eq('username', body.username)
-    .eq('email', body.email)
-
-  if(data?.length != 0){
-    return c.json ({ error: "Username or Email Already Registered"})
   }
 
-  await supabase
-  .from('user')
-  .insert({username: body.username, password: body.password, email: body.email }) 
+  const { data, error } = await supabase
+    .from("user")
+    .select()
+    .eq("username", body.username)
+    .eq("email", body.email);
 
-  return c.json ("User Registered")
+  if (data?.length != 0) {
+    return c.json({ error: "Username or Email Already Registered" }, 422);
+  }
 
-})
+  await supabase.from("user").insert({
+    username: body.username,
+    password: body.password,
+    email: body.email,
+  });
 
-
+  return c.json("User Registered");
+});
 
 app.use("*", logger());
 const wsConnections: {
@@ -104,6 +110,36 @@ app.use("/api/*", async (c, next) => {
 });
 
 app.route("/", rooms);
+
+app.post("/user/login", async (c) => {
+  const body = await c.req.json();
+  const { data, error } = await supabase
+    .from("user")
+    .select()
+    .eq("email", body.email);
+  //@ts-ignore
+  let user;
+  user = data?.pop();
+  if (user) {
+    /*     body.password = await bcrypt.hash(user.password, saltRounds);
+     */
+    const userPass = user.password;
+
+    const isMatch = bcrypt.compareSync(body.password, userPass);
+    if (isMatch) {
+      const token = jwt.sign(
+        { _id: user.uuid, name: user.username },
+        SECRET_KEY,
+        {
+          expiresIn: "2 days",
+        }
+      );
+      return c.json({ token });
+    } else {
+      return c.json({ error: "Incorrect password or login" }, 422);
+    }
+  }
+});
 
 app.post("/login", async (c) => {
   // You would typically validate user credentials here

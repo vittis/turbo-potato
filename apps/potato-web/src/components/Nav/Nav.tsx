@@ -8,6 +8,7 @@ import { useGlobalConnection } from "@/services/features/Global/useGlobalConnect
 import { ReadyState } from "react-use-websocket";
 import { WifiIcon, WifiOffIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { CreateUserDrawer } from "../User/CreateUser";
 
 const navItems = [
   {
@@ -72,9 +73,12 @@ export function Nav() {
       </ScrollArea>
       <div className="grow flex justify-end gap-4 items-center">
         {!userData?.name ? (
-          <Button disabled={loginIsPending} onClick={() => login()}>
-            Sign In
-          </Button>
+          <>
+            <CreateUserDrawer />
+            <Button disabled={loginIsPending} onClick={() => login()}>
+              Sign In
+            </Button>
+          </>
         ) : (
           <div className="">
             Logged as <span className="text-primary mr-2">{userData.name}</span>{" "}

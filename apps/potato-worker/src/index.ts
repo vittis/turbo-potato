@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { Game } from "../modules/game/game/Game";
+import { Classes, Weapons } from "../modules/game/game/data";
+import { nanoid } from "nanoid";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -63,6 +65,22 @@ app.get("/game/battle/setup", async (c) => {
     firstStep,
     totalSteps,
     eventHistory,
+  });
+});
+
+app.get("/game/setup/allStuff", async (c) => {
+  const classes: string[] = [];
+  Object.keys(Classes).forEach((key) => {
+    classes.push(key);
+  });
+  const weapons: string[] = [];
+  Object.keys(Weapons).forEach((key) => {
+    weapons.push(key);
+  });
+
+  return c.json({
+    classes: classes.map((c) => ({ id: nanoid(4), name: c })),
+    weapons: weapons.map((w) => ({ id: nanoid(4), name: w })),
   });
 });
 

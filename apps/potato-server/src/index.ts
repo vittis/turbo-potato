@@ -8,8 +8,7 @@ import { logger } from "hono/logger";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
-import { Room, RoomRepository } from "./rooms/roomsRoutes";
-import rooms from "./rooms/roomsRoutes";
+import rooms, { Room, RoomRepository } from "./controllers/rooms/roomsRoutes";
 import { uniqueNamesGenerator, starWars } from "unique-names-generator";
 
 export type Variables = {

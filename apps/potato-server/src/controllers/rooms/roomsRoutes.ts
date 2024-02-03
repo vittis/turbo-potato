@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { EntityId, Schema, Repository } from "redis-om";
-import { redisClient } from "../redis";
-import { Variables } from "../index";
+import { redisClient } from "../../redis";
+import { Variables } from "../../index";
 import { nanoid } from "nanoid";
 
 const app = new Hono<{ Variables: Variables }>();

@@ -6,6 +6,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateRoomDrawer } from "./CreateRoomDrawer";
 import RoomsView from "./RoomsView";
 import { useUserStore } from "@/services/features/User/useUserStore";
+import SupaRoomsView from "./SupaRoomsView";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
 interface LobbyViewProps {
   defaultSize: number;
@@ -13,6 +15,8 @@ interface LobbyViewProps {
 
 const LobbyView = ({ defaultSize }: LobbyViewProps) => {
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
+  const user = useSupabaseUserStore((state) => state.user);
 
   return (
     <ResizablePanel defaultSize={defaultSize} minSize={30}>
@@ -48,7 +52,8 @@ const LobbyView = ({ defaultSize }: LobbyViewProps) => {
           </div>
         </form>
 
-        {isLoggedIn && <RoomsView />}
+        {/* {isLoggedIn && <RoomsView />} */}
+        {user && <SupaRoomsView />}
         {!isLoggedIn && (
           <h1 className="px-4 mt-2 text-muted-foreground">Sign in to browse rooms</h1>
         )}

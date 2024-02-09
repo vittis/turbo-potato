@@ -57,8 +57,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         stacked
         hideProgressBar={false}
       />
-      <SetupView />
-      {/* <MainLayout /> */}
+      {/* <SetupView /> */}
+      <MainLayout />
       {/* <App /> */}
     </ThemeProvider>
   </QueryClientProvider>

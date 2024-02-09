@@ -1,5 +1,5 @@
 import { Nav } from "@/components/Nav/Nav";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import debounce from "lodash.debounce";
 import SideNav from "./Play/SideNav/SideNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,8 @@ import LobbyView from "./Play/Views/Lobby/LobbyView";
 import MessagesPanel from "./MessagesPanel/MessagesPanel";
 import { useFetchProfile } from "@/services/features/User/useFetchProfile";
 import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
+import { supabase } from "@/services/supabase/supabase";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
 const MainLayout = () => {
   const layout = localStorage.getItem("react-resizable-panels:layout");
@@ -23,8 +25,21 @@ const MainLayout = () => {
     []
   );
 
+  const setUser = useSupabaseUserStore((state) => state.setUser);
+
   useFetchProfile();
   useGlobalConnection();
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+      if (session && session.user) {
+        setUser(session.user);
+      }
+    });
+  }, []);
 
   return (
     <>

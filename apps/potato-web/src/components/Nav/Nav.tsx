@@ -8,6 +8,10 @@ import { useGlobalConnection } from "@/services/features/Global/useGlobalConnect
 import { ReadyState } from "react-use-websocket";
 import { WifiIcon, WifiOffIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { RegisterUserDrawer } from "../User/RegisterUserDrawer";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
+import { supabase } from "@/services/supabase/supabase";
+import { LoginUserDrawer } from "../User/LoginUserDrawer";
 
 const navItems = [
   {
@@ -34,6 +38,7 @@ const navItems = [
 ];
 
 export function Nav() {
+  const user = useSupabaseUserStore((state) => state.user);
   const userData = useUserStore((state) => state.userData);
   const { login, logout, loginIsPending, logoutIsPending } = useAuth();
 
@@ -49,6 +54,14 @@ export function Nav() {
 
   const notConnected = readyState !== ReadyState.OPEN;
   const Icon = notConnected ? WifiOffIcon : WifiIcon;
+
+  const supaBaselogout = async () => {
+    let { error } = await supabase.auth.signOut();
+
+    if (error) {
+      throw error;
+    }
+  };
 
   return (
     <div className="relative flex z-20">
@@ -72,9 +85,27 @@ export function Nav() {
       </ScrollArea>
       <div className="grow flex justify-end gap-4 items-center">
         {!userData?.name ? (
-          <Button disabled={loginIsPending} onClick={() => login()}>
-            Sign In
-          </Button>
+          <>
+            {user ? (
+              <>
+                <div className="text-muted-foreground">
+                  Logged as <span className="text-primary mr-2">{user.email}</span>
+                </div>
+                <Button onClick={() => supaBaselogout()} variant="outline">
+                  Supa Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <LoginUserDrawer />
+                <RegisterUserDrawer />
+              </>
+            )}
+
+            <Button disabled={loginIsPending} onClick={() => login()}>
+              Sign In
+            </Button>
+          </>
         ) : (
           <div className="">
             Logged as <span className="text-primary mr-2">{userData.name}</span>{" "}

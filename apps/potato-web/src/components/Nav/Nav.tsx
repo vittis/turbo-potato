@@ -39,8 +39,6 @@ const navItems = [
 
 export function Nav() {
   const user = useSupabaseUserStore((state) => state.user);
-  const userData = useUserStore((state) => state.userData);
-  const { login, logout, loginIsPending, logoutIsPending } = useAuth();
 
   const { readyState } = useGlobalConnection();
 
@@ -84,35 +82,27 @@ export function Nav() {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       <div className="grow flex justify-end gap-4 items-center">
-        {!userData?.name ? (
+        {user ? (
           <>
-            {user ? (
-              <>
-                <div className="text-muted-foreground">
-                  Logged as <span className="text-primary mr-2">{user.email}</span>
-                </div>
-                <Button onClick={() => supaBaselogout()} variant="outline">
-                  Supa Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <LoginUserDrawer />
-                <RegisterUserDrawer />
-              </>
-            )}
-
-            <Button disabled={loginIsPending} onClick={() => login()}>
-              Sign In
+            <div className="text-muted-foreground">
+              Logged as{" "}
+              <span className="text-primary mr-2">
+                {user.user_metadata.username
+                  ? user.user_metadata.username
+                  : user.user_metadata.preferred_username
+                  ? user.user_metadata.name
+                  : user.email}
+              </span>
+            </div>
+            <Button onClick={() => supaBaselogout()} variant="outline">
+              Logout
             </Button>
           </>
         ) : (
-          <div className="">
-            Logged as <span className="text-primary mr-2">{userData.name}</span>{" "}
-            <Button disabled={logoutIsPending} onClick={() => logout()} variant="destructive">
-              Sign Out
-            </Button>
-          </div>
+          <>
+            <LoginUserDrawer />
+            <RegisterUserDrawer />
+          </>
         )}
         <TooltipProvider delayDuration={0}>
           <Tooltip>

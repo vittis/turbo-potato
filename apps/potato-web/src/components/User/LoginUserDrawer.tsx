@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { supabase } from "@/services/supabase/supabase";
+import { Github } from "lucide-react";
 
 const FormSchema = z.object({
   /* username: z.string().min(4, { message: "Name must be at least 4 characters" }).max(16, {
@@ -47,6 +48,18 @@ const LoginUserDrawer = ({}: LoginUserDrawer) => {
     },
   });
 
+  async function signInWithGithub() {
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+    });
+  }
+
+  async function signInWithGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+  }
+
   async function onSubmit(formData: z.infer<typeof FormSchema>) {
     let { data, error } = await supabase.auth.signInWithPassword({
       email: formData.email,
@@ -57,23 +70,28 @@ const LoginUserDrawer = ({}: LoginUserDrawer) => {
       throw error;
     }
 
-    console.log(data);
-
     setIsOpen(false);
     // todo toast
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button onClick={() => setIsOpen(true)} type="button" variant="outline">
-        Supa Login
+      <Button onClick={() => setIsOpen(true)} type="button">
+        Login
       </Button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Login</DialogTitle>
           <DialogDescription>Fill your info</DialogDescription>
         </DialogHeader>
-
+        <div className="w-100 flex justify-center gap-4">
+          <Button variant="outline" size="icon" onClick={signInWithGithub}>
+            <Github />
+          </Button>
+          <Button variant="outline" size="icon" onClick={signInWithGoogle}>
+            G
+          </Button>
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* <FormField

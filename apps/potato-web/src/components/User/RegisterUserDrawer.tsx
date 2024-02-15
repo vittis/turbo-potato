@@ -21,11 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { supabase } from "@/services/supabase/supabase";
+import { toast } from "react-toastify";
 
 const FormSchema = z.object({
-  /* username: z.string().min(4, { message: "Name must be at least 4 characters" }).max(16, {
+  username: z.string().min(4, { message: "Name must be at least 4 characters" }).max(16, {
     message: "Username must not be longer than 16 characters.",
-  }), */
+  }),
   password: z.string().min(6, { message: "Password must have at least 6 characters" }),
   email: z
     .string()
@@ -41,7 +42,7 @@ const RegisterUserDrawer = ({}: RegisterUserDrawer) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      /*  username: "", */
+      username: "",
       password: "",
       email: "",
     },
@@ -51,22 +52,25 @@ const RegisterUserDrawer = ({}: RegisterUserDrawer) => {
     let { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
+      options: {
+        data: {
+          username: formData.username,
+        },
+      },
     });
 
     if (error) {
       throw error;
     }
 
-    console.log(data);
-
     setIsOpen(false);
-    // todo toast
+    toast.success("User registered successfully, please check your email to verify your account.");
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button onClick={() => setIsOpen(true)} type="button" variant="outline">
-        Supa Sign Up
+        Sign Up
       </Button>
       <DialogContent>
         <DialogHeader>
@@ -76,7 +80,7 @@ const RegisterUserDrawer = ({}: RegisterUserDrawer) => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* <FormField
+            <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
@@ -88,7 +92,7 @@ const RegisterUserDrawer = ({}: RegisterUserDrawer) => {
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
 
             <FormField
               control={form.control}

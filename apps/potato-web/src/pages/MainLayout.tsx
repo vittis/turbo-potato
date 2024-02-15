@@ -36,6 +36,7 @@ const MainLayout = () => {
         setUser(null);
       }
       if (session && session.user) {
+        console.log(session.user);
         setUser(session.user);
       }
     });

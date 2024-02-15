@@ -12,6 +12,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useChatMessages } from "@/services/features/Messages/useChatMessages";
 import { useUserStore } from "@/services/features/User/useUserStore";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
 const mockChatNavItems = [
   {
@@ -46,6 +47,7 @@ interface MessagesPanelProps {
 }
 
 const MessagesPanel = ({ defaultSize }: MessagesPanelProps) => {
+  const user = useSupabaseUserStore((state) => state.user);
   const userData = useUserStore((state) => state.userData);
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
@@ -116,7 +118,7 @@ const MessagesPanel = ({ defaultSize }: MessagesPanelProps) => {
                   sender={message.sender}
                   message={message.message}
                   timestamp={message.timestamp}
-                  isFromMe={message.sender === userData.name}
+                  isFromMe={message.sender === user.user_metadata.username}
                 />
               ))}
             </ScrollArea>

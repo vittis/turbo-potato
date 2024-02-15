@@ -130,69 +130,78 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       }
 
       const onImpactPoint = () => {
-        const receiveDamageEvent = event.subEvents?.find(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
-        ) as StepEvent;
-        if (receiveDamageEvent) {
-          targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
-        }
+        const receiveDamageEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+          ) as StepEvent[]) || [];
+
+        receiveDamageEvents &&
+          receiveDamageEvents.forEach((damageSubEvent) => {
+            const targetId = damageSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply damage on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+
+            target.playEvent({ event: damageSubEvent });
+          });
 
         const statusEffectEvents =
-          (event.subEvents?.filter(
+          (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
           ) as StepEvent[]) || [];
-        if (statusEffectEvents.length > 0) {
-          statusEffectEvents.forEach((statusEffectEvent) => {
-            const targetIds = statusEffectEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(
-                  `Trying to apply status effect: cCouldnt find target with id: ${targetId}`
-                );
-              }
-              target.playEvent({ event: statusEffectEvent });
-            });
+        statusEffectEvents &&
+          statusEffectEvents.forEach((statusEffectSubEvent) => {
+            const targetId = statusEffectSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply status effect on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: statusEffectSubEvent });
           });
-        }
 
         const shieldEvents =
           (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
           ) as StepEvent[]) || [];
-        console.log(shieldEvents);
-        if (shieldEvents.length > 0) {
-          shieldEvents.forEach((shieldEvent) => {
-            const targetIds = shieldEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(`Trying to apply shield: cCouldnt find target with id: ${targetId}`);
-              }
-              target.playEvent({ event: shieldEvent });
-            });
+        shieldEvents &&
+          shieldEvents.forEach((shieldSubEvent) => {
+            const targetId = shieldSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply shield on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: shieldSubEvent });
           });
-        }
 
         const healEvents =
           (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
           ) as StepEvent[]) || [];
-        if (healEvents.length > 0) {
-          healEvents.forEach((healEvent) => {
-            const targetIds = healEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(`Trying to apply heal: cCouldnt find target with id: ${targetId}`);
-              }
-              target.playEvent({ event: healEvent });
-            });
+        healEvents &&
+          healEvents.forEach((healEvent) => {
+            const targetId = healEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply heal on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: healEvent });
           });
-        }
       };
 
       const onFinishAnimation = () => {
@@ -232,68 +241,78 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       };
 
       const onImpactPoint = () => {
-        const receiveDamageEvent = event.payload?.subEvents?.find(
-          (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
-        ) as StepEvent;
-        if (receiveDamageEvent) {
-          targets.forEach((target) => target.playEvent({ event: receiveDamageEvent }));
-        }
+        const receiveDamageEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+          ) as StepEvent[]) || [];
+
+        receiveDamageEvents &&
+          receiveDamageEvents.forEach((damageSubEvent) => {
+            const targetId = damageSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply damage on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+
+            target.playEvent({ event: damageSubEvent });
+          });
 
         const statusEffectEvents =
           (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
           ) as StepEvent[]) || [];
-        if (statusEffectEvents.length > 0) {
-          statusEffectEvents.forEach((statusEffectEvent) => {
-            const targetIds = statusEffectEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(
-                  `Trying to apply status effect: cCouldnt find target with id: ${targetId}`
-                );
-              }
-              target.playEvent({ event: statusEffectEvent });
-            });
+        statusEffectEvents &&
+          statusEffectEvents.forEach((statusEffectSubEvent) => {
+            const targetId = statusEffectSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply status effect on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: statusEffectSubEvent });
           });
-        }
 
         const shieldEvents =
           (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
           ) as StepEvent[]) || [];
-        if (shieldEvents.length > 0) {
-          shieldEvents.forEach((shieldEvent) => {
-            const targetIds = shieldEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(`Trying to apply shield: cCouldnt find target with id: ${targetId}`);
-              }
-              target.playEvent({ event: shieldEvent });
-            });
+        shieldEvents &&
+          shieldEvents.forEach((shieldSubEvent) => {
+            const targetId = shieldSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply shield on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: shieldSubEvent });
           });
-        }
 
         const healEvents =
           (event.payload?.subEvents?.filter(
             (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
           ) as StepEvent[]) || [];
-        if (healEvents.length > 0) {
-          healEvents.forEach((healEvent) => {
-            const targetIds = healEvent.payload.targetsId as string[];
 
-            targetIds.forEach((targetId) => {
-              const target = allUnits?.find((unit) => unit.id === targetId);
-              if (!target) {
-                throw Error(`Trying to apply heal: cCouldnt find target with id: ${targetId}`);
-              }
-              target.playEvent({ event: healEvent });
-            });
+        healEvents &&
+          healEvents.forEach((healEvent) => {
+            const targetId = healEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply heal on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: healEvent });
           });
-        }
       };
 
       // TODO set mainTarget based on target type

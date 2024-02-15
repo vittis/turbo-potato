@@ -13,10 +13,12 @@ function setupBoard() {
   const unit1 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_FRONT, bm);
   const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_FRONT, bm);
   const unit3 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_MID, bm);
+  const unit4 = new Unit(OWNER.TEAM_ONE, POSITION.TOP_BACK, bm);
   bm.addToBoard(unit1);
   bm.addToBoard(unit2);
   bm.addToBoard(unit3);
-  return { bm, unit1, unit2, unit3 };
+  bm.addToBoard(unit4);
+  return { bm, unit1, unit2, unit3, unit4 };
 }
 
 describe("Ability", () => {
@@ -48,7 +50,7 @@ describe("Ability", () => {
             type: "INSTANT_EFFECT",
             payload: {
               type: "DAMAGE",
-              targetsId: [unit2.id],
+              targetId: unit2.id,
               payload: { value: effects[0].payload.value },
             },
           });
@@ -79,7 +81,7 @@ describe("Ability", () => {
             type: "INSTANT_EFFECT",
             payload: {
               type: "DAMAGE",
-              targetsId: [unit2.id],
+              targetId: unit2.id,
               payload: {
                 value: finalDamage,
               },
@@ -117,7 +119,7 @@ describe("Ability", () => {
             type: "INSTANT_EFFECT",
             payload: {
               type: "DAMAGE",
-              targetsId: [unit2.id],
+              targetId: unit2.id,
               payload: {
                 value: finalDamage,
               },
@@ -143,7 +145,7 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
-            targetsId: [unit2.id],
+            targetId: unit2.id,
             payload: [
               {
                 name: "VULNERABLE",
@@ -171,7 +173,7 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
-            targetsId: [unit2.id],
+            targetId: unit2.id,
             payload: [
               { name: "VULNERABLE", quantity: -VULNERABLE_LOSS_PER_HIT },
             ],
@@ -196,7 +198,7 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
-            targetsId: [unit2.id],
+            targetId: unit2.id,
             payload: [{ name: "VULNERABLE", quantity: -2 }],
           },
         });
@@ -219,7 +221,7 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
-            targetsId: [unit1.id],
+            targetId: unit1.id,
             payload: [
               {
                 name: "ATTACK_POWER",
@@ -232,28 +234,29 @@ describe("Ability", () => {
     });
 
     describe("Reinforce Allies (Apply SHIELD on ADJACENT_ALLIES on use)", () => {
-      it("should generate SHIELD subEvent", () => {
-        const { unit1, unit3 } = setupBoard();
+      it("should generate SHIELD subEvent on multiple units", () => {
+        const { unit1, unit3, unit4 } = setupBoard();
 
         const ability = new Ability(Abilities.ReinforceAllies);
-        const event = ability.use(unit1);
+        const event = ability.use(unit3);
 
         const effects = ability.data
           .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.SHIELD>[];
 
-        expect(event.actorId).toBe(unit1.id);
+        expect(event.actorId).toBe(unit3.id);
         expect(event.payload.name).toBe(ability.data.name);
-        expect(event.payload.targetsId).toEqual([unit3.id]);
+        expect(event.payload.targetsId).toEqual([unit1.id, unit4.id]);
         expect(event.payload.subEvents[0]).toEqual({
           type: "INSTANT_EFFECT",
           payload: {
             type: "SHIELD",
-            targetsId: [unit3.id],
+            targetId: unit1.id,
             payload: {
               value: effects[0].payload.value,
             },
           },
         });
+        expect(event.payload.subEvents[1].payload.targetId).toEqual(unit4.id);
         //expect(unit3.stats.shield).toBe(effects[0].payload.value);
       });
     });
@@ -277,7 +280,7 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "STATUS_EFFECT",
-            targetsId: [unit3.id],
+            targetId: unit3.id,
             payload: [
               {
                 name: "REGEN",
@@ -290,12 +293,59 @@ describe("Ability", () => {
           type: "INSTANT_EFFECT",
           payload: {
             type: "HEAL",
-            targetsId: [unit3.id],
+            targetId: unit3.id,
             payload: {
               value: effectsHeal[1].payload.value,
             },
           },
         });
+      });
+    });
+
+    describe("Phalanx Fury (Apply DAMAGE on STANDARD_ROW on hit)", () => {
+      it("should generate DAMAGE subEvent on multiple units", () => {
+        const { unit1, unit2, unit3, unit4 } = setupBoard();
+
+        unit1.setClass(new Class(Classes.Blacksmith));
+
+        const ability = new Ability(Abilities.PhalanxFury);
+        const event = ability.use(unit2);
+
+        const effects = ability.data
+          .effects as TriggerEffect<TRIGGER_EFFECT_TYPE.DAMAGE>[];
+
+        const rawDamage = effects[0].payload.value;
+        const finalDamageUnit1 =
+          rawDamage +
+          (rawDamage *
+            (unit2.stats.attackDamageModifier -
+              unit1.stats.damageReductionModifier)) /
+            100;
+
+        expect(event.actorId).toBe(unit2.id);
+        expect(event.payload.name).toBe(ability.data.name);
+        expect(event.payload.targetsId).toEqual([unit1.id, unit3.id, unit4.id]);
+        expect(event.payload.subEvents[0]).toEqual({
+          type: "INSTANT_EFFECT",
+          payload: {
+            type: "DAMAGE",
+            targetId: unit1.id,
+            payload: {
+              value: finalDamageUnit1,
+            },
+          },
+        });
+        expect(event.payload.subEvents[1]).toEqual({
+          type: "INSTANT_EFFECT",
+          payload: {
+            type: "DAMAGE",
+            targetId: unit3.id,
+            payload: {
+              value: rawDamage,
+            },
+          },
+        });
+        expect(event.payload.subEvents[2].payload.targetId).toEqual(unit4.id);
       });
     });
   });

@@ -15,14 +15,42 @@ async function joinRoom(params) {
 }
 async function leaveRoom(params) {
   const { userId } = params;
-  await supabase.from("room_members").delete().eq("user_id", userId); // todo: this silently fails, could use select() at end and check data
+  const { data } = await supabase.from("room_members").delete().eq("user_id", userId).select(); // todo: this silently fails, could use select() at end and check data
+  const roomId = data?.[0].room_id;
+
+  const { data: roomData } = await supabase.from("room_members").select().eq("room_id", roomId);
+
+  if (roomData && roomData.length < 1) {
+    await supabase.from("rooms").delete().eq("id", roomId).select();
+  } else if (roomData) {
+    const hasCreator = roomData.filter((member) => member.is_creator);
+    console.log(hasCreator);
+    if (hasCreator && hasCreator.length < 1) {
+      console.log("no creator");
+      await supabase
+        .from("room_members")
+        .upsert([{ user_id: roomData[0].user_id, room_id: roomId, is_creator: true }])
+        .eq("room_id", roomId)
+        .select()
+        .order("joined_at", { ascending: true });
+    }
+  }
 }
 
-async function createRoom(data) {
-  const res = await api.post("/api/rooms/create", data, {
-    withCredentials: true,
-  });
-  return res.data;
+async function createRoom(params) {
+  const { data } = await supabase
+    .from("rooms")
+    .insert([{ name: params.name, description: params.description, capacity: params.capacity }])
+    .select();
+
+  const roomId = data?.[0]?.id;
+
+  await supabase
+    .from("room_members")
+    .insert([{ user_id: params.userId, room_id: roomId, is_creator: true }])
+    .select();
+
+  return data;
 }
 
 const useLobbyMutations = () => {

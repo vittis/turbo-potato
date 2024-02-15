@@ -22,8 +22,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
 const FormSchema = z.object({
+  userId: z.string().optional(),
   name: z.string().min(4, { message: "Name must be at least 4 characters" }).max(30, {
     message: "Name must not be longer than 30 characters.",
   }),
@@ -43,6 +45,7 @@ interface CreateRoomDrawerProps {}
 
 const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
   const { createRoom, isLoading } = useLobbyMutations();
+  const supaUser = useSupabaseUserStore((state) => state.user);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -56,6 +59,8 @@ const CreateRoomDrawer = ({}: CreateRoomDrawerProps) => {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    data.userId = supaUser?.id;
+
     await createRoom(data);
     setIsOpen(false);
     // todo toast

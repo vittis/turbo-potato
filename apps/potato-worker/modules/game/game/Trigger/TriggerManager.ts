@@ -1,5 +1,11 @@
 import { BoardManager } from "../BoardManager";
 import {
+  createDamageSubEvent,
+  createHealSubEvent,
+  createShieldSubEvent,
+  createStatusEffectSubEvent,
+} from "../Event/EventFactory";
+import {
   EVENT_TYPE,
   INSTANT_EFFECT_TYPE,
   SUBEVENT_TYPE,
@@ -85,30 +91,25 @@ export class TriggerManager {
         return;
       }
 
-      const targets = bm.getTarget(unit, activeEffect.effect.target);
+      let newSubEvents: SubEvent[] = [];
 
-      if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
-        subEvents.push({
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-            targetsId: targets.map((target) => target.id),
-            payload: activeEffect.effect.payload.map((statusEffect) => ({
-              name: statusEffect.name,
-              quantity: statusEffect.quantity as number,
-            })),
-          },
-        });
-      } else if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
-        subEvents.push({
-          type: SUBEVENT_TYPE.INSTANT_EFFECT,
-          payload: {
-            type: INSTANT_EFFECT_TYPE.DAMAGE,
-            targetsId: targets.map((target) => target.id),
-            payload: { value: activeEffect.effect.payload.value },
-          },
-        });
+      if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
+        newSubEvents = createDamageSubEvent(
+          unit,
+          activeEffect.effect,
+          0 // TODO serase 0 ou pega modifier de attack ou spell
+        );
+      } else if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.HEAL) {
+        newSubEvents = createHealSubEvent(unit, activeEffect.effect);
+      } else if (activeEffect.effect.type === TRIGGER_EFFECT_TYPE.SHIELD) {
+        newSubEvents = createShieldSubEvent(unit, activeEffect.effect);
+      } else if (
+        activeEffect.effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT
+      ) {
+        newSubEvents = createStatusEffectSubEvent(unit, activeEffect.effect);
       }
+
+      subEvents = [...subEvents, ...newSubEvents];
     });
 
     if (subEvents.length > 0) {

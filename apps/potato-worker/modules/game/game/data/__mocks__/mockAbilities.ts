@@ -143,4 +143,22 @@ export const MockAbilities = {
       },
     ],
   },
+  PhalanxFury: {
+    name: "Phalanx Fury",
+    type: "ATTACK",
+    tags: ["WEAPON_ABILITY"],
+    target: "STANDARD_ROW",
+    cooldown: 40,
+    effects: [
+      {
+        type: "DAMAGE",
+        trigger: "ON_HIT",
+        target: "STANDARD_ROW",
+        conditions: [],
+        payload: {
+          value: 40,
+        },
+      },
+    ],
+  },
 };

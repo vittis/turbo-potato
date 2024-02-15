@@ -216,19 +216,13 @@ export class Unit {
 
   applySubEvents(subEvents: SubEvent[]) {
     subEvents.forEach((subEvent) => {
+      const target = this.bm.getUnitById(subEvent.payload.targetId);
+
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.DAMAGE) {
-        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
         target.receiveDamage(subEvent.payload.payload.value);
       }
 
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.STATUS_EFFECT) {
-        if (subEvent.payload.targetsId.length === 0) {
-          throw Error("applySubEvents: No targets for status effect");
-        }
-
-        // TODO tem q pegar todos os targets
-        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
-
         subEvent.payload.payload.forEach((statusEffect) => {
           if (statusEffect.quantity > 0) {
             target.statusEffectManager.applyStatusEffect(statusEffect);
@@ -246,12 +240,10 @@ export class Unit {
       }
 
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.SHIELD) {
-        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
         target.receiveShield(subEvent.payload.payload.value);
       }
 
       if (subEvent.payload.type === INSTANT_EFFECT_TYPE.HEAL) {
-        const target = this.bm.getUnitById(subEvent.payload.targetsId[0]);
         target.receiveHeal(subEvent.payload.payload.value);
       }
     });

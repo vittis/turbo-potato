@@ -119,40 +119,52 @@ export class Ability {
   }
 
   onUse(unit: Unit, effects: PossibleTriggerEffect[]) {
-    const subEvents: SubEvent[] = [];
+    let subEvents: SubEvent[] = [];
 
     effects.forEach((effect) => {
+      let newSubEvents: SubEvent[] = [];
+
       if (effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
-        subEvents.push(
-          createDamageSubEvent(unit, effect, this.getDamageModifier(unit))
+        newSubEvents = createDamageSubEvent(
+          unit,
+          effect,
+          this.getDamageModifier(unit)
         );
       } else if (effect.type === TRIGGER_EFFECT_TYPE.HEAL) {
-        subEvents.push(createHealSubEvent(unit, effect));
+        newSubEvents = createHealSubEvent(unit, effect);
       } else if (effect.type === TRIGGER_EFFECT_TYPE.SHIELD) {
-        subEvents.push(createShieldSubEvent(unit, effect));
+        newSubEvents = createShieldSubEvent(unit, effect);
       } else if (effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
-        subEvents.push(createStatusEffectSubEvent(unit, effect));
+        newSubEvents = createStatusEffectSubEvent(unit, effect);
       }
+
+      subEvents = [...subEvents, ...newSubEvents];
     });
 
     return subEvents;
   }
 
   onHit(unit: Unit, effects: PossibleTriggerEffect[]) {
-    const subEvents: SubEvent[] = [];
+    let subEvents: SubEvent[] = [];
 
     effects.forEach((effect) => {
+      let newSubEvents: SubEvent[] = [];
+
       if (effect.type === TRIGGER_EFFECT_TYPE.DAMAGE) {
-        subEvents.push(
-          createDamageSubEvent(unit, effect, this.getDamageModifier(unit))
+        newSubEvents = createDamageSubEvent(
+          unit,
+          effect,
+          this.getDamageModifier(unit)
         );
       } else if (effect.type === TRIGGER_EFFECT_TYPE.HEAL) {
-        subEvents.push(createHealSubEvent(unit, effect));
+        newSubEvents = createHealSubEvent(unit, effect);
       } else if (effect.type === TRIGGER_EFFECT_TYPE.SHIELD) {
-        subEvents.push(createShieldSubEvent(unit, effect));
+        newSubEvents = createShieldSubEvent(unit, effect);
       } else if (effect.type === TRIGGER_EFFECT_TYPE.STATUS_EFFECT) {
-        subEvents.push(createStatusEffectSubEvent(unit, effect));
+        newSubEvents = createStatusEffectSubEvent(unit, effect);
       }
+
+      subEvents = [...subEvents, ...newSubEvents];
     });
 
     return subEvents;

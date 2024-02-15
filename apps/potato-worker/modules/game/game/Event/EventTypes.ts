@@ -54,7 +54,7 @@ type InstantEffectPossiblePayload =
 
 export interface InstantEffectPayload<T extends INSTANT_EFFECT_TYPE> {
   type: T;
-  targetsId: string[];
+  targetId: string;
   payload: InstantEffectPayloadMap[T];
 }
 

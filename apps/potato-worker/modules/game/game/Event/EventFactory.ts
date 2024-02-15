@@ -10,21 +10,23 @@ export function createStatusEffectSubEvent(
 ) {
   const targets = unit.bm.getTarget(unit, effect.target);
 
-  const payloadStatusEffects = effect.payload.map((statusEffect) => ({
-    name: statusEffect.name,
-    quantity: statusEffect.quantity,
-  }));
+  const subEvents = targets.map((target) => {
+    const payloadStatusEffects = effect.payload.map((statusEffect) => ({
+      name: statusEffect.name,
+      quantity: statusEffect.quantity,
+    }));
 
-  const subEvent = {
-    type: SUBEVENT_TYPE.INSTANT_EFFECT,
-    payload: {
-      type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-      targetsId: targets.map((t) => t?.id),
-      payload: [...payloadStatusEffects],
-    },
-  };
+    return {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
+      payload: {
+        type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
+        targetId: target.id,
+        payload: [...payloadStatusEffects],
+      },
+    } as SubEvent;
+  });
 
-  return subEvent as SubEvent;
+  return subEvents;
 }
 
 export function createHealSubEvent(
@@ -33,18 +35,20 @@ export function createHealSubEvent(
 ) {
   const targets = unit.bm.getTarget(unit, effect.target);
 
-  const subEvent = {
-    type: SUBEVENT_TYPE.INSTANT_EFFECT,
-    payload: {
-      type: INSTANT_EFFECT_TYPE.HEAL,
-      targetsId: targets.map((t) => t?.id),
+  const subEvents = targets.map((target) => {
+    return {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
       payload: {
-        value: effect.payload.value,
+        type: INSTANT_EFFECT_TYPE.HEAL,
+        targetId: target.id,
+        payload: {
+          value: effect.payload.value,
+        },
       },
-    },
-  };
+    } as SubEvent;
+  });
 
-  return subEvent as SubEvent;
+  return subEvents as SubEvent[];
 }
 
 export function createShieldSubEvent(
@@ -53,18 +57,20 @@ export function createShieldSubEvent(
 ) {
   const targets = unit.bm.getTarget(unit, effect.target);
 
-  const subEvent = {
-    type: SUBEVENT_TYPE.INSTANT_EFFECT,
-    payload: {
-      type: INSTANT_EFFECT_TYPE.SHIELD,
-      targetsId: targets.map((t) => t?.id),
+  const subEvents = targets.map((target) => {
+    return {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
       payload: {
-        value: effect.payload.value,
+        type: INSTANT_EFFECT_TYPE.SHIELD,
+        targetId: target.id,
+        payload: {
+          value: effect.payload.value,
+        },
       },
-    },
-  };
+    } as SubEvent;
+  });
 
-  return subEvent as SubEvent;
+  return subEvents as SubEvent[];
 }
 
 export function createDamageSubEvent(
@@ -74,58 +80,35 @@ export function createDamageSubEvent(
 ) {
   const targets = unit.bm.getTarget(unit, effect.target);
 
-  /* const targetHasVulnerable = targets[0].statusEffects.some(
-    (effect) => effect.name === STATUS_EFFECT.VULNERABLE
-  );
+  const subEvents = targets.map((target) => {
+    const targetVulnerableModifier =
+      target.statusEffects.filter(
+        (effect) => effect.name === STATUS_EFFECT.VULNERABLE
+      )[0]?.quantity || 0;
 
-  if (targetHasVulnerable) {
-    abilitySubEvents.push(createSubEventVulnerable(targets));
-  } */
+    const targetDamageReductionModifier =
+      target.stats.damageReductionModifier + targetVulnerableModifier;
 
-  const targetDamageReductionModifier =
-    targets[0].stats.damageReductionModifier;
+    const finalModifier = damageModifier - targetDamageReductionModifier;
 
-  const finalModifier = damageModifier - targetDamageReductionModifier;
+    const finalDamage = Math.max(
+      0,
+      Math.round(
+        effect.payload.value + (effect.payload.value * finalModifier) / 100
+      )
+    );
 
-  const finalDamage = Math.max(
-    0,
-    Math.round(
-      effect.payload.value + (effect.payload.value * finalModifier) / 100
-    )
-  );
-
-  const subEvent = {
-    type: SUBEVENT_TYPE.INSTANT_EFFECT,
-    payload: {
-      type: INSTANT_EFFECT_TYPE.DAMAGE,
-      targetsId: targets.map((t) => t?.id),
+    return {
+      type: SUBEVENT_TYPE.INSTANT_EFFECT,
       payload: {
-        value: finalDamage,
-      },
-    },
-  };
-
-  return subEvent as SubEvent;
-}
-
-export function createSubEventVulnerable(targets: Unit[]) {
-  const vulnerableQuantity = targets[0].statusEffects.find(
-    (effect) => effect.name === STATUS_EFFECT.VULNERABLE
-  )?.quantity as number;
-
-  const subEvent = {
-    type: SUBEVENT_TYPE.INSTANT_EFFECT,
-    payload: {
-      type: INSTANT_EFFECT_TYPE.STATUS_EFFECT,
-      targetsId: [targets[0].id], // todo not only [0]
-      payload: [
-        {
-          name: STATUS_EFFECT.VULNERABLE,
-          quantity: Math.max(-VULNERABLE_LOSS_PER_HIT, -vulnerableQuantity),
+        type: INSTANT_EFFECT_TYPE.DAMAGE,
+        targetId: target.id,
+        payload: {
+          value: finalDamage,
         },
-      ],
-    },
-  };
+      },
+    } as SubEvent;
+  });
 
-  return subEvent as SubEvent;
+  return subEvents as SubEvent[];
 }

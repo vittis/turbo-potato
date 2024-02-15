@@ -1,26 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../api/http";
 import { toast } from "react-toastify";
+import { supabase } from "@/services/supabase/supabase";
+import { queryClient } from "@/services/api/queryClient";
 
-async function joinRoom(id) {
-  const res = await api.post(
-    `/api/rooms/${id}/join`,
-    {},
-    {
-      withCredentials: true,
-    }
-  );
-  return res.data;
+async function joinRoom(params) {
+  const { roomId, userId } = params;
+  const { data } = await supabase
+    .from("room_members")
+    .insert([{ user_id: userId, room_id: roomId }])
+    .select();
+
+  return data;
 }
-async function leaveRoom(id) {
-  const res = await api.post(
-    `/api/rooms/${id}/leave`,
-    {},
-    {
-      withCredentials: true,
-    }
-  );
-  return res.data;
+async function leaveRoom(params) {
+  const { userId } = params;
+  await supabase.from("room_members").delete().eq("user_id", userId); // todo: this silently fails, could use select() at end and check data
 }
 
 async function createRoom(data) {
@@ -35,6 +30,7 @@ const useLobbyMutations = () => {
     mutationFn: joinRoom,
     mutationKey: ["join"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supa", "rooms"] });
       toast.success("Joined room successfully");
     },
   });
@@ -43,6 +39,7 @@ const useLobbyMutations = () => {
     mutationFn: leaveRoom,
     mutationKey: ["leave"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supa", "rooms"] });
       toast.success("Leaved room successfully");
     },
   });
@@ -51,6 +48,7 @@ const useLobbyMutations = () => {
     mutationFn: createRoom,
     mutationKey: ["createRoom"],
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supa", "rooms"] });
       toast.success("Created room successfully");
     },
   });

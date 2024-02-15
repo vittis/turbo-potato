@@ -27,7 +27,7 @@ const MainLayout = () => {
 
   const setUser = useSupabaseUserStore((state) => state.setUser);
 
-  useFetchProfile();
+  // useFetchProfile();
   useGlobalConnection();
 
   useEffect(() => {

@@ -20,6 +20,7 @@ import { LobbyRoomUserRow } from "./LobbyRoomUserRow";
 import { useLobbyMutations } from "@/services/features/Lobby/useLobbyMutations";
 import { useUserStore } from "@/services/features/User/useUserStore";
 import { toast } from "react-toastify";
+import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
 interface LobbyRoomMember {
   id: string;
@@ -50,11 +51,10 @@ const LobbyRoom = ({
   isInAnyRoom,
   listIsLoading,
 }: LobbyRoomProps) => {
-  console.log({ lastUpdated });
   const { joinRoom, leaveRoom, isLoading: mutationIsLoading } = useLobbyMutations();
-  const userData = useUserStore((state) => state.userData);
+  const supaUser = useSupabaseUserStore((state) => state.user);
 
-  const you = members.find((member) => member.id === userData?.userId);
+  const you = members.find((member) => member.id === supaUser?.id);
 
   const isInRoom = !!you;
   const isFull = members.length === maxMembers;
@@ -73,18 +73,18 @@ const LobbyRoom = ({
     );
 
   async function onClickJoin() {
-    await joinRoom(id);
+    await joinRoom({ userId: supaUser.id, roomId: id });
   }
   async function onClickLeave() {
     console.log("??");
-    await leaveRoom(id);
+    await leaveRoom({ userId: supaUser.id, roomId: id });
   }
 
   const orderedMembers = members.sort((a, b) => {
     if (a.isCreator) return -1; // Creator comes first
-    if (a.id === userData?.userId && !b.isCreator) return -1; // You come second
+    if (a.id === supaUser?.id && !b.isCreator) return -1; // You come second
     if (b.isCreator) return 1; // Creator comes first
-    if (b.id === userData?.userId) return 1; // You come second
+    if (b.id === supaUser?.id) return 1; // You come second
     return 0; // Keep the rest in the same order
   });
 
@@ -132,11 +132,7 @@ const LobbyRoom = ({
             <ScrollBar />
             <div className="space-y-1">
               {orderedMembers.map((member) => (
-                <LobbyRoomUserRow
-                  key={member.id}
-                  isYou={member.id === userData.userId}
-                  {...member}
-                />
+                <LobbyRoomUserRow key={member.id} isYou={member.id === supaUser.id} {...member} />
               ))}
 
               {shouldShowJoinButton && !hasMoreThan3Members && <JoinButton />}

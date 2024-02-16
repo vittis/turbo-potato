@@ -10,6 +10,19 @@ import { useFetchProfile } from "@/services/features/User/useFetchProfile";
 import { useGlobalConnection } from "@/services/features/Global/useGlobalConnection";
 import { supabase } from "@/services/supabase/supabase";
 import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
+import { useSetupState } from "@/services/state/useSetupState";
+import App from "@/App";
+import { SetupView } from "./Setup/SetupView";
+
+const MainWrapper = () => {
+  const shouldStartGame = useSetupState((state) => state.shouldStartGame);
+
+  if (shouldStartGame) {
+    return <App />;
+  }
+
+  return <SetupView />;
+};
 
 const MainLayout = () => {
   const layout = localStorage.getItem("react-resizable-panels:layout");
@@ -74,4 +87,4 @@ const MainLayout = () => {
   );
 };
 
-export { MainLayout };
+export { MainWrapper, MainLayout };

@@ -9,6 +9,7 @@ import {
   restoreAbilities,
   unhighlightAbilities,
 } from "./battleUnit/BattleUnitAbilities";
+import { useSetupState } from "@/services/state/useSetupState";
 
 // todo: reuse from server
 enum EVENT_TYPE {
@@ -35,6 +36,13 @@ export interface StepEvent {
 }
 
 export async function fetchBattleSetup() {
+  const gameFromLocalStorage = localStorage.getItem("game");
+
+  if (gameFromLocalStorage) {
+    console.log("getting");
+    return JSON.parse(gameFromLocalStorage);
+  }
+
   const response = await fetch("http://localhost:8787/game/battle/setup");
   const data = await response.json();
   return data;
@@ -104,6 +112,22 @@ export class Battle extends Phaser.Scene {
             unit.onDeselected();
           }
         });
+      }
+    );
+
+    useSetupState.subscribe(
+      (state) => state.shouldStartGame,
+      (shouldStartGame) => {
+        if (shouldStartGame) {
+          const gameFromLocalStorage = localStorage.getItem("game");
+          const data = JSON.parse(gameFromLocalStorage as string);
+
+          queryClient.invalidateQueries({ queryKey: ["game/battle/setup"] });
+          this.firstStep = data.firstStep;
+          this.totalSteps = data.totalSteps;
+          this.eventHistory = data.eventHistory;
+          this.initializeUnits(this.firstStep);
+        }
       }
     );
 

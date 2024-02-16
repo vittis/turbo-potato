@@ -21,12 +21,10 @@ async function leaveRoom(params) {
   const { data: roomData } = await supabase.from("room_members").select().eq("room_id", roomId);
 
   if (roomData && roomData.length < 1) {
-    await supabase.from("rooms").delete().eq("id", roomId).select();
+    await supabase.from("rooms").delete().eq("id", roomId);
   } else if (roomData) {
     const hasCreator = roomData.filter((member) => member.is_creator);
-    console.log(hasCreator);
     if (hasCreator && hasCreator.length < 1) {
-      console.log("no creator");
       await supabase
         .from("room_members")
         .upsert([{ user_id: roomData[0].user_id, room_id: roomId, is_creator: true }])

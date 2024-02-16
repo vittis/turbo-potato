@@ -11,11 +11,21 @@ import { Classes, Weapons } from "./data";
 import { PossibleEvent } from "./Event/EventTypes";
 import { TRIGGER } from "./Trigger/TriggerTypes";
 
+export interface UnitsDTO {
+  equipments: string[];
+  position: POSITION;
+  unitClass: string;
+}
+
 export class Game {
   boardManager: BoardManager;
 
-  constructor() {
+  constructor({ skipConstructor = false } = {}) {
     this.boardManager = new BoardManager();
+
+    if (skipConstructor) {
+      return;
+    }
 
     const unit1 = new Unit(
       OWNER.TEAM_ONE,
@@ -130,6 +140,24 @@ export class Game {
     this.boardManager.addToBoard(unitB);
     /* this.boardManager.addToBoard(unitC);
     this.boardManager.addToBoard(unitD); */
+  }
+
+  setTeam(team: OWNER, units: UnitsDTO[]) {
+    units.forEach((unitDTO) => {
+      console.log(unitDTO.position);
+      const unit = new Unit(team, unitDTO.position, this.boardManager);
+      unit.setClass(
+        new Class(Classes[unitDTO.unitClass as keyof typeof Classes])
+      );
+      unitDTO.equipments.forEach((equipmentName) => {
+        unit.equip(
+          new Equipment(Weapons[equipmentName as keyof typeof Weapons]),
+          EQUIPMENT_SLOT.MAIN_HAND
+        );
+      });
+
+      this.boardManager.addToBoard(unit);
+    });
   }
 
   startGame() {

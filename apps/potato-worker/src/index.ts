@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
-import { Game } from "../modules/game/game/Game";
+import { Game, UnitsDTO } from "../modules/game/game/Game";
 import { Classes, Weapons } from "../modules/game/game/data";
 import { nanoid } from "nanoid";
+import { OWNER } from "../modules/game/game/BoardManager";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -81,6 +82,26 @@ app.get("/game/setup/allStuff", async (c) => {
   return c.json({
     classes: classes.map((c) => ({ id: nanoid(4), name: c })),
     weapons: weapons.map((w) => ({ id: nanoid(4), name: w })),
+  });
+});
+
+app.post("/game/setup/teams", async (c) => {
+  const { team1, team2 } = await c.req.json<{
+    team1: UnitsDTO[];
+    team2: UnitsDTO[];
+  }>();
+
+  const game = new Game({ skipConstructor: true });
+
+  game.setTeam(OWNER.TEAM_ONE, team1 as UnitsDTO[]);
+  game.setTeam(OWNER.TEAM_TWO, team2 as UnitsDTO[]);
+
+  const { totalSteps, eventHistory, firstStep } = game.startGame();
+
+  return c.json({
+    firstStep,
+    totalSteps,
+    eventHistory,
   });
 });
 

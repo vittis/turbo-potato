@@ -1,7 +1,33 @@
 import React, { useState } from "react";
 import { DndContext, DragEndEvent, useDraggable, useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
+import { useSetupState } from "@/services/state/useSetupState";
+
+export async function setupTeams(data) {
+  try {
+    const response = await fetch("http://localhost:8787/game/setup/teams", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+export interface UnitsDTO {
+  equipments: string[];
+  position: number;
+  unitClass: string;
+}
 
 export function Draggable({ children, id, unit }: any) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -65,66 +91,115 @@ export async function fetchSetupStuff() {
 }
 
 /* 
-    2 1 0 
-    5 4 3 
+    2 1 0   0 1 2
+    5 4 3   3 4 5
 */
 export function SetupView() {
+  const onStartGame = useSetupState((state) => state.onStartGame);
+
   const { data } = useQuery({
     queryKey: ["setup-stuff"],
     queryFn: fetchSetupStuff,
   });
 
+  const { mutateAsync: setupTeamsMutation } = useMutation({
+    mutationFn: setupTeams,
+    mutationKey: ["setup-teams"],
+    onSuccess: (data) => {
+      console.log(data);
+      localStorage.setItem("game", JSON.stringify(data));
+      toast.success("Starting teams");
+
+      onStartGame();
+      const canvas = document.querySelector("canvas");
+
+      if (!canvas) return;
+
+      canvas.classList.remove("hidden");
+    },
+  });
+
   const classes = data?.classes || [];
   const weapons = data?.weapons || [];
 
-  const [board, setBoard] = useState<{ id: string; occupied: boolean; unit: any }[]>([
+  const [board, setBoard] = useState<{ id: string; unit: any }[]>([
     {
-      id: "0",
-      occupied: false,
+      id: "2",
       unit: null,
     },
     {
       id: "1",
-      occupied: false,
       unit: null,
     },
     {
-      id: "2",
-      occupied: false,
-      unit: null,
-    },
-    {
-      id: "3",
-      occupied: false,
-      unit: null,
-    },
-    {
-      id: "4",
-      occupied: false,
+      id: "0",
       unit: null,
     },
     {
       id: "5",
-      occupied: false,
+      unit: null,
+    },
+    {
+      id: "4",
+      unit: null,
+    },
+    {
+      id: "3",
+      unit: null,
+    },
+  ]);
+
+  const [board2, setBoard2] = useState<{ id: string; unit: any }[]>([
+    {
+      id: "-0",
+      unit: null,
+    },
+    {
+      id: "-1",
+      unit: null,
+    },
+    {
+      id: "-2",
+      unit: null,
+    },
+    {
+      id: "-3",
+      unit: null,
+    },
+    {
+      id: "-4",
+      unit: null,
+    },
+    {
+      id: "-5",
       unit: null,
     },
   ]);
 
   function handleDragEnd(event: DragEndEvent) {
-    console.log(event);
+    let targetBoard;
+    let targetSetBoard;
+    if (event.over?.id.toString().startsWith("-")) {
+      targetBoard = board2;
+      targetSetBoard = setBoard2;
+    } else {
+      targetBoard = board;
+      targetSetBoard = setBoard;
+    }
+
     const isFromBoard = !classes.find((unitClass) => unitClass.id === event.active.id);
 
     const isEquipment = !!weapons.find((weapon) => weapon.id === event.active.id);
 
     if (isEquipment) {
-      const targetCell = board.find((cell) => cell.id === event.over?.id);
+      const targetCell = targetBoard.find((cell) => cell.id === event.over?.id);
       const hasUnit = targetCell?.unit;
 
       if (!hasUnit) return;
 
       const weaponName = weapons.find((weapon) => weapon.id === event.active.id).name;
 
-      const newBoard = board.map((cell) => {
+      const newBoard = targetBoard.map((cell) => {
         if (cell.id === event.over?.id) {
           const unitEquipment = cell?.unit?.equipment || [];
           return {
@@ -138,7 +213,7 @@ export function SetupView() {
         return cell;
       });
 
-      setBoard(newBoard);
+      targetSetBoard(newBoard);
 
       return;
     }
@@ -147,11 +222,10 @@ export function SetupView() {
 
     let newBoard;
     if (!isFromBoard) {
-      newBoard = board.map((cell) => {
+      newBoard = targetBoard.map((cell) => {
         if (cell.id === event.over?.id) {
           return {
             ...cell,
-            occupied: true,
             unit: { id: Math.floor(Math.random() * 100), name: name },
           };
         }
@@ -159,21 +233,19 @@ export function SetupView() {
         return cell;
       });
     } else {
-      newBoard = board.map((cell) => {
+      newBoard = targetBoard.map((cell) => {
         if (cell?.unit?.id === event?.active?.id && cell.id !== event.over?.id) {
           return {
             ...cell,
-            occupied: false,
             unit: null,
           };
         }
 
-        const unit = board.find((cell) => cell?.unit?.id === event.active.id)?.unit;
+        const unit = targetBoard.find((cell) => cell?.unit?.id === event.active.id)?.unit;
 
         if (cell.id === event.over?.id) {
           return {
             ...cell,
-            occupied: true,
             unit: {
               id: Math.floor(Math.random() * 100),
               name: unit?.name,
@@ -186,53 +258,99 @@ export function SetupView() {
       });
     }
 
-    setBoard(newBoard);
+    targetSetBoard(newBoard);
   }
 
-  console.log(board);
+  function onClickStartGame() {
+    const team1finalUnits: UnitsDTO[] = board
+      .filter((cell) => !!cell.unit)
+      .map((cell) => {
+        return {
+          equipments: cell.unit?.equipment,
+          position: parseInt(cell.id),
+          unitClass: cell.unit.name,
+        };
+      });
+
+    const team2finalUnits: UnitsDTO[] = board2
+      .filter((cell) => !!cell.unit)
+      .map((cell) => {
+        console.log(cell.id);
+        return {
+          equipments: cell.unit?.equipment,
+          position: parseInt(cell.id.toString().replace("-", "")),
+          unitClass: cell.unit.name,
+        };
+      });
+    console.log({ team1finalUnits });
+    console.log({ team2finalUnits });
+
+    setupTeamsMutation({ team1: team1finalUnits, team2: team2finalUnits });
+  }
 
   return (
-    <DndContext
-      // sensors={sensors}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex p-6">
-        <div className="flex items-center justify-center">
-          <div className="w-fit h-fit grid grid-cols-3 gap-4">
-            {board.map(({ id, unit }) => (
-              <React.Fragment key={id}>
-                {unit ? (
-                  <Droppable id={id}>
-                    <Draggable key={unit.id} id={unit.id} unit={unit}>
-                      {unit.name}
-                    </Draggable>
-                  </Droppable>
-                ) : (
-                  <Droppable id={id}></Droppable>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+    <>
+      <DndContext
+        // sensors={sensors}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex p-6 gap-6 flex-col">
+          <div className="grow flex flex-col">
+            <div className="w-full flex gap-4 mt-4 min-h-[150px] items-center justify-center flex-wrap">
+              {classes.map((unitClass) => (
+                <Draggable key={unitClass.id} id={unitClass.id}>
+                  {unitClass.name}
+                </Draggable>
+              ))}
+            </div>
 
-        <div className="grow">
-          <div className="w-full flex gap-4 mb-20 mt-4 min-h-[150px] items-center justify-center">
-            {classes.map((unitClass) => (
-              <Draggable key={unitClass.id} id={unitClass.id}>
-                {unitClass.name}
-              </Draggable>
-            ))}
+            <div className="w-full flex gap-4 mt-4 min-h-[150px] items-center justify-center flex-wrap">
+              {weapons.map((weapon) => (
+                <Draggable key={weapon.id} id={weapon.id}>
+                  {weapon.name}
+                </Draggable>
+              ))}
+            </div>
           </div>
 
-          <div className="w-full flex gap-4 mb-20 mt-4 min-h-[150px] items-center justify-center">
-            {weapons.map((weapon) => (
-              <Draggable key={weapon.id} id={weapon.id}>
-                {weapon.name}
-              </Draggable>
-            ))}
+          <div className="flex items-center justify-center min-w-[500px] gap-20 mt-20">
+            <div className="w-fit h-fit grid grid-cols-3 gap-4">
+              {board.map(({ id, unit }) => (
+                <React.Fragment key={id}>
+                  {unit ? (
+                    <Droppable id={id}>
+                      <Draggable key={unit.id} id={unit.id} unit={unit}>
+                        {unit.name}
+                      </Draggable>
+                    </Droppable>
+                  ) : (
+                    <Droppable id={id}></Droppable>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="w-fit h-fit grid grid-cols-3 gap-4">
+              {board2.map(({ id, unit }) => (
+                <React.Fragment key={id}>
+                  {unit ? (
+                    <Droppable id={id}>
+                      <Draggable key={unit.id} id={unit.id} unit={unit}>
+                        {unit.name}
+                      </Draggable>
+                    </Droppable>
+                  ) : (
+                    <Droppable id={id}></Droppable>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
+      </DndContext>
+
+      <div className="mt-10 mx-auto w-fit">
+        <Button onClick={onClickStartGame}>Start game</Button>
       </div>
-    </DndContext>
+    </>
   );
 }

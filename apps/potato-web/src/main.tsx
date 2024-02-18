@@ -17,7 +17,13 @@ import { Battle } from "./game/scenes/battle/BattleScene";
 import { Setup } from "./game/scenes/setup/SetupScene";
 import { SetupView } from "./pages/Setup/SetupView";
 
-export const game = new Phaser.Game(
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import RootLayout from "./pages/Root/RootLayout";
+import PlayLayout from "./pages/Play/PlayLayout";
+import LobbyView from "./pages/Play/Views/Lobby/LobbyView";
+import { GameView } from "./pages/Game/GameView";
+
+/* export const game = new Phaser.Game(
   Object.assign(PHASER_CONFIG, {
     scene: [Battle, Setup],
   })
@@ -31,7 +37,44 @@ function onReady() {
   canvas.classList.add("hidden");
 }
 
-game.events.on("ready", onReady);
+game.events.on("ready", onReady); */
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: (
+          <>
+            <Navigate to="play" replace />
+          </>
+        ),
+      },
+      {
+        path: "play",
+        element: <PlayLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <>
+                <Navigate to="rooms" replace />
+              </>
+            ),
+          },
+          { path: "rooms", element: <LobbyView /> },
+          { path: "sandbox", element: <SetupView /> },
+        ],
+      },
+      {
+        path: "game",
+        element: <GameView />,
+      },
+    ],
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
@@ -52,8 +95,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         stacked
         hideProgressBar={false}
       />
+      <RouterProvider router={router} />
       {/* <SetupView /> */}
-      <MainLayout />
+      {/* <MainLayout /> */}
       {/* <App /> */}
 
       {/* <MainWrapper /> */}

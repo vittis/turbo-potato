@@ -29,8 +29,8 @@ export interface UnitsDTO {
   unitClass: string;
 }
 
-export function Draggable({ children, id, unit }: any) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+export function Draggable({ children, id, unit, isClass }: any) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id,
   });
   const style = transform
@@ -48,12 +48,19 @@ export function Draggable({ children, id, unit }: any) {
       style={style}
       {...listeners}
       {...attributes}
-      className="w-[150px] h-[150px] rounded-md border border-zinc-700 relative"
+      className={cn(
+        "w-[100px] h-[100px] rounded-md border border-zinc-700 relative bg-black transition-colors",
+        isDragging && "z-30",
+        isClass && "border-green-900 hover:border-green-700",
+        !isClass &&
+          !unit &&
+          "border-dashed border-yellow-700 hover:border-yellow-600 w-auto h-auto p-1"
+      )}
     >
       {children}
       <div className="absolute top-0 right-0">
         {unitEquips.map((equip) => (
-          <div className="border border-zinc-700 rounded p-1" key={equip}>
+          <div className="border border-yellow-700 border-dashed rounded p-0.5 text-xs" key={equip}>
             {equip}
           </div>
         ))}
@@ -62,21 +69,18 @@ export function Draggable({ children, id, unit }: any) {
   );
 }
 
-export function Droppable({ children, id }: any) {
-  const { isOver, setNodeRef } = useDroppable({
+export function Droppable({ children, id, isOccupied }: any) {
+  const { isOver, setNodeRef, active } = useDroppable({
     id: id,
   });
-  const style = {
-    color: isOver ? "green" : undefined,
-  };
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
       className={cn(
-        "w-[150px] h-[150px] rounded-md border border-zinc-700",
-        isOver && "bg-zinc-800"
+        "w-[100px] h-[100px] rounded-md border border-zinc-700 transition-transform",
+        isOver && "bg-zinc-800",
+        isOver && "scale-110"
       )}
     >
       {children}
@@ -296,15 +300,15 @@ export function SetupView() {
       >
         <div className="flex p-6 gap-6 flex-col">
           <div className="grow flex flex-col">
-            <div className="w-full flex gap-4 mt-4 min-h-[150px] items-center justify-center flex-wrap">
+            <div className="w-full flex gap-4 mt-4 min-h-[100px] items-center justify-center flex-wrap">
               {classes.map((unitClass) => (
-                <Draggable key={unitClass.id} id={unitClass.id}>
+                <Draggable key={unitClass.id} id={unitClass.id} isClass>
                   {unitClass.name}
                 </Draggable>
               ))}
             </div>
 
-            <div className="w-full flex gap-4 mt-4 min-h-[150px] items-center justify-center flex-wrap">
+            <div className="w-full flex gap-4 mt-4 min-h-[100px] items-center justify-center flex-wrap">
               {weapons.map((weapon) => (
                 <Draggable key={weapon.id} id={weapon.id}>
                   {weapon.name}
@@ -314,12 +318,12 @@ export function SetupView() {
           </div>
 
           <div className="flex items-center justify-center min-w-[500px] gap-20 mt-20">
-            <div className="w-fit h-fit grid grid-cols-3 gap-4">
+            <div className="w-fit h-fit grid grid-cols-3 gap-5">
               {board.map(({ id, unit }) => (
                 <React.Fragment key={id}>
                   {unit ? (
-                    <Droppable id={id}>
-                      <Draggable key={unit.id} id={unit.id} unit={unit}>
+                    <Droppable id={id} isOccupied>
+                      <Draggable key={unit.id} id={unit.id} unit={unit} isClass>
                         {unit.name}
                       </Draggable>
                     </Droppable>
@@ -329,12 +333,12 @@ export function SetupView() {
                 </React.Fragment>
               ))}
             </div>
-            <div className="w-fit h-fit grid grid-cols-3 gap-4">
+            <div className="w-fit h-fit grid grid-cols-3 gap-5">
               {board2.map(({ id, unit }) => (
                 <React.Fragment key={id}>
                   {unit ? (
-                    <Droppable id={id}>
-                      <Draggable key={unit.id} id={unit.id} unit={unit}>
+                    <Droppable id={id} isOccupied>
+                      <Draggable key={unit.id} id={unit.id} unit={unit} isClass>
                         {unit.name}
                       </Draggable>
                     </Droppable>

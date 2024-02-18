@@ -2,24 +2,27 @@ import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { SideNavItems } from "./SideNavItems";
-import { AlertCircle, DoorClosed, Swords, Trophy, User } from "lucide-react";
+import { PlaySideNavItems } from "./PlaySideNavItems";
+import { AlertCircle, DoorClosed, FlaskConical, Swords, Trophy, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/services/features/User/useAuth";
 import { useUserStore } from "@/services/features/User/useUserStore";
+import { matchPath, useLocation } from "react-router-dom";
 
-interface SideNavProps {
+interface PlaySideNavProps {
   defaultCollapsed: boolean;
   defaultSize: number;
   navCollapsedSize: number;
 }
 
-const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavProps) => {
+const PlaySideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: PlaySideNavProps) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
   const userData = useUserStore((state) => state.userData);
 
   const { login, loginIsPending } = useAuth();
+
+  const { pathname } = useLocation();
 
   return (
     <>
@@ -70,7 +73,7 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
           )}
         </div>
         <Separator />
-        <SideNavItems
+        <PlaySideNavItems
           isCollapsed={isCollapsed}
           links={[
             {
@@ -82,13 +85,15 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
               props: {
                 disabled: true,
               },
+              path: "#",
             },
             {
-              title: "Lobby",
-              label: "9",
+              title: "Rooms",
+              label: "",
               icon: DoorClosed,
               variant: "ghost",
-              selected: true,
+              selected: !!matchPath("/lobby/rooms", pathname),
+              path: "rooms",
             },
             {
               title: "Tournaments",
@@ -99,11 +104,20 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
               props: {
                 disabled: true,
               },
+              path: "#",
+            },
+            {
+              title: "Sandbox",
+              label: "",
+              icon: FlaskConical,
+              variant: "ghost",
+              selected: !!matchPath("/lobby/sandbox", pathname),
+              path: "sandbox",
             },
           ]}
         />
         <Separator />
-        <SideNavItems
+        <PlaySideNavItems
           isCollapsed={isCollapsed}
           links={[
             {
@@ -115,6 +129,7 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
               props: {
                 disabled: true,
               },
+              path: "#",
             },
             {
               title: "Updates",
@@ -125,6 +140,7 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
               props: {
                 disabled: true,
               },
+              path: "#",
             },
           ]}
         />
@@ -134,4 +150,4 @@ const SideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: SideNavPro
   );
 };
 
-export default SideNav;
+export { PlaySideNav };

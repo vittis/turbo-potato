@@ -1,7 +1,7 @@
 import { Nav } from "@/components/Nav/Nav";
 import { useCallback, useEffect } from "react";
 import debounce from "lodash.debounce";
-import SideNav from "./Play/SideNav/SideNav";
+import { PlaySideNav } from "./Play/PlaySideNav/PlaySideNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ResizablePanelGroup } from "@/components/ui/resizable";
 import LobbyView from "./Play/Views/Lobby/LobbyView";
@@ -13,6 +13,7 @@ import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserSt
 import { useSetupState } from "@/services/state/useSetupState";
 import App from "@/App";
 import { SetupView } from "./Setup/SetupView";
+import { Outlet } from "react-router-dom";
 
 const MainWrapper = () => {
   const shouldStartGame = useSetupState((state) => state.shouldStartGame);
@@ -45,6 +46,7 @@ const MainLayout = () => {
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
+      console.log(event, session);
       if (event === "SIGNED_OUT") {
         setUser(null);
       }
@@ -57,6 +59,7 @@ const MainLayout = () => {
 
   return (
     <>
+      <Outlet />
       <div className="relative h-full p-4">
         <section className="flex flex-col h-full">
           <Nav />
@@ -69,13 +72,13 @@ const MainLayout = () => {
                 }}
                 className="h-full items-stretch"
               >
-                <SideNav
+                <PlaySideNav
                   defaultCollapsed={defaultCollapsed}
                   defaultSize={defaultLayout?.[0]}
                   navCollapsedSize={1}
                 />
 
-                <LobbyView defaultSize={defaultLayout?.[1]} />
+                <LobbyView />
 
                 <MessagesPanel defaultSize={defaultLayout?.[2]} />
               </ResizablePanelGroup>

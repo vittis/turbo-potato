@@ -9,56 +9,48 @@ import { useUserStore } from "@/services/features/User/useUserStore";
 import SupaRoomsView from "./SupaRoomsView";
 import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 
-interface LobbyViewProps {
-  defaultSize: number;
-}
-
-const LobbyView = ({ defaultSize }: LobbyViewProps) => {
+const LobbyView = () => {
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
   const user = useSupabaseUserStore((state) => state.user);
 
   return (
-    <ResizablePanel defaultSize={defaultSize} minSize={30}>
-      <div className="flex flex-col h-full">
-        <div>
-          <div className="breadcrumbs h-[52px] flex items-center px-4">
-            <ul>
-              <li>
-                <h1 className="text-lg font-bold">Lobby</h1>
-              </li>
-              <li>
-                <h2 className="text-md text-muted-foreground font-bold">Browse Rooms</h2>
-              </li>
-            </ul>
-          </div>
+    <div className="flex flex-col h-full">
+      <div>
+        <div className="breadcrumbs h-[52px] flex items-center px-4">
+          <ul>
+            <li>
+              <h1 className="text-lg font-bold">Lobby</h1>
+            </li>
+            <li>
+              <h2 className="text-md text-muted-foreground font-bold">Browse Rooms</h2>
+            </li>
+          </ul>
         </div>
-
-        <Separator />
-
-        <form className="px-4 py-3">
-          <div className="relative flex gap-4">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search" className="pl-8" />
-            <Tabs defaultValue="all" className="ml-auto">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="open">Open</TabsTrigger>
-                <TabsTrigger value="inProgress">In Progress</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <CreateRoomDrawer />
-          </div>
-        </form>
-
-        {/* {isLoggedIn && <RoomsView />} */}
-        {user && <SupaRoomsView />}
-        {!isLoggedIn && (
-          <h1 className="px-4 mt-2 text-muted-foreground">Sign in to browse rooms</h1>
-        )}
       </div>
-    </ResizablePanel>
+
+      <Separator />
+
+      <form className="px-4 py-3">
+        <div className="relative flex gap-4">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search" className="pl-8" />
+          <Tabs defaultValue="all" className="ml-auto">
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="open">Open</TabsTrigger>
+              <TabsTrigger value="inProgress">In Progress</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <CreateRoomDrawer />
+        </div>
+      </form>
+
+      {/* {isLoggedIn && <RoomsView />} */}
+      {user && <SupaRoomsView />}
+      {!isLoggedIn && <h1 className="px-4 mt-2 text-muted-foreground">Sign in to browse rooms</h1>}
+    </div>
   );
 };
 

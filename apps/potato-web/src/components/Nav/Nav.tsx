@@ -12,28 +12,38 @@ import { RegisterUserDrawer } from "../User/RegisterUserDrawer";
 import { useSupabaseUserStore } from "@/services/features/User/useSupabaseUserStore";
 import { supabase } from "@/services/supabase/supabase";
 import { LoginUserDrawer } from "../User/LoginUserDrawer";
+import { Link, matchPath, useLocation, useResolvedPath } from "react-router-dom";
 
 const navItems = [
   {
     name: "Play",
+    path: "/play",
+    disabled: false,
+  },
+  {
+    name: "Game",
+    path: "/game",
+    disabled: false,
   },
   {
     name: "Leaderboards",
+    disabled: true,
   },
   {
     name: "Guide",
-  },
-  {
-    name: "Training",
+    disabled: true,
   },
   {
     name: "Shop",
+    disabled: true,
   },
   {
     name: "Encyclopedia",
+    disabled: true,
   },
   {
     name: "Settings",
+    disabled: true,
   },
 ];
 
@@ -41,6 +51,8 @@ export function Nav() {
   const user = useSupabaseUserStore((state) => state.user);
 
   const { readyState } = useGlobalConnection();
+
+  const { pathname } = useLocation();
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: "Connecting",
@@ -64,19 +76,26 @@ export function Nav() {
   return (
     <div className="relative flex z-20">
       <ScrollArea className="max-w-[100%] lg:max-w-none">
-        <div className={cn("mb-4 flex items-center")}>
-          {navItems.map((navItem, index) => (
-            <Button
-              variant={"ghost"}
-              disabled={index !== 0}
+        <div className={cn("mb-4 flex items-center gap-2")}>
+          {navItems.map((navItem) => (
+            <Link
               key={navItem.name}
-              className={cn(
-                "flex h-7 items-center justify-center rounded-md px-4 text-center text-lg transition-colors hover:text-primary py-6",
-                index === 0 ? "bg-muted font-medium text-primary" : "text-muted-foreground"
-              )}
+              to={navItem.path || ""}
+              className={cn(navItem?.disabled && "pointer-events-none")}
             >
-              {navItem.name}
-            </Button>
+              <Button
+                variant={"ghost"}
+                disabled={navItem?.disabled}
+                className={cn(
+                  "flex h-7 items-center justify-center rounded-md px-4 text-center text-lg transition-colors hover:text-primary py-6",
+                  !!matchPath(`${navItem.path}/*`, pathname)
+                    ? "bg-muted font-medium text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                {navItem.name}
+              </Button>
+            </Link>
           ))}
         </div>
         <ScrollBar orientation="horizontal" />

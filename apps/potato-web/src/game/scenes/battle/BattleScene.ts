@@ -39,7 +39,6 @@ export async function fetchBattleSetup() {
   const gameFromLocalStorage = localStorage.getItem("game");
 
   if (gameFromLocalStorage) {
-    console.log("getting");
     return JSON.parse(gameFromLocalStorage);
   }
 

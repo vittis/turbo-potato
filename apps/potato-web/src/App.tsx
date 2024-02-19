@@ -1,13 +1,11 @@
-import { CSSProperties, useMemo } from "react";
+import { useMemo } from "react";
 import { useGameState } from "./services/state/useGameState";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBattleSetup } from "./game/scenes/battle/BattleScene";
 import { Button } from "./components/ui/button";
-import { useSetupState } from "./services/state/useSetupState";
 
 function App() {
   const { selectedEntity, isGamePaused, setSelectedEntity, setIsGamePaused } = useGameState();
-  const onClickReady = useSetupState((state) => state.onClickReady);
 
   const { data } = useQuery({
     queryKey: ["game/battle/setup"],
@@ -32,16 +30,16 @@ function App() {
 
   return (
     <>
-      <div className="fixed top-10 w-full flex justify-center">
-        <Button onClick={onClickReady}>go to battle</Button>
-        <button
+      <div className="fixed top-24 w-full flex justify-center">
+        <Button
+          variant="outline"
           onClick={() => {
             setIsGamePaused(!isGamePaused);
           }}
-          className={`btn  btn-wide shadow-lg ${!isGamePaused ? "btn-neutral" : "btn-secondary"}`}
+          className="w-[200px] h-12"
         >
           {!isGamePaused ? "Stop" : "Start"}
-        </button>
+        </Button>
       </div>
 
       <div className="fixed bottom-10 w-full flex justify-center">

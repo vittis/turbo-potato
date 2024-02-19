@@ -7,7 +7,8 @@ interface GameState {
   selectedEntity: any;
   setSelectedEntity: (entity: any) => void;
   setIsGamePaused: (isGameRunning: boolean) => void;
-  setGameInstance: (gameInstance: Phaser.Game) => void;
+  setGameInstance: (gameInstance: Phaser.Game | null) => void;
+  destroyGameInstance: () => void;
 }
 
 const useGameState = create<GameState>()(
@@ -17,7 +18,18 @@ const useGameState = create<GameState>()(
     setIsGamePaused: (isGamePaused: boolean) => set({ isGamePaused }),
     setSelectedEntity: (entity: any) => set({ selectedEntity: entity }),
     gameInstance: null,
-    setGameInstance: (gameInstance: Phaser.Game) => set({ gameInstance }),
+    setGameInstance: (gameInstance: Phaser.Game | null) => set({ gameInstance }),
+    destroyGameInstance: () =>
+      set(({ gameInstance }) => {
+        if (gameInstance) {
+          // state.gameInstance.destroy(true); // todo: fix battleunitsprite to make this work
+          gameInstance.canvas.classList.add("hidden");
+        }
+
+        return {
+          gameInstance: null,
+        };
+      }),
   }))
 );
 

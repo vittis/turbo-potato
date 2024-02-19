@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DndContext, DragEndEvent, useDraggable, useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-import { useSetupState } from "@/services/state/useSetupState";
+import { useNavigate } from "react-router-dom";
 
 export async function setupTeams(data) {
   try {
@@ -69,7 +69,7 @@ export function Draggable({ children, id, unit, isClass }: any) {
   );
 }
 
-export function Droppable({ children, id, isOccupied }: any) {
+export function Droppable({ children, id }: any) {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
   });
@@ -99,8 +99,7 @@ export async function fetchSetupStuff() {
     5 4 3   3 4 5
 */
 export function SetupView() {
-  const onStartGame = useSetupState((state) => state.onStartGame);
-
+  const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ["setup-stuff"],
     queryFn: fetchSetupStuff,
@@ -110,16 +109,9 @@ export function SetupView() {
     mutationFn: setupTeams,
     mutationKey: ["setup-teams"],
     onSuccess: (data) => {
-      console.log(data);
       localStorage.setItem("game", JSON.stringify(data));
-      toast.success("Starting teams");
-
-      onStartGame();
-      const canvas = document.querySelector("canvas");
-
-      if (!canvas) return;
-
-      canvas.classList.remove("hidden");
+      toast.success("Game started!");
+      navigate("/game");
     },
   });
 
@@ -179,6 +171,16 @@ export function SetupView() {
       unit: null,
     },
   ]);
+
+  useEffect(() => {
+    const board = JSON.parse(localStorage.getItem("board") || "[]");
+    const board2 = JSON.parse(localStorage.getItem("board2") || "[]");
+
+    if (board.length > 0) {
+      setBoard(board);
+      setBoard2(board2);
+    }
+  }, []);
 
   function handleDragEnd(event: DragEndEvent) {
     let targetBoard;
@@ -279,15 +281,15 @@ export function SetupView() {
     const team2finalUnits: UnitsDTO[] = board2
       .filter((cell) => !!cell.unit)
       .map((cell) => {
-        console.log(cell.id);
         return {
           equipments: cell.unit?.equipment,
           position: parseInt(cell.id.toString().replace("-", "")),
           unitClass: cell.unit.name,
         };
       });
-    console.log({ team1finalUnits });
-    console.log({ team2finalUnits });
+
+    localStorage.setItem("board", JSON.stringify(board));
+    localStorage.setItem("board2", JSON.stringify(board2));
 
     setupTeamsMutation({ team1: team1finalUnits, team2: team2finalUnits });
   }
@@ -322,7 +324,7 @@ export function SetupView() {
               {board.map(({ id, unit }) => (
                 <React.Fragment key={id}>
                   {unit ? (
-                    <Droppable id={id} isOccupied>
+                    <Droppable id={id}>
                       <Draggable key={unit.id} id={unit.id} unit={unit} isClass>
                         {unit.name}
                       </Draggable>
@@ -337,7 +339,7 @@ export function SetupView() {
               {board2.map(({ id, unit }) => (
                 <React.Fragment key={id}>
                   {unit ? (
-                    <Droppable id={id} isOccupied>
+                    <Droppable id={id}>
                       <Draggable key={unit.id} id={unit.id} unit={unit} isClass>
                         {unit.name}
                       </Draggable>

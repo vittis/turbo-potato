@@ -92,7 +92,7 @@ const PlaySideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: PlaySi
               label: "",
               icon: DoorClosed,
               variant: "ghost",
-              selected: !!matchPath("/lobby/rooms", pathname),
+              selected: !!matchPath("/play/rooms", pathname),
               path: "rooms",
             },
             {
@@ -111,7 +111,7 @@ const PlaySideNav = ({ defaultCollapsed, defaultSize, navCollapsedSize }: PlaySi
               label: "",
               icon: FlaskConical,
               variant: "ghost",
-              selected: !!matchPath("/lobby/sandbox", pathname),
+              selected: !!matchPath("/play/sandbox", pathname),
               path: "sandbox",
             },
           ]}

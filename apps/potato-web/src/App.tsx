@@ -10,6 +10,7 @@ function App() {
   const { data } = useQuery({
     queryKey: ["game/battle/setup"],
     queryFn: fetchBattleSetup,
+    staleTime: Infinity,
   });
 
   const firstState = data?.firstStep;

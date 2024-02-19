@@ -102,6 +102,23 @@ export class Battle extends Phaser.Scene {
       });
 
     useGameState.subscribe(
+      (state) => state.isGameHidden,
+      (isGameHidden) => {
+        if (!isGameHidden) {
+          const gameFromLocalStorage = localStorage.getItem("game");
+
+          if (gameFromLocalStorage) {
+            const game = JSON.parse(gameFromLocalStorage);
+            this.firstStep = game.firstStep;
+            this.totalSteps = game.totalSteps;
+            this.eventHistory = game.eventHistory;
+            this.initializeUnits(this.firstStep);
+          }
+        }
+      }
+    );
+
+    useGameState.subscribe(
       (state) => state.selectedEntity,
       (selectedEntity) => {
         this.units.forEach((unit) => {

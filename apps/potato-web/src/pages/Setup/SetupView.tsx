@@ -5,8 +5,67 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/services/supabase/supabase";
+import { Loader2 } from "lucide-react";
+
+const initialBoard = [
+  {
+    id: "2",
+    unit: null,
+  },
+  {
+    id: "1",
+    unit: null,
+  },
+  {
+    id: "0",
+    unit: null,
+  },
+  {
+    id: "5",
+    unit: null,
+  },
+  {
+    id: "4",
+    unit: null,
+  },
+  {
+    id: "3",
+    unit: null,
+  },
+];
+
+const initialBoard2 = [
+  {
+    id: "-0",
+    unit: null,
+  },
+  {
+    id: "-1",
+    unit: null,
+  },
+  {
+    id: "-2",
+    unit: null,
+  },
+  {
+    id: "-3",
+    unit: null,
+  },
+  {
+    id: "-4",
+    unit: null,
+  },
+  {
+    id: "-5",
+    unit: null,
+  },
+];
 
 export async function setupTeams(data) {
+  const { data: response, error } = await supabase.functions.invoke("setup-teams", { body: data });
+  return response;
+  /* console.log(data);
   try {
     const response = await fetch("http://localhost:8787/game/setup/teams", {
       method: "POST",
@@ -20,7 +79,7 @@ export async function setupTeams(data) {
     return result;
   } catch (error) {
     console.error("Error:", error);
-  }
+  } */
 }
 
 export interface UnitsDTO {
@@ -89,8 +148,7 @@ export function Droppable({ children, id }: any) {
 }
 
 export async function fetchSetupStuff() {
-  const response = await fetch("http://localhost:8787/game/setup/allStuff");
-  const data = await response.json();
+  const { data, error } = await supabase.functions.invoke("all-stuff");
   return data;
 }
 
@@ -100,7 +158,7 @@ export async function fetchSetupStuff() {
 */
 export function SetupView() {
   const navigate = useNavigate();
-  const { data } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["setup-stuff"],
     queryFn: fetchSetupStuff,
   });
@@ -118,59 +176,9 @@ export function SetupView() {
   const classes = data?.classes || [];
   const weapons = data?.weapons || [];
 
-  const [board, setBoard] = useState<{ id: string; unit: any }[]>([
-    {
-      id: "2",
-      unit: null,
-    },
-    {
-      id: "1",
-      unit: null,
-    },
-    {
-      id: "0",
-      unit: null,
-    },
-    {
-      id: "5",
-      unit: null,
-    },
-    {
-      id: "4",
-      unit: null,
-    },
-    {
-      id: "3",
-      unit: null,
-    },
-  ]);
+  const [board, setBoard] = useState<{ id: string; unit: any }[]>(initialBoard);
 
-  const [board2, setBoard2] = useState<{ id: string; unit: any }[]>([
-    {
-      id: "-0",
-      unit: null,
-    },
-    {
-      id: "-1",
-      unit: null,
-    },
-    {
-      id: "-2",
-      unit: null,
-    },
-    {
-      id: "-3",
-      unit: null,
-    },
-    {
-      id: "-4",
-      unit: null,
-    },
-    {
-      id: "-5",
-      unit: null,
-    },
-  ]);
+  const [board2, setBoard2] = useState<{ id: string; unit: any }[]>(initialBoard2);
 
   useEffect(() => {
     const board = JSON.parse(localStorage.getItem("board") || "[]");
@@ -239,6 +247,7 @@ export function SetupView() {
         return cell;
       });
     } else {
+      console.log("oi");
       newBoard = targetBoard.map((cell) => {
         if (cell?.unit?.id === event?.active?.id && cell.id !== event.over?.id) {
           return {
@@ -267,6 +276,11 @@ export function SetupView() {
     targetSetBoard(newBoard);
   }
 
+  function onClickReset() {
+    setBoard(initialBoard);
+    setBoard2(initialBoard2);
+  }
+
   function onClickStartGame() {
     const team1finalUnits: UnitsDTO[] = board
       .filter((cell) => !!cell.unit)
@@ -292,6 +306,10 @@ export function SetupView() {
     localStorage.setItem("board2", JSON.stringify(board2));
 
     setupTeamsMutation({ team1: team1finalUnits, team2: team2finalUnits });
+  }
+
+  if (isFetching) {
+    return <Loader2 className="animate-spin mx-auto w-80 mt-20" />;
   }
 
   return (
@@ -354,8 +372,11 @@ export function SetupView() {
         </div>
       </DndContext>
 
-      <div className="mt-10 mx-auto w-fit">
+      <div className="mt-10 mx-auto w-fit flex flex-col gap-4">
         <Button onClick={onClickStartGame}>Start game</Button>
+        <Button variant="ghost" onClick={onClickReset}>
+          Reset
+        </Button>
       </div>
     </>
   );

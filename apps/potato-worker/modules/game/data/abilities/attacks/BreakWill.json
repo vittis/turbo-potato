@@ -1,0 +1,20 @@
+{
+  "name": "Break Will",
+  "type": "ATTACK",
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
+  "target": "STANDARD_COLUMN",
+  "cooldown": 70,
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD_COLUMN",
+      "conditions": [],
+      "payload": {
+        "value": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Dark Bolt",
+  "type": "SPELL",
+  "tags": [],
+  "target": "STANDARD",
+  "cooldown": 40,
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "conditions": [],
+      "payload": {
+        "value": 30
+      }
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_HIT",
+      "target": "SELF",
+      "conditions": [],
+      "payload": {
+        "value": 5
+      }
+    }
+  ]
+}

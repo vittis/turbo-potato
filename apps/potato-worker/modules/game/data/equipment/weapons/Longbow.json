@@ -1,0 +1,42 @@
+{
+  "name": "Longbow",
+  "tags": [
+    "WEAPON",
+    "TWO_HANDED",
+    "PHYSICAL",
+    "RANGED"
+  ],
+  "slots": [
+    "MAIN_HAND"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Long Shot"
+      }
+    },
+    {
+      "type": "GRANT_PERK",
+      "payload": {
+        "name": "Open Field Tactics",
+        "tier": 1
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_COOLDOWN_MODIFIER",
+        "value": -10
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "SPELL_COOLDOWN_MODIFIER",
+        "value": -10
+      }
+    }
+  ],
+  "effects": []
+}

@@ -1,8 +1,0 @@
-{
-    "name": "Plate Mail",
-    "implicits": {
-        "shield": 60
-    },
-    "weight": 10,
-    "slot": "CHEST"
-}

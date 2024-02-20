@@ -1,0 +1,45 @@
+{
+  "name": "Ranged Proficiency",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "FAST",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "conditions": [
+        {
+          "type": "EQUIPMENT",
+          "payload": {
+            "target": "SELF",
+            "slots": [
+              "MAIN_HAND",
+              "OFF_HAND"
+            ],
+            "tags": [
+              "PHYSICAL",
+              "RANGED"
+            ]
+          }
+        }
+      ],
+      "payload": [
+        {
+          "name": "FAST",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Prey The Weak",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "VULNERABLE",
+      "values": [
+        4,
+        10,
+        18,
+        30,
+        45
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "target": "HIT_TARGET",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "VULNERABLE",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

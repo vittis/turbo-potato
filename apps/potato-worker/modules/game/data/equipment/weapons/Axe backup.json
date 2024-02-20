@@ -1,0 +1,51 @@
+{
+  "name": "Axe",
+  "tags": [],
+  "slots": [
+    "MAIN_HAND"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Empowering Strike"
+      }
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "target": "HIT_TARGET",
+      "payload": [
+        {
+          "name": "VULNERABLE",
+          "quantity": 20
+        }
+      ]
+    },
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "payload": [
+        {
+          "name": "VULNERABLE",
+          "quantity": 10
+        },
+        {
+          "name": "ATTACK_POWER",
+          "quantity": 10
+        }
+      ]
+    },
+    {
+      "type": "DAMAGE",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "payload": {
+        "value": 20
+      }
+    }
+  ]
+}

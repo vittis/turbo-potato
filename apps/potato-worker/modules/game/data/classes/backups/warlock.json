@@ -1,0 +1,67 @@
+{
+  "name": "Warlock",
+  "hp": 80,
+  "base": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY",
+          "payload": {
+            "name": "Dark Bolt"
+          }
+        }
+      ],
+      "description": "Gain the Dark Bolt spell"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "SPELL_COOLDOWN_MODIFIER",
+            "value": 10
+          }
+        }
+      ],
+      "description": "TODO should be perk? -> If side to an ally gain +10% Spell Cooldown Modifier"
+    }
+  ],
+  "utility": [],
+  "tree": [
+    {
+      "name": "Master of Demons",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Summon Hell Dog"
+              }
+            }
+          ],
+          "description": "Gain Summon Hell Dog spell"
+        },
+        {
+          "tier": 3,
+          "req": 2,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Demonic Presence"
+              }
+            }
+          ],
+          "description": "Gain Demonic Presence"
+        }
+      ]
+    },
+    {
+      "name": "Vampire Lord",
+      "talents": []
+    }
+  ]
+}

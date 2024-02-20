@@ -1,0 +1,31 @@
+version : "3"
+
+services:
+    lb:
+      image: haproxy
+      ports:
+          - "8080:8080"
+      volumes:
+          - ./haproxy:/usr/local/etc/haproxy
+    potate1:
+        image: potate-api
+        environment:
+            - APPID=1111
+        #ports:
+        #  - "8787:8787"
+        #  - "8080:8080"
+        volumes:
+          - .:/usr/app
+    potate2:
+        image: potate-api
+        environment:
+            - APPID=2222
+        #ports:
+        #  - "8787:8787"
+        #  - "8080:8080"
+        volumes:
+          - .:/usr/app
+    rds:
+        image: redis/redis-stack-server
+        ports:
+          - "127.0.0.1:6379:6379"

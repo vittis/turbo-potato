@@ -1,29 +1,23 @@
 import Phaser from "phaser";
-import { GAME_LOOP_SPEED, StepEvent, SubStepEvent } from "../BattleScene";
-import { BAR_WIDTH, createBars, createTexts, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
-import { onReceiveDamage } from "./BattleUnitEventHandler";
+import { StepEvent } from "../BattleScene";
+import { createShadow, getUnitPos, setupUnitPointerEvents } from "./BattleUnitSetup";
 import {
   createAttackAnimation,
   createDeathAnimation,
-  createHeadCrushAnimation,
-  createHealingWordAnimation,
-  createPowershotAnimation,
+  createTriggerEffectAnimation,
   createWiggleAnimation,
 } from "./BattleUnitAnimations";
 import { BattleUnitSprite } from "./BattleUnitSprite";
+import { Ability, BattleUnitAbilities } from "./BattleUnitAbilities";
+import { BattleUnitStatusEffects } from "./BattleUnitStatusEffects";
+import { BattleUnitBars } from "./BattleUnitBars";
 
 export class BattleUnit extends Phaser.GameObjects.Container {
   public id: string;
   public battleUnitSprite!: BattleUnitSprite;
   public sprite!: Phaser.GameObjects.Image;
-  public hpBar: Phaser.GameObjects.Rectangle;
-  public shieldBar: Phaser.GameObjects.Rectangle;
-  public apBar: Phaser.GameObjects.Rectangle;
-  public spBar: Phaser.GameObjects.Rectangle;
   public boardPosition: number;
   public owner: number;
-  public hpText: Phaser.GameObjects.Text;
-  public shieldText: Phaser.GameObjects.Text;
 
   public stats: any;
   public equipment: any;
@@ -32,8 +26,11 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public dataUnit: any;
 
   public isSelected = false;
-  public apBarTween!: Phaser.Tweens.Tween;
   public spBarTween!: Phaser.Tweens.Tween;
+
+  public abilitiesManager: BattleUnitAbilities;
+  public statusEffectsManager: BattleUnitStatusEffects;
+  public barsManager: BattleUnitBars;
 
   public isDead = false;
   public startingX;
@@ -43,9 +40,10 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public glow: Phaser.FX.Glow | undefined;
 
   constructor(scene: Phaser.Scene, dataUnit: any) {
-    const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner);
+    const { x, y } = getUnitPos(dataUnit.position, dataUnit.owner, scene["tiles"]);
 
     super(scene, x, y);
+
     this.startingX = x;
     this.startingY = y;
     this.setDepth(1);
@@ -54,52 +52,34 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     this.dataUnit = dataUnit;
     this.unitName = dataUnit.name;
     this.stats = dataUnit.stats;
-    this.equipment = dataUnit.equipment;
+    // this.equipment = dataUnit.equipment;
     this.owner = dataUnit.owner;
 
     this.battleUnitSprite = new BattleUnitSprite(scene, x, y, dataUnit);
-
     this.sprite = scene.add.image(0, 0, this.battleUnitSprite.textureName);
-
     if (dataUnit.owner === 0) {
       this.sprite.flipX = true;
     }
     this.sprite.setScale(0.79);
 
-    const spriteOffsetX = this.owner === 0 ? -4 : 4;
-
-    const shadowContainer = scene.add.container();
-    const shadowColor = 0x000000;
-    const shadowAlpha = 0.4;
-    const shadowWidth = 65;
-    const shadowHeight = 25;
-    const shadowCircle = scene.add.graphics();
-    shadowCircle.fillStyle(shadowColor, shadowAlpha);
-    shadowCircle.fillEllipse(0, 0, shadowWidth, shadowHeight);
-    shadowContainer.add(shadowCircle);
-    shadowContainer.setPosition(this.sprite.x + spriteOffsetX, this.sprite.y + 63);
-    this.add(shadowContainer);
+    createShadow(this, scene);
+    this.add(this.sprite);
 
     setupUnitPointerEvents(this);
-
-    const { hpBar, shieldBar, apBar, spBar } = createBars(this);
-    this.hpBar = hpBar;
-    this.shieldBar = shieldBar;
-    this.apBar = apBar;
-    this.spBar = spBar;
-
-    const { hpText, shieldText } = createTexts(this, hpBar.x, hpBar.y);
-    this.hpText = hpText;
-    this.shieldText = shieldText;
-    this.hpText.setText(`${Math.max(0, dataUnit.stats.hp)}`);
-    this.shieldText.setText(`${Math.max(0, dataUnit.stats.shield)}`);
 
     this.glow = this.sprite.preFX?.addGlow(0xeeee00, 4);
     this.glow?.setActive(false);
 
-    this.add(this.sprite);
-
     createWiggleAnimation(this);
+
+    this.barsManager = new BattleUnitBars(this, scene, dataUnit);
+    this.add(this.barsManager);
+
+    this.abilitiesManager = new BattleUnitAbilities(this, scene, dataUnit);
+    this.add(this.abilitiesManager);
+
+    this.statusEffectsManager = new BattleUnitStatusEffects(scene, dataUnit);
+    this.add(this.statusEffectsManager);
 
     scene.add.existing(this);
   }
@@ -118,13 +98,19 @@ export class BattleUnit extends Phaser.GameObjects.Container {
     event,
     targets,
     onEnd,
+    onStart,
+    allUnits,
   }: {
     event: StepEvent;
     targets?: BattleUnit[];
     onEnd?: Function;
     onAttack?: Function;
+    onStart?: Function;
+    allUnits?: BattleUnit[];
   }) {
-    if (event.type === "HAS_DIED") {
+    console.log("playing ", event.type, event.trigger);
+
+    if (event.type === "FAINT") {
       const onFinishAnimation = () => {
         this.setVisible(false);
         this.isDead = true;
@@ -138,27 +124,205 @@ export class BattleUnit extends Phaser.GameObjects.Container {
 
       this.currentAnimation = deathTween;
     }
-
-    if (event.type === "ATTACK") {
-      const target = targets?.[0];
-
-      if (!target) {
-        throw new Error("Attack target is undefined");
+    if (event.type === "TRIGGER_EFFECT") {
+      if (!targets) {
+        throw new Error("Trigger Effect target is undefined");
       }
 
-      const onFinishAnimation = () => {
-        this.fillApBar(event.payload.stats.ap);
-        if (onEnd) onEnd();
-      };
       const onImpactPoint = () => {
-        const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
-        this.fillSpBar(event.payload.stats.sp);
-        target.playEvent({ event: receiveDamageEvent });
+        const receiveDamageEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+          ) as StepEvent[]) || [];
+
+        receiveDamageEvents &&
+          receiveDamageEvents.forEach((damageSubEvent) => {
+            const targetId = damageSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply damage on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+
+            target.playEvent({ event: damageSubEvent });
+          });
+
+        const statusEffectEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+          ) as StepEvent[]) || [];
+
+        statusEffectEvents &&
+          statusEffectEvents.forEach((statusEffectSubEvent) => {
+            const targetId = statusEffectSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply status effect on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: statusEffectSubEvent });
+          });
+
+        const shieldEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+          ) as StepEvent[]) || [];
+
+        shieldEvents &&
+          shieldEvents.forEach((shieldSubEvent) => {
+            const targetId = shieldSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply shield on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: shieldSubEvent });
+          });
+
+        const healEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+          ) as StepEvent[]) || [];
+
+        healEvents &&
+          healEvents.forEach((healEvent) => {
+            const targetId = healEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply heal on TRIGGER_EFFECT: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: healEvent });
+          });
       };
 
+      const onFinishAnimation = () => {
+        if (onEnd) onEnd();
+      };
+
+      // TODO set animationTarget based on target type
+      const animationTarget = targets?.[0];
+
+      const { triggerEffectTweenChain } = createTriggerEffectAnimation({
+        unit: this,
+        target: animationTarget,
+        trigger: event?.trigger || "",
+        onImpactPoint,
+        onFinishAnimation,
+      });
+
+      this.currentAnimation = triggerEffectTweenChain;
+    }
+
+    if (event.type === "USE_ABILITY") {
+      const abilityUsed = this.abilitiesManager.abilities.find(
+        (ability) => ability.id === event.payload.id
+      ) as Ability;
+
+      if (targets === undefined || targets?.length === 0) {
+        throw new Error("Ability target is undefined");
+      }
+
+      const onStartAnimation = () => {
+        if (onStart) onStart();
+      };
+
+      const onFinishAnimation = () => {
+        abilityUsed?.overlay?.setAlpha(0.6);
+        if (onEnd) onEnd();
+      };
+
+      const onImpactPoint = () => {
+        const receiveDamageEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "DAMAGE"
+          ) as StepEvent[]) || [];
+
+        receiveDamageEvents &&
+          receiveDamageEvents.forEach((damageSubEvent) => {
+            const targetId = damageSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply damage on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+
+            target.playEvent({ event: damageSubEvent });
+          });
+
+        const statusEffectEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "STATUS_EFFECT"
+          ) as StepEvent[]) || [];
+
+        statusEffectEvents &&
+          statusEffectEvents.forEach((statusEffectSubEvent) => {
+            const targetId = statusEffectSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply status effect on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: statusEffectSubEvent });
+          });
+
+        const shieldEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "SHIELD"
+          ) as StepEvent[]) || [];
+
+        shieldEvents &&
+          shieldEvents.forEach((shieldSubEvent) => {
+            const targetId = shieldSubEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply shield on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: shieldSubEvent });
+          });
+
+        const healEvents =
+          (event.payload?.subEvents?.filter(
+            (e) => e.type === "INSTANT_EFFECT" && e.payload.type === "HEAL"
+          ) as StepEvent[]) || [];
+
+        healEvents &&
+          healEvents.forEach((healEvent) => {
+            const targetId = healEvent.payload.targetId as string;
+
+            const target = allUnits?.find((unit) => unit.id === targetId);
+            if (!target) {
+              throw Error(
+                `Trying to apply heal on USE_ABILITY: Couldn't find target with id: ${targetId}`
+              );
+            }
+            target.playEvent({ event: healEvent });
+          });
+      };
+
+      // TODO set mainTarget based on target type
+      const mainTarget = targets?.[0];
+
+      onStartAnimation();
       const { attackTweenChain } = createAttackAnimation({
         unit: this,
-        target,
+        mainTarget,
+        targets,
         onImpactPoint,
         onFinishAnimation,
       });
@@ -166,221 +330,37 @@ export class BattleUnit extends Phaser.GameObjects.Container {
       this.currentAnimation = attackTweenChain;
     }
 
-    if (event.type === "RECEIVED_DAMAGE") {
-      onReceiveDamage(this, event);
-      // temporary
-
-      this.fillSpBar(Math.min(event.payload.stats.sp, 1000));
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "DAMAGE") {
+      this.barsManager.onReceiveDamage(event);
     }
 
-    if (event.type === "CAST_SKILL") {
-      if (event.payload.skillName === "Healing Word") {
-        const target = targets?.[0];
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          this.fillSpBar(0);
-          const receiveHealEvent = event.subEvents?.find((e) => e.type === "RECEIVED_HEAL") as StepEvent;
-          target?.playEvent({ event: receiveHealEvent });
-        };
-
-        const { healingWordTween } = createHealingWordAnimation({
-          unit: this,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = healingWordTween;
-      }
-
-      if (event.payload.skillName === "Powershot") {
-        const target = targets?.[0];
-
-        if (!target) {
-          throw new Error("Attack target is undefined");
-        }
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          this.fillSpBar(0);
-          const receiveDamageEvents = targets?.map(
-            (target) =>
-              event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE" && e.actorId === target.id) as StepEvent
-          );
-
-          if (receiveDamageEvents) {
-            receiveDamageEvents.forEach((e) => {
-              const target = targets?.find((target) => target.id === e.actorId);
-              if (target) target.playEvent({ event: e });
-            });
-          }
-        };
-
-        const { powershotAnimation } = createPowershotAnimation({
-          unit: this,
-          target,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = powershotAnimation;
-      }
-
-      if (event.payload.skillName === "Head Crush") {
-        const target = targets?.[0];
-
-        if (!target) {
-          throw new Error("Attack target is undefined");
-        }
-
-        const onFinishAnimation = () => {
-          if (onEnd) onEnd();
-        };
-        const onImpactPoint = () => {
-          this.fillSpBar(0);
-          const receiveDamageEvent = event.subEvents?.find((e) => e.type === "RECEIVED_DAMAGE") as StepEvent;
-          target?.playEvent({ event: receiveDamageEvent });
-        };
-
-        const { headCrushAnimation } = createHeadCrushAnimation({
-          unit: this,
-          target,
-          onImpactPoint,
-          onFinishAnimation,
-        });
-
-        this.currentAnimation = headCrushAnimation;
-      }
-
-      this.fillSpBar(0);
-    }
-
-    // todo: combine logic of receive damage and heal
-    if (event.type === "RECEIVED_HEAL") {
-      const newHp = event.payload.stats.hp;
-      const hpHealed = event.payload.modifiers.hp;
-      this.hpText.setText(`${newHp}`);
-
-      this.scene.tweens.add({
-        targets: this.hpText,
-        scaleX: 1.25,
-        scaleY: 1.25,
-        duration: 150,
-        ease: "Bounce.easeOut",
-        onComplete: () => {
-          this.scene.tweens.add({
-            targets: this.hpText,
-            scaleX: 1,
-            scaleY: 1,
-            duration: 150,
-            ease: "Bounce.easeOut",
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "STATUS_EFFECT") {
+      event.payload.payload.forEach((statusEffect) => {
+        if (statusEffect.quantity < 0) {
+          this.statusEffectsManager.removeStatusEffect({
+            name: statusEffect.name,
+            quantity: statusEffect.quantity * -1,
           });
-        },
-      });
-
-      if (!this.isSelected) {
-        // this.sprite.setTint(0x1dad2e);
-      }
-
-      this.scene.time.addEvent({
-        delay: 150,
-        callback: () => {
-          if (!this.isSelected) {
-            // this.sprite.clearTint();
-          }
-        },
-      });
-
-      const healText = this.scene.add.text(0, 30, "+" + hpHealed.toString(), {
-        fontSize: hpHealed > 50 ? "40px" : "30px",
-        color: "#1dad2e",
-        fontFamily: "IM Fell DW Pica",
-        stroke: "#000000",
-        strokeThickness: 2,
-        fontStyle: "bold",
-        shadow: {
-          offsetX: 0,
-          offsetY: 3,
-          color: "#000",
-          blur: 0,
-          stroke: true,
-          fill: false,
-        },
-      });
-      healText.setOrigin(0.5);
-
-      this.scene.tweens.add({
-        targets: healText,
-        x: Phaser.Math.Between(-15, 15),
-        y: healText.y - 40,
-        alpha: 0,
-        duration: hpHealed > 50 ? 1900 : 1200,
-        ease: "Linear",
-        onComplete: () => {
-          healText.destroy();
-        },
-      });
-
-      this.add(healText);
-
-      const newHpBarValue = (newHp / this.stats.maxHp) * BAR_WIDTH;
-      this.scene.tweens.add({
-        targets: this.hpBar,
-        width: newHpBarValue <= 0 ? 0 : newHpBarValue,
-        duration: 80,
-        ease: "Linear",
+        } else {
+          this.statusEffectsManager.addStatusEffect({
+            name: statusEffect.name,
+            quantity: statusEffect.quantity,
+          });
+        }
       });
     }
-  }
 
-  public fillApBar(currentAp: number, fromResume?: boolean) {
-    const stepsToAttackFromZeroAP = Math.ceil(1000 / this.stats.attackSpeed);
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "SHIELD") {
+      this.barsManager.onReceiveShield(event);
+    }
 
-    const willNeedOneLessStep = (stepsToAttackFromZeroAP - 1) * this.stats.attackSpeed + currentAp >= 1000;
-
-    const stepsToAttack = stepsToAttackFromZeroAP - (willNeedOneLessStep ? 1 : 0);
-
-    const timeToAttack = stepsToAttack * GAME_LOOP_SPEED;
-
-    const duration = timeToAttack;
-    /* if (fromResume) {
-      if (this.apBarTween) {
-        duration = this.apBarTween.duration - this.apBarTween.elapsed;
-      }
-    } else {
-      duration = timeToAttack;
-    } */
-
-    this.apBarTween = this.scene.tweens.add({
-      targets: this.apBar,
-      width: { from: 0, to: BAR_WIDTH },
-      duration: duration,
-      ease: "Linear",
-    });
-  }
-
-  public fillSpBar(currentSp: number) {
-    const newSpBarWidth = Math.min((currentSp * BAR_WIDTH) / 1000, BAR_WIDTH);
-
-    this.spBar.width = newSpBarWidth;
-
-    /* this.spBarTween = this.scene.tweens.add({
-      targets: this.spBar,
-      width: newSpBarWidth,
-      duration: 50,
-      ease: "Linear",
-      onComplete: () => {
-        this.spBarTween = null as any;
-      },
-    }); */
+    if (event.type === "INSTANT_EFFECT" && event.payload.type === "HEAL") {
+      this.barsManager.onReceiveHeal(event);
+    }
   }
 
   public onStart() {
-    this.fillApBar(0);
+    this.abilitiesManager.createAbilityOverlayTween();
   }
 
   public resumeAnimations() {
@@ -391,17 +371,6 @@ export class BattleUnit extends Phaser.GameObjects.Container {
   public pauseAnimations() {
     if (this.currentAnimation?.isPlaying()) {
       this.currentAnimation.pause();
-    }
-  }
-  public resumeApBar() {
-    if (this.apBarTween && this.apBarTween.isPaused()) {
-      this.apBarTween.resume();
-    }
-  }
-
-  public pauseApBar() {
-    if (this.apBarTween && this.apBarTween.isPlaying()) {
-      this.apBarTween.pause();
     }
   }
 }

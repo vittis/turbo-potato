@@ -1,9 +1,0 @@
-{
-    "name": "One Handed Sword",
-    "possibleModifiers": [
-        "Penetration",
-        "AttackSpeed",
-        "Dex",
-        "Weight"
-    ]
-}

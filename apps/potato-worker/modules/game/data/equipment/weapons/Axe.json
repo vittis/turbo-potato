@@ -1,0 +1,22 @@
+{
+  "name": "Axe",
+  "tags": [],
+  "slots": [
+    "MAIN_HAND"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Stab"
+      }
+    },
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Reinforce Allies"
+      }
+    }
+  ],
+  "effects": []
+}

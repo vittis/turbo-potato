@@ -1,0 +1,20 @@
+{
+  "name": "Powershot",
+  "type": "ATTACK",
+  "tags": [
+    "USE_WEAPON_ABILITY"
+  ],
+  "target": "HIT_TARGET",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "HIT_TARGET",
+      "conditions": [],
+      "payload": {
+        "value": 25
+      }
+    }
+  ]
+}

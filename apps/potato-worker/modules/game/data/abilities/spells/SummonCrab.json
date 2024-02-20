@@ -1,0 +1,27 @@
+{
+  "name": "Summon Crab",
+  "type": "SPELL",
+  "tags": [
+    "SUMMON"
+  ],
+  "target": "ADJACENT_ALLIES",
+  "cooldown": 80,
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "STURDY",
+          "quantity": 5
+        },
+        {
+          "name": "THORN",
+          "quantity": 5
+        }
+      ]
+    }
+  ]
+}

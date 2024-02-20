@@ -1,0 +1,44 @@
+{
+  "name": "Focused Mind",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "FOCUS",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    },
+    {
+      "name": "ATTACK_POWER",
+      "values": [
+        10,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "FOCUS",
+          "quantity": "DYNAMIC"
+        },
+        {
+          "name": "ATTACK_POWER",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

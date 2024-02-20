@@ -15,18 +15,24 @@ export function createWiggleAnimation(unit: BattleUnit) {
   });
 }
 
-export function createDeathAnimation({ unit, onFinishAnimation }: { unit: BattleUnit; onFinishAnimation: Function }) {
+export function createDeathAnimation({
+  unit,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  onFinishAnimation: Function;
+}) {
   const deathTween = unit.scene.tweens.add({
-    targets: unit,
+    targets: unit.sprite,
     alpha: 0,
     scaleX: 0,
     scaleY: 0,
     angle: 180,
-    duration: 1400,
-    delay: 150 * animationSpeed,
+    duration: 1200 * animationSpeed,
+    delay: 10 * animationSpeed,
     ease: "Sine.easeInOut",
     onComplete: () => {
-      unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
+      unit.scene.time.delayedCall(10 * animationSpeed, onFinishAnimation);
     },
   });
 
@@ -35,18 +41,27 @@ export function createDeathAnimation({ unit, onFinishAnimation }: { unit: Battle
 
 export function createAttackAnimation({
   unit,
-  target,
+  mainTarget,
+  targets,
   onImpactPoint,
   onFinishAnimation,
 }: {
   unit: BattleUnit;
-  target: BattleUnit;
+  mainTarget: BattleUnit;
+  targets: BattleUnit[];
   onImpactPoint: Function;
   onFinishAnimation: Function;
 }) {
-  const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
+  // const unitGlowFx = unit.sprite.preFX?.addGlow(0xeeee00, 2);
+
+  //const targetGlowFx = target.sprite.preFX?.addGlow(0xff0000, 0);
+
+  const targetsGlowFx = targets.map((target) => {
+    return target.sprite.preFX?.addGlow(0xff0000, 0);
+  });
+
   unit.scene.tweens.add({
-    targets: targetGlowFx,
+    targets: targetsGlowFx,
     outerStrength: 2,
     duration: 260 * animationSpeed,
   });
@@ -56,9 +71,10 @@ export function createAttackAnimation({
   const PUSHBACK_DISTANCE = unit.owner === 0 ? 45 : -45;
 
   const attackTweenChain = unit.scene.tweens.chain({
-    delay: 45 * animationSpeed,
+    delay: 200 * animationSpeed,
     targets: unit,
     onComplete: () => {
+      // unitGlowFx?.destroy();
       unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
     },
     tweens: [
@@ -93,10 +109,10 @@ export function createAttackAnimation({
         delay: 100 * animationSpeed,
         alpha: 1,
         x: {
-          from: target.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
-          to: target.startingX - DISTANCE_TO_ENEMY,
+          from: mainTarget.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
+          to: mainTarget.startingX - DISTANCE_TO_ENEMY,
         },
-        y: { from: target.startingY, to: target.startingY },
+        y: { from: mainTarget.startingY, to: mainTarget.startingY },
         duration: 200 * animationSpeed,
         onStart: () => {
           // start bouncing
@@ -113,17 +129,17 @@ export function createAttackAnimation({
       // attack (pushback)
       {
         delay: 200 * animationSpeed,
-        x: target.startingX - PUSHBACK_DISTANCE,
+        x: mainTarget.startingX - PUSHBACK_DISTANCE,
         duration: 125 * animationSpeed,
         yoyo: true,
         ease: Phaser.Math.Easing.Bounce.InOut,
         onYoyo: () => {
           onImpactPoint();
-          targetGlowFx?.destroy();
+          targetsGlowFx?.forEach((targetGlowFx) => targetGlowFx?.destroy());
 
           // particle burst
-          const angle = target.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
-          const xOffset = target.owner === 0 ? -12 : 12;
+          const angle = mainTarget.owner === 0 ? { min: 140, max: 220 } : { min: -40, max: 40 };
+          const xOffset = mainTarget.owner === 0 ? -12 : 12;
           const rect = new Phaser.Geom.Line(xOffset, -20, xOffset, 40);
           const emitter = unit.scene.add.particles(xOffset, 15, "square", {
             angle: angle,
@@ -138,19 +154,19 @@ export function createAttackAnimation({
             scale: 0.7,
           });
           // todo: better way to positionate emitter without using .add
-          target.add(emitter);
-          // target.bringToTop(target.sprite);
+          mainTarget.add(emitter);
+          // mainTarget.bringToTop(mainTarget.sprite);
 
           // receive damage pushback
-          target.sprite.setTint(0xde3c45);
-          target.scene.tweens.add({
-            targets: target,
-            x: target.owner === 0 ? target.x - 4 : target.x + 4,
+          mainTarget.sprite.setTint(0xde3c45);
+          mainTarget.scene.tweens.add({
+            targets: mainTarget,
+            x: mainTarget.owner === 0 ? mainTarget.x - 4 : mainTarget.x + 4,
             duration: 150 * animationSpeed,
             yoyo: true,
             ease: Phaser.Math.Easing.Bounce.InOut,
             onComplete: () => {
-              target.sprite.clearTint();
+              mainTarget.sprite.clearTint();
               unit.sprite.setFlipX(unit.owner === 0 ? false : true);
             },
           });
@@ -161,10 +177,10 @@ export function createAttackAnimation({
         delay: 100 * animationSpeed,
         alpha: 0,
         x: {
-          from: target.startingX - DISTANCE_TO_ENEMY,
-          to: target.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
+          from: mainTarget.startingX - DISTANCE_TO_ENEMY,
+          to: mainTarget.startingX - (DISTANCE_TO_ENEMY + RUN_DISTANCE),
         },
-        y: { from: target.startingY, to: target.startingY },
+        y: { from: mainTarget.startingY, to: mainTarget.startingY },
         duration: 200 * animationSpeed,
         onStart: () => {
           // start bouncing
@@ -203,6 +219,84 @@ export function createAttackAnimation({
   });
 
   return { attackTweenChain };
+}
+
+export function createTriggerEffectAnimation({
+  unit,
+  target,
+  trigger,
+  onImpactPoint,
+  onFinishAnimation,
+}: {
+  unit: BattleUnit;
+  target: BattleUnit;
+  trigger: string;
+  onImpactPoint: Function;
+  onFinishAnimation: Function;
+}) {
+  const targetGlowFx = target.sprite.preFX?.addGlow(0x10ab8c, 0);
+  unit.scene.tweens.add({
+    targets: targetGlowFx,
+    outerStrength: 2,
+    duration: 150 * animationSpeed,
+  });
+
+  const triggerEffectTweenChain = unit.scene.tweens.chain({
+    delay: 200 * animationSpeed,
+    targets: unit,
+    onComplete: () => {
+      unit.scene.time.delayedCall(150 * animationSpeed, onFinishAnimation);
+      targetGlowFx?.destroy();
+    },
+    tweens: [
+      // pulinho
+      {
+        targets: unit.sprite,
+        y: unit.sprite.y - 38,
+        duration: 225 * animationSpeed,
+        yoyo: true,
+        ease: Phaser.Math.Easing.Bounce.InOut,
+        onYoyo: () => {
+          onImpactPoint();
+
+          const battleStartText = unit.scene.add.text(0, -30, trigger.replace(/_/g, " "), {
+            fontSize: 28,
+            color: "#10AB8C",
+            fontFamily: "IM Fell DW Pica",
+            stroke: "#000000",
+            strokeThickness: 2,
+            fontStyle: "bold",
+            shadow: {
+              offsetX: 0,
+              offsetY: 3,
+              color: "#000",
+              blur: 0,
+              stroke: true,
+              fill: false,
+            },
+          });
+          battleStartText.setOrigin(0.5);
+
+          // damage text going up
+          unit.scene.tweens.add({
+            targets: battleStartText,
+            x: Phaser.Math.Between(-15, 15),
+            y: battleStartText.y - 38 - Phaser.Math.Between(0, 10),
+            alpha: 0,
+            duration: 1200,
+            ease: "Linear",
+            onComplete: () => {
+              battleStartText.destroy();
+            },
+          });
+
+          unit.add(battleStartText);
+        },
+      },
+    ],
+  });
+
+  return { triggerEffectTweenChain };
 }
 
 export function createHealingWordAnimation({

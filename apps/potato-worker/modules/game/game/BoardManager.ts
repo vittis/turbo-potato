@@ -1,4 +1,6 @@
-import { Unit } from "./Unit";
+import { TARGET_TYPE } from "./Target/TargetTypes";
+import { getTargetFunction } from "./Target/TargetUtils";
+import { Unit } from "./Unit/Unit";
 
 export enum OWNER {
   TEAM_ONE = 0,
@@ -23,6 +25,11 @@ export enum COLUMN {
   FRONT = 0,
   MID = 1,
   BACK = 2,
+}
+
+export enum BOX {
+  FRONT = 0,
+  BACK = 1,
 }
 
 type Board = [
@@ -95,6 +102,18 @@ export class BoardManager {
     return this.getAllUnits().filter((unit) => unit?.isDead) as Unit[];
   }
 
+  getAllAliveUnitsOfOwner(owner: OWNER): Unit[] {
+    return this.getAllUnitsOfOwner(owner).filter(
+      (unit) => !unit?.isDead
+    ) as Unit[];
+  }
+
+  getAllDeadUnitsOfOwner(owner: OWNER): Unit[] {
+    return this.getAllUnitsOfOwner(owner).filter(
+      (unit) => unit?.isDead
+    ) as Unit[];
+  }
+
   getEnemyOwner(owner: OWNER): OWNER {
     if (owner === OWNER.TEAM_ONE) return OWNER.TEAM_TWO;
     else return OWNER.TEAM_ONE;
@@ -131,9 +150,55 @@ export class BoardManager {
     return unitsInColumn;
   }
 
+  getAllAliveUnitsInColumn(owner: OWNER, column: number): Unit[] {
+    const unitsInColumn = this.getAllAliveUnitsOfOwner(owner).filter(
+      (unit) => this.getUnitColumn(unit) === column
+    );
+
+    return unitsInColumn;
+  }
+
+  getAllAliveUnitsInRow(owner: OWNER, row: number): Unit[] {
+    const unitsInRow = this.getAllAliveUnitsOfOwner(owner).filter(
+      (unit) => this.getUnitRow(unit) === row
+    );
+
+    return unitsInRow;
+  }
+
+  getAllAliveUnitsInBox(owner: OWNER, box: BOX): Unit[] {
+    if (box === BOX.FRONT) {
+      const unitsInFrontBox = this.getAllAliveUnitsInColumn(
+        owner,
+        COLUMN.FRONT
+      ).concat(this.getAllAliveUnitsInColumn(owner, COLUMN.MID));
+
+      return unitsInFrontBox;
+    }
+
+    const unitsInBackBox = this.getAllAliveUnitsInColumn(
+      owner,
+      COLUMN.BACK
+    ).concat(this.getAllAliveUnitsInColumn(owner, COLUMN.MID));
+
+    return unitsInBackBox;
+  }
+
+  getUnitByPosition(owner: OWNER, position: POSITION): Unit[] {
+    const unit = this.board[owner][position];
+    if (!unit) {
+      /* throw Error(
+        `Tried to getUnitByPosition ${owner} ${position} that doesnt exist`
+      ); */
+      return [];
+    }
+    return [unit];
+  }
+
   getUnitById(id: string): Unit {
     const unit = this.getAllUnits().find((unit) => unit.id === id);
     if (!unit) {
+      /* console.trace("show"); */
       throw Error(`Tried to getUnitById ${id} that doesnt exist`);
     }
     return unit;
@@ -164,6 +229,17 @@ export class BoardManager {
     }
 
     return target as Unit;
+  }
+
+  getTarget(
+    unit: Unit,
+    targetType: TARGET_TYPE = TARGET_TYPE.STANDARD
+  ): Unit[] {
+    const targetFunction = getTargetFunction(targetType);
+
+    const target = targetFunction(this, unit);
+
+    return target;
   }
 
   // todo update

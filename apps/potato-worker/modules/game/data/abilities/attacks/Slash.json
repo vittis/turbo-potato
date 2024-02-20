@@ -1,0 +1,20 @@
+{
+  "name": "Slash",
+  "type": "ATTACK",
+  "tags": [
+    "WEAPON_ABILITY"
+  ],
+  "target": "STANDARD",
+  "cooldown": 20,
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "conditions": [],
+      "payload": {
+        "value": 20
+      }
+    }
+  ]
+}

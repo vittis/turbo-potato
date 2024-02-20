@@ -1,8 +1,0 @@
-{
-    "name": "Leather Hat",
-    "implicits": {
-        "dex": 2
-    },
-    "weight": 1.2,
-    "slot": "HEAD"
-}

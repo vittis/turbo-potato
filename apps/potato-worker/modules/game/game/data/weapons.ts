@@ -1,5 +1,16 @@
-import Dagger from "../../data/equipment/weapons/dagger.json";
-import Greatsword from "../../data/equipment/weapons/greatsword.json";
-import Wand from "../../data/equipment/weapons/wand.json";
+import { EquipmentData } from "../Equipment/EquipmentTypes";
+import * as ShortSpear from "../../data/equipment/weapons/ShortSpear.json";
+import * as Sword from "../../data/equipment/weapons/Sword.json";
+import * as Shortbow from "../../data/equipment/weapons/Shortbow.json";
+import * as Axe from "../../data/equipment/weapons/Axe.json";
+import * as Wand from "../../data/equipment/weapons/Wand.json";
 
-export default { Dagger, Greatsword, Wand };
+// todo any way to make this import/export dynamically?
+
+export default {
+  ShortSpear: ShortSpear as EquipmentData,
+  Sword: Sword as EquipmentData,
+  Shortbow: Shortbow as EquipmentData,
+  Axe: Axe as EquipmentData,
+  Wand: Wand as EquipmentData,
+};

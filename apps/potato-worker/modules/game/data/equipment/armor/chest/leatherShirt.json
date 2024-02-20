@@ -1,8 +1,0 @@
-{
-    "name": "Leather Shirt",
-    "implicits": {
-        "dex": 3
-    },
-    "weight": 3.4,
-    "slot": "CHEST"
-}

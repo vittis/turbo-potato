@@ -1,0 +1,32 @@
+{
+  "name": "Blessed Beacon",
+  "type": "SPELL",
+  "tags": [
+    "BUFF"
+  ],
+  "target": "ADJACENT_ALLIES",
+  "cooldown": 120,
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "REGEN",
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "type": "HEAL",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "conditions": [],
+      "payload": {
+        "value": 10
+      }
+    }
+  ]
+}

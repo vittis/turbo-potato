@@ -1,0 +1,191 @@
+{
+  "name": "Rogue",
+  "hp": 90,
+  "base": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY",
+          "payload": {
+            "name": "Quick attack"
+          }
+        }
+      ],
+      "description": "Gain the Quick attack attack"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "ATTACK_DAMAGE_MODIFIER",
+            "value": 15
+          }
+        }
+      ],
+      "description": "TODO should be perk? -> If isolated +15% Attack Damage Modifier"
+    }
+  ],
+  "utility": [
+    {
+      "mods": [
+        {
+          "type": "ABILITY_MODIFIER",
+          "payload": {
+            "name": "Quick Attack",
+            "nodeName": "Quick Spell",
+            "unique": true
+          }
+        }
+      ],
+      "description": "Quick attack is a spell now"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_PERK",
+          "payload": {
+            "name": "Dead Man Tells No Tales"
+          }
+        }
+      ],
+      "description": "Gain Dead Man Tells No Tales"
+    }
+  ],
+  "tree": [
+    {
+      "name": "Master Poisoner",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Prey The Weak",
+                "tier": 1
+              }
+            }
+          ],
+          "description": "Gain 1 Prey The Weak"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Decay Strike"
+              }
+            }
+          ],
+          "description": "Gain Decay Strike Spell"
+        },
+        {
+          "tier": 2,
+          "req": 1,
+          "mods": [
+            {
+              "type": "ABILITY_MODIFIER",
+              "payload": {
+                "name": "Decay Strike",
+                "modifiers": {
+                  "target": [
+                    {
+                      "name": "ROW"
+                    },
+                    {
+                      "name": "STANDARD",
+                      "remove": true
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Decay Strike applies to all enemies in row"
+        },
+        {
+          "tier": 2,
+          "req": 1,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Twin Toxins"
+              }
+            }
+          ],
+          "description": "Gain Twin Toxins"
+        }
+      ]
+    },
+    {
+      "name": "Trickster",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Careful Preparation"
+              }
+            }
+          ],
+          "description": "Gain Careful Preparation Spell"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY",
+              "payload": {
+                "name": "Opening Gambit"
+              }
+            }
+          ],
+          "description": "Gain Opening Gambit attack"
+        },
+        {
+          "tier": 2,
+          "req": 1,
+          "mods": [
+            {
+              "type": "GRANT_PERK",
+              "payload": {
+                "name": "Savage Fury",
+                "tier": 2
+              }
+            }
+          ],
+          "description": "Gain 2 Savage Fury"
+        },
+        {
+          "tier": 2,
+          "req": 1,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Opening Gambit",
+                "modifiers": {
+                  "trigger": [
+                    {
+                      "name": "STANDARD"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "TODO should be modifier or unique perk? -> Opening Gambit now has a cooldown of X seconds"
+        }
+      ]
+    }
+  ]
+}

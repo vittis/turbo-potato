@@ -1,6 +1,4 @@
 import { toCamelCase } from "../../../../utils/formatString";
-import { showArms, showNeck } from "../../../data/equipment/armor/chest/chests";
-import { showHead } from "../../../data/equipment/armor/head/heads";
 import {
   addEquipBackSprite,
   addEquipChestSprite,
@@ -8,6 +6,7 @@ import {
   addEquipOffhandSprite,
   addEquipWeaponSprite,
   addUnitSprite,
+  getOutfitFromClass,
 } from "../AddSpriteFromSpritesheet";
 
 export class BattleUnitSprite extends Phaser.GameObjects.Container {
@@ -33,14 +32,13 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene, x: number, y: number, dataUnit: any) {
     super(scene, x, y);
 
-    this.setupBodyParts(dataUnit);
+    const outfit = getOutfitFromClass(dataUnit.class.toLowerCase());
+    const equips = this.getEquips(dataUnit);
 
-    this.setupEquipments(dataUnit);
-
+    this.setupBodyParts(outfit);
+    this.setupEquipments(equips, outfit);
     this.setupContainer();
-
     this.setupZIndex();
-
     this.createTexture(dataUnit);
   }
 
@@ -71,6 +69,7 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     if (this.bodySkinTop) this.bringToTop(this.bodySkinTop);
     if (this.bodyLine) this.bringToTop(this.bodyLine);
     if (this.chest) this.bringToTop(this.chest);
+    if (this.offhand) this.bringToTop(this.offhand);
     if (this.leftArmSkin) this.bringToTop(this.leftArmSkin);
     if (this.leftArmLine) this.bringToTop(this.leftArmLine);
     if (this.neckSkin) this.bringToTop(this.neckSkin);
@@ -78,33 +77,32 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     if (this.headSkin) this.bringToTop(this.headSkin);
     if (this.headLine) this.bringToTop(this.headLine);
     if (this.helmet) this.bringToTop(this.helmet);
-    if (this.offhand) this.bringToTop(this.offhand);
     if (this.weapon) this.bringToTop(this.weapon);
   }
 
-  setupBodyParts(dataUnit: any) {
+  setupBodyParts(outfit: any) {
     this.bodySkinTop = addUnitSprite(this.scene, 0, 0, "bodyTopSkin");
     this.bodyLine = addUnitSprite(this.scene, 0, 0, "bodyLine");
     this.bodyBot = addUnitSprite(this.scene, 0, 0, "bodyBot");
 
-    if (this.showHead(dataUnit)) {
-      this.headLine = addUnitSprite(this.scene, 0, 0, `headLine${this.getRace(dataUnit)}`);
-      this.headSkin = addUnitSprite(this.scene, 0, 0, `headSkin${this.getRace(dataUnit)}`);
+    if (outfit.showHead) {
+      this.headLine = addUnitSprite(this.scene, 0, 0, "headLineHuman");
+      this.headSkin = addUnitSprite(this.scene, 0, 0, "headSkinHuman");
     }
 
-    if (this.showNeck(dataUnit)) {
-      this.neckLine = addUnitSprite(this.scene, 0, 0, `neckLine`);
-      this.neckSkin = addUnitSprite(this.scene, 0, 0, `neckSkin`);
+    if (outfit.showNeck) {
+      this.neckLine = addUnitSprite(this.scene, 0, 0, "neckLine");
+      this.neckSkin = addUnitSprite(this.scene, 0, 0, "neckSkin");
     }
 
-    if (this.showArms(dataUnit)) {
+    if (outfit.showArms) {
       this.leftArmLine = addUnitSprite(this.scene, 0, 0, "leftArmLine");
       this.leftArmSkin = addUnitSprite(this.scene, 0, 0, "leftArmSkin");
       this.rightArmLine = addUnitSprite(this.scene, 0, 0, "rightArmLine");
       this.rightArmSkin = addUnitSprite(this.scene, 0, 0, "rightArmSkin");
     }
 
-    const skinColor = this.getRaceColor(dataUnit);
+    const skinColor = this.getUnitColor();
 
     if (this.headSkin) this.headSkin.setTint(skinColor);
     if (this.neckSkin) this.neckSkin.setTint(skinColor);
@@ -113,9 +111,7 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
     if (this.rightArmSkin) this.rightArmSkin.setTint(skinColor);
   }
 
-  setupEquipments(dataUnit) {
-    const equips = this.getEquips(dataUnit);
-
+  setupEquipments(equips: any, outfit: any) {
     if (equips.weapon) {
       this.weapon = addEquipWeaponSprite(this.scene, 0, 0, toCamelCase(equips.weapon));
     }
@@ -128,61 +124,28 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
       }
     }
 
-    if (equips.helmet) {
-      this.helmet = addEquipHelmetSprite(this.scene, 0, 0, toCamelCase(equips.helmet));
+    if (outfit.helmet) {
+      this.helmet = addEquipHelmetSprite(this.scene, 0, 0, outfit.helmet);
     }
 
-    if (equips.chest) {
-      this.chest = addEquipChestSprite(this.scene, 0, 0, toCamelCase(equips.chest));
+    if (outfit.chest) {
+      this.chest = addEquipChestSprite(this.scene, 0, 0, outfit.chest);
     }
 
-    this.back = this.getEquipBack(dataUnit);
-  }
-
-  showHead(dataUnit) {
-    return showHead(dataUnit.equipment.head.name);
-  }
-
-  showNeck(dataUnit) {
-    return showNeck(dataUnit.equipment.chest.name);
-  }
-
-  showArms(dataUnit) {
-    return showArms(dataUnit.equipment.chest.name);
-  }
-
-  getEquipBack(dataUnit) {
-    if (dataUnit.equipment?.mainHandWeapon?.name.includes("bow")) {
-      return addEquipBackSprite(this.scene, 0, 0, "quiver");
+    if (outfit.back) {
+      this.back = addEquipBackSprite(this.scene, 0, 0, outfit.back);
     }
-
-    return null;
   }
 
   getEquips(dataUnit) {
     return {
-      weapon: dataUnit.equipment?.mainHandWeapon?.name,
-      offhand: dataUnit.equipment?.offHandWeapon?.name,
-      helmet: dataUnit.equipment?.head?.name,
-      chest: dataUnit.equipment?.chest?.name,
+      weapon: dataUnit.equipment.find((equip) => equip.slot === "MAIN_HAND").equip.data.name,
+      offhand: dataUnit.equipment.find((equip) => equip.slot === "OFF_HAND")?.equip?.data?.name,
     };
   }
 
-  getRace(dataUnit) {
-    return dataUnit.race.name;
-  }
-
-  getRaceColor(dataUnit) {
-    switch (this.getRace(dataUnit)) {
-      case "Human":
-        return 0xebbc9e;
-      case "Elf":
-        return 0xf4dbcb;
-      case "Orc":
-        return 0x82883e;
-      default:
-        return 0xebbc9e;
-    }
+  getUnitColor() {
+    return 0xebbc9e; // maybe add logic to change or randomize color
   }
 
   createTexture(dataUnit) {
@@ -191,6 +154,8 @@ export class BattleUnitSprite extends Phaser.GameObjects.Container {
 
     this.textureName = `unitTexture${dataUnit.id}`;
 
-    texture.saveTexture(this.textureName);
+    if (!this.scene.textures.exists(this.textureName)) {
+      texture.saveTexture(this.textureName);
+    }
   }
 }

@@ -1,0 +1,253 @@
+{
+  "name": "Blacksmith",
+  "hp": 110,
+  "base": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY",
+          "payload": {
+            "name": "Reinforce Allies"
+          }
+        }
+      ],
+      "description": "Gain the Reinforce Allies spell"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_BASE_STAT",
+          "payload": {
+            "stat": "DAMAGE_REDUCTION",
+            "value": 10
+          }
+        }
+      ],
+      "description": "Gain 10% Damage Reduction"
+    }
+  ],
+  "utility": [
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY_MODIFIER",
+          "payload": {
+            "name": "Reinforce Allies",
+            "modifiers": {
+              "target": [
+                {
+                  "name": "ADJACENT_ALLIES",
+                  "remove": true
+                },
+                {
+                  "name": "SELF"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "description": "Reinforce Allies don't affect adjacents units anymore. Apply the same amount to self"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY_MODIFIER",
+          "payload": {
+            "name": "Reinforce Allies",
+            "modifiers": {
+              "trigger": [
+                {
+                  "name": "BATTLE_START"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "description": "BATTLE START: Trigger Reinforce Allies"
+    },
+    {
+      "mods": [
+        {
+          "type": "GRANT_ABILITY_MODIFIER",
+          "payload": {
+            "name": "Reinforce Allies",
+            "modifiers": {
+              "trigger": [
+                {
+                  "name": "FAINT"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "description": "FAINT: Trigger Reinforce Allies"
+    }
+  ],
+  "tree": [
+    {
+      "name": "Weaponsmith",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "FAST",
+                      "target": "ADJACENT_ALLIES",
+                      "value": 5
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies also gives 5 FAST to adjacent allies"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "ATTACK_POWER",
+                      "target": "FRONT_ALLY",
+                      "value": 10
+                    },
+                    {
+                      "name": "SPELL_POTENCY",
+                      "target": "FRONT_ALLY",
+                      "value": 10
+                    },
+                    {
+                      "name": "FAST",
+                      "target": "FRONT_ALLY",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies also gives 10 ATTACK POWER, 10 SPELL POTENCY and 10 FAST to FRONT ally"
+        },
+        {
+          "tier": 2,
+          "req": 2,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "MULTISTRIKE",
+                      "target": "FRONT_ALLY",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies also gives 1 MULTISTRIKE to FRONT ally"
+        }
+      ]
+    },
+    {
+      "name": "Armorsmith",
+      "talents": [
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "SHIELD",
+                      "target": "ADJACENT_ALLIES",
+                      "value": 15
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies also gives 15 more SHIELD to adjacent allies"
+        },
+        {
+          "tier": 1,
+          "req": 0,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "STURDY",
+                      "target": "FRONT_ALLY",
+                      "value": 10
+                    },
+                    {
+                      "name": "SHIELD",
+                      "target": "FRONT_ALLY",
+                      "value": 20
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies give 10 STURDY and 20 more SHIELD to FRONT ally"
+        },
+        {
+          "tier": 2,
+          "req": 2,
+          "mods": [
+            {
+              "type": "GRANT_ABILITY_MODIFIER",
+              "payload": {
+                "name": "Reinforce Allies",
+                "modifiers": {
+                  "status_effect": [
+                    {
+                      "name": "TAUNT",
+                      "target": "FRONT_ALLY",
+                      "value": 2
+                    },
+                    {
+                      "name": "THORN",
+                      "target": "FRONT_ALLY",
+                      "value": 25
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "description": "Reinforce Allies: Give 2 TAUNT and 25 THORN to FRONT ally"
+        }
+      ]
+    }
+  ]
+}

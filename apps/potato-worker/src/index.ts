@@ -1,7 +1,10 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { getGameEventHistory, getGameHistory } from "../modules/game";
 import { cors } from "hono/cors";
+import { Game, UnitsDTO } from "../modules/game/game/Game";
+import { Classes, Weapons } from "../modules/game/game/data";
+import { nanoid } from "nanoid";
+import { OWNER } from "../modules/game/game/BoardManager";
 
 /* durable objects exports */
 export { Counter } from "./counter";
@@ -26,6 +29,7 @@ app.get("/lobby/*", async (c) => {
 });
 
 app.get("/counter/*", async (c) => {
+  console.log("kaskd");
   const id = c.env.COUNTER.idFromName("A");
   const obj = c.env.COUNTER.get(id);
   const resp = await obj.fetch(c.req.url);
@@ -54,17 +58,49 @@ app.get("/chat/global", async (c) => {
   return resp;
 });
 
-app.get("/game/karpov", async (c) => {
-  const history = getGameHistory();
-  return c.json(history);
+app.get("/game/battle/setup", async (c) => {
+  const game = new Game();
+  const { totalSteps, eventHistory, firstStep } = game.startGame();
+
+  return c.json({
+    firstStep,
+    totalSteps,
+    eventHistory,
+  });
 });
 
-app.get("/game/battle/setup", async (c) => {
-  const history = getGameHistory();
-  const eventHistory = getGameEventHistory();
+app.get("/game/setup/allStuff", async (c) => {
+  const classes: string[] = [];
+  Object.keys(Classes).forEach((key) => {
+    classes.push(key);
+  });
+  const weapons: string[] = [];
+  Object.keys(Weapons).forEach((key) => {
+    weapons.push(key);
+  });
+
   return c.json({
-    firstStep: history[0],
-    totalSteps: history.length - 1,
+    classes: classes.map((c) => ({ id: nanoid(4), name: c })),
+    weapons: weapons.map((w) => ({ id: nanoid(4), name: w })),
+  });
+});
+
+app.post("/game/setup/teams", async (c) => {
+  const { team1, team2 } = await c.req.json<{
+    team1: UnitsDTO[];
+    team2: UnitsDTO[];
+  }>();
+
+  const game = new Game({ skipConstructor: true });
+
+  game.setTeam(OWNER.TEAM_ONE, team1 as UnitsDTO[]);
+  game.setTeam(OWNER.TEAM_TWO, team2 as UnitsDTO[]);
+
+  const { totalSteps, eventHistory, firstStep } = game.startGame();
+
+  return c.json({
+    firstStep,
+    totalSteps,
     eventHistory,
   });
 });

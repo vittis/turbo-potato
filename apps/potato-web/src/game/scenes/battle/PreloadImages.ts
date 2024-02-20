@@ -1,5 +1,6 @@
 export function loadCurrentAssets(scene: Phaser.Scene) {
-  scene.load.image("board", "assets/board3.png");
+  scene.load.image("board", "assets/board/board4.png");
+  scene.load.image("floor", "assets/board/floor.png");
   scene.load.image("castle", "assets/castle.png");
 
   scene.load.spritesheet("warrior", "assets/Warrior.png", {
@@ -22,6 +23,28 @@ export function loadCurrentAssets(scene: Phaser.Scene) {
 }
 
 export function loadAssets(scene: Phaser.Scene) {
+  scene.load.image("paul", "assets/paul.png");
+
+  // Abilities
+  scene.load.image("ability_thrust", "assets/abilities/thrust.png");
+  scene.load.image("ability_disarming_shot", "assets/abilities/disarming_shot.png");
+  scene.load.image("ability_slash", "assets/abilities/slash.png");
+  scene.load.image("ability_empowering_strike", "assets/abilities/empowering_strike.png");
+
+  // Status Effects
+  scene.load.image("statusEffect_attack_power", "assets/status_effects/attack_power.png");
+  scene.load.image("statusEffect_fast", "assets/status_effects/fast.png");
+  scene.load.image("statusEffect_focus", "assets/status_effects/focus.png");
+  scene.load.image("statusEffect_multistrike", "assets/status_effects/multistrike.png");
+  scene.load.image("statusEffect_poison", "assets/status_effects/poison.png");
+  scene.load.image("statusEffect_regen", "assets/status_effects/regen.png");
+  scene.load.image("statusEffect_slow", "assets/status_effects/slow.png");
+  scene.load.image("statusEffect_spell_potency", "assets/status_effects/spell_potency.png");
+  scene.load.image("statusEffect_sturdy", "assets/status_effects/sturdy.png");
+  scene.load.image("statusEffect_taunt", "assets/status_effects/taunt.png");
+  scene.load.image("statusEffect_thorn", "assets/status_effects/thorn.png");
+  scene.load.image("statusEffect_vulnerable", "assets/status_effects/vulnerable.png");
+
   // Unit
   scene.load.spritesheet("unit", "assets/unit.png", {
     frameWidth: 180,

@@ -1,0 +1,24 @@
+{
+  "name": "Sword",
+  "tags": [],
+  "slots": [
+    "MAIN_HAND",
+    "OFF_HAND"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Slash"
+      }
+    },
+    {
+      "type": "GRANT_PERK",
+      "payload": {
+        "name": "Berserk",
+        "tier": 1
+      }
+    }
+  ],
+  "effects": []
+}

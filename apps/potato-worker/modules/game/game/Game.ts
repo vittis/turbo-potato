@@ -1,251 +1,216 @@
 import { BoardManager, OWNER, POSITION } from "./BoardManager";
-import { EVENT_TYPE, Unit } from "./Unit";
+import { Unit } from "./Unit/Unit";
+import { Equipment } from "./Equipment/Equipment";
+import { EQUIPMENT_SLOT } from "./Equipment/EquipmentTypes";
+import {
+  getAndExecuteDeathEvents,
+  sortAndExecuteEvents,
+} from "./Event/EventUtils";
+import { Class } from "./Class/Class";
+import { Classes, Weapons } from "./data";
+import { PossibleEvent } from "./Event/EventTypes";
+import { TRIGGER } from "./Trigger/TriggerTypes";
 
-import Races from "./data/races";
-import Classes from "./data/classes";
-import Weapons from "./data/weapons";
-import Chests from "./data/chests";
-import Heads from "./data/heads";
-
-import { WeaponData } from "./Weapon";
-import { ArmorData } from "./Armor";
+export interface UnitsDTO {
+  equipments: string[];
+  position: POSITION;
+  unitClass: string;
+}
 
 export class Game {
   boardManager: BoardManager;
-  history: any[] = [];
-  eventHistory: any[] = [];
 
-  constructor() {
+  constructor({ skipConstructor = false } = {}) {
     this.boardManager = new BoardManager();
 
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.TOP_FRONT,
-        Races.Human,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.PlateMail as ArmorData,
-          head: Heads.LeatherHat as ArmorData,
-        }
-      )
+    if (skipConstructor) {
+      return;
+    }
+
+    const unit1 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_FRONT,
+      this.boardManager
     );
+    unit1.setClass(new Class(Classes.Paladin));
+    unit1.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.BOT_BACK,
-        Races.Dwarf,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Dagger as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.ClothHat as ArmorData,
-        }
-      )
+    const unit2 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
+    unit2.setClass(new Class(Classes.Blacksmith));
+
+    unit2.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+
+    const unit3 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_BACK,
+      this.boardManager
     );
+    unit3.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit3.setClass(new Class(Classes.Ranger));
 
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_ONE,
-        POSITION.BOT_MID,
-        Races.Elf,
-        Classes.Ranger,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
-    ); */
+    const unit4 = new Unit(OWNER.TEAM_TWO, POSITION.TOP_MID, this.boardManager);
+    unit4.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
 
-    /* this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_FRONT,
-        Races.Dwarf,
-        Classes.Knight,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
-    ); */
+    const unit5 = new Unit(OWNER.TEAM_TWO, POSITION.BOT_MID, this.boardManager);
+    unit5.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_BACK,
-        Races.Elf,
-        Classes.Cleric,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.ClothRobe as ArmorData,
-          head: Heads.PlateHelmet as ArmorData,
-        }
-      )
+    const unit6 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.BOT_FRONT,
+      this.boardManager
     );
+    unit6.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
 
-    this.boardManager.addToBoard(
-      new Unit(
-        this.boardManager,
-        OWNER.TEAM_TWO,
-        POSITION.BOT_MID,
-        Races.Dwarf,
-        Classes.Knight,
-        {
-          mainHandWeapon: Weapons.Greatsword as WeaponData,
-          chest: Chests.LeatherShirt as ArmorData,
-          head: Heads.ClothHat as ArmorData,
-        }
-      )
+    const unit7 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_FRONT,
+      this.boardManager
     );
+    unit7.equip(new Equipment(Weapons.Axe), EQUIPMENT_SLOT.MAIN_HAND);
+    unit7.setClass(new Class(Classes.Warrior));
 
-    // this.boardManager.printBoard();
+    const unit8 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.BOT_FRONT,
+      this.boardManager
+    );
+    unit8.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unit8.setClass(new Class(Classes.Warrior));
+
+    const unit9 = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.BOT_BACK,
+      this.boardManager
+    );
+    unit9.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unit9.setClass(new Class(Classes.Rogue));
+
+    const unit10 = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.BOT_MID,
+      this.boardManager
+    );
+    unit10.equip(new Equipment(Weapons.Wand), EQUIPMENT_SLOT.MAIN_HAND);
+    unit10.setClass(new Class(Classes.Warlock));
+
+    /* this.boardManager.addToBoard(unit1);
+    this.boardManager.addToBoard(unit2);
+    this.boardManager.addToBoard(unit9);
+    this.boardManager.addToBoard(unit10);
+    this.boardManager.addToBoard(unit3);
+    this.boardManager.addToBoard(unit7); */
+    /* this.boardManager.addToBoard(unit4);
+    this.boardManager.addToBoard(unit5);
+    this.boardManager.addToBoard(unit6);
+    this.boardManager.addToBoard(unit8); */
+
+    const unitA = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    unitA.equip(new Equipment(Weapons.Shortbow), EQUIPMENT_SLOT.MAIN_HAND);
+    unitA.setClass(new Class(Classes.Ranger));
+
+    const unitB = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_FRONT,
+      this.boardManager
+    );
+    unitB.equip(new Equipment(Weapons.Sword), EQUIPMENT_SLOT.MAIN_HAND);
+    unitB.setClass(new Class(Classes.Blacksmith));
+
+    const unitC = new Unit(
+      OWNER.TEAM_TWO,
+      POSITION.TOP_BACK,
+      this.boardManager
+    );
+    unitC.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+    unitC.setClass(new Class(Classes.Warrior));
+
+    const unitD = new Unit(
+      OWNER.TEAM_ONE,
+      POSITION.TOP_BACK,
+      this.boardManager
+    );
+    unitD.equip(new Equipment(Weapons.ShortSpear), EQUIPMENT_SLOT.MAIN_HAND);
+    unitD.setClass(new Class(Classes.Warrior));
+
+    this.boardManager.addToBoard(unitA);
+    this.boardManager.addToBoard(unitB);
+    /* this.boardManager.addToBoard(unitC);
+    this.boardManager.addToBoard(unitD); */
   }
 
-  /* 
-    Function to sort events by type in order CAST_SKILL -> ATTACK
-    Maybe add other criterias in the future, for example should unit x cast skill before unit y?
-  */
-  sortEventsByType(events: any[]) {
-    events.sort(function (a, b) {
-      if (a.type === "CAST_SKILL" && b.type === "ATTACK") {
-        return -1;
-      } else if (a.type === "ATTACK" && b.type === "CAST_SKILL") {
-        return 1;
-      } else {
-        return 0;
-      }
+  setTeam(team: OWNER, units: UnitsDTO[]) {
+    units.forEach((unitDTO) => {
+      console.log(unitDTO.position);
+      const unit = new Unit(team, unitDTO.position, this.boardManager);
+      unit.setClass(
+        new Class(Classes[unitDTO.unitClass as keyof typeof Classes])
+      );
+      unitDTO.equipments.forEach((equipmentName) => {
+        unit.equip(
+          new Equipment(Weapons[equipmentName as keyof typeof Weapons]),
+          EQUIPMENT_SLOT.MAIN_HAND
+        );
+      });
+
+      this.boardManager.addToBoard(unit);
+    });
+  }
+
+  startGame() {
+    const { totalSteps, eventHistory, firstStep } = runGame(this.boardManager);
+
+    return { totalSteps, eventHistory, firstStep };
+  }
+}
+
+function hasGameEnded(bm: BoardManager) {
+  return (
+    bm.getAllUnitsOfOwner(OWNER.TEAM_ONE).every((unit) => unit.isDead) ||
+    bm.getAllUnitsOfOwner(OWNER.TEAM_TWO).every((unit) => unit.isDead)
+  );
+}
+
+export function runGame(bm: BoardManager) {
+  let firstStep: any;
+  const eventHistory: PossibleEvent[] = [];
+
+  const serializedUnits = bm.getAllUnits().map((unit) => unit.serialize());
+  firstStep = { units: serializedUnits };
+
+  let currentStep = 1;
+
+  const battleStartEvents: PossibleEvent[] = [];
+  bm.getAllUnits().forEach((unit) => {
+    unit.triggerManager.onTrigger(TRIGGER.BATTLE_START, unit, bm);
+    battleStartEvents.push(...unit.serializeEvents());
+  });
+  const orderedEvents = sortAndExecuteEvents(bm, battleStartEvents);
+  orderedEvents.forEach((event) => {
+    eventHistory.push(event);
+  });
+
+  do {
+    bm.getAllAliveUnits().forEach((unit) => {
+      unit.step(currentStep);
     });
 
-    return events;
-  }
-
-  executeStepEvents(events: any[]) {
-    events.forEach((event) => {
-      this.boardManager
-        .getUnitById(event.actorId)
-        .applyStatsModifiersAfterEvent(event);
-
-      if (event.subEvents) {
-        event.subEvents.forEach((subEvent: any) => {
-          this.boardManager
-            .getUnitById(subEvent.actorId)
-            .applyStatsModifiersAfterEvent(subEvent);
-        });
-      }
+    const stepEvents: PossibleEvent[] = [];
+    bm.getAllUnits().forEach((unit) => {
+      stepEvents.push(...unit.serializeEvents());
     });
+    const orderedEvents = sortAndExecuteEvents(bm, stepEvents);
+    eventHistory.push(...orderedEvents);
 
-    return events;
-  }
+    eventHistory.push(...getAndExecuteDeathEvents(bm));
 
-  async startGame() {
-    const serializedUnits = this.boardManager
-      .getAllUnits()
-      .map((unit) => unit.serialize());
-    this.history.push({ units: serializedUnits });
+    currentStep++;
+  } while (!hasGameEnded(bm));
 
-    let currentStep = 1;
-    do {
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        unit.step(currentStep);
-      });
-
-      const stepEvents: any[] = [];
-
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        stepEvents.push(...unit.serializeEvents());
-      });
-
-      const orderedEvents = this.sortEventsByType(stepEvents);
-
-      this.executeStepEvents(orderedEvents);
-
-      orderedEvents.forEach((event) => {
-        this.eventHistory.push(event);
-      });
-
-      this.boardManager.getAllAliveUnits().forEach((unit) => {
-        if (!unit.isDead && unit.hasDied()) {
-          unit.markAsDead();
-          this.eventHistory.push({
-            actorId: unit.id,
-            type: EVENT_TYPE.HAS_DIED,
-            step: currentStep,
-          });
-        }
-      });
-
-      const serializedUnits = this.boardManager
-        .getAllUnits()
-        .map((unit) => unit.serialize());
-
-      this.history.push({ units: serializedUnits });
-      currentStep++;
-    } while (!this.hasGameEnded());
-
-    const unit1 = this.boardManager.getAllUnits()[0];
-    const unit2 = this.boardManager.getAllUnits()[1];
-
-    this.boardManager.getAllUnits().forEach((unit) => {
-      console.log(unit.getName(), unit.TEST_attacksCounter);
-    });
-
-    // @ts-ignore
-    console.table([
-      {
-        name: unit1?.getName(),
-        hp: unit1.stats.hp + "/" + unit1.stats.maxHp,
-        shield: unit1.stats.shield,
-        def: unit1.stats.def,
-        ap: unit1.stats.ap,
-        attackSpeed: unit1.stats.attackSpeed,
-        weapon: unit1.equipment.mainHandWeapon.name,
-        attackDamage: unit1.stats.attackDamage,
-        sp: unit1.stats.sp,
-        skillRegen: unit1.stats.skillRegen,
-        str: unit1.stats.str,
-        dex: unit1.stats.dex,
-        int: unit1.stats.int,
-        attacks: unit1.TEST_attacksCounter,
-      },
-      {
-        name: unit2?.getName(),
-        hp: unit2.stats.hp + "/" + unit2.stats.maxHp,
-        shield: unit2.stats.shield,
-        def: unit2.stats.def,
-        ap: unit2.stats.ap,
-        attackSpeed: unit2.stats.attackSpeed,
-        weapon: unit2.equipment.mainHandWeapon.name,
-        attackDamage: unit2.stats.attackDamage,
-        sp: unit2.stats.sp,
-        skillRegen: unit2.stats.skillRegen,
-        str: unit2.stats.str,
-        dex: unit2.stats.dex,
-        int: unit2.stats.int,
-        attacks: unit2.TEST_attacksCounter,
-      },
-    ]);
-  }
-
-  hasGameEnded() {
-    return (
-      this.boardManager
-        .getAllUnitsOfOwner(OWNER.TEAM_ONE)
-        .every((unit) => unit.isDead) ||
-      this.boardManager
-        .getAllUnitsOfOwner(OWNER.TEAM_TWO)
-        .every((unit) => unit.isDead)
-    );
-  }
+  return { totalSteps: currentStep - 1, eventHistory, firstStep };
 }
 
 /* 
@@ -291,12 +256,11 @@ OR start with X fast
 STATUS EFFECTS
 
 REGEN = heal 1 hp per stack per 5 steps and remove 1 stack
-BUFF ATTACK SPEED (FAST) = increase 1 attack speed per stack and remove 1 per attack
-BUFF SKILL SPEED (FOCUS) = increase 1 skill speed per stack and remove 1 per skill used
-BUFF ATTACK DAMAGE (A. DAMAGE) = increase 1 attack damage per stack and remove 1 per attack
-BUFF SKILL DAMAGE (S. DAMAGE) = increase 1 skill damage per stack and remove 1 per skill use
+FAST = increase 1 attack speed per stack and remove 1 per attack
+FOCUS)= increase 1 skill speed per stack and remove 1 per skill used
+ATTACK POWER = increase 1 attack damage per stack and remove 1 per attack
+SPELL POTENCY = increase 1 skill damage per stack and remove 1 per skill use
 POISON = deal 1 dmg per stack per 5 steps and remove 1 stack
-BLEED = deal 1 dmg per stack per 5 steps and remove 1 stack
 SLOW = reduce 1 attack speed per stack per 5 steps and remove 1 stack per attack
 VULNERABLE = increase 1% damage taken per stack, remove all on hit
 STURDY = reduce 1% damage taken per stack, remove 1 stack on hit
@@ -304,12 +268,7 @@ THORN = deal 1 dmg per stack on hit and remove 1 stack
 TAUNT = force enemy units to attack this unit, remove 1 stack on hit
 MULTISTRIKE = on weapon attack/skill immediately trigger the attack again more X times and remove all stacks
 
-
-
-
-
-
-DISABLE
+DISABLES
 
 STUN = barrinha (duração em step) e icone
 
@@ -319,6 +278,11 @@ INSTANT EFFECTS
 DAMAGE = deal X dmg
 HEAL = heal X hp
 APPLY SHIELD = gain X shield
+
+
+
+
+
 
 
 
@@ -500,7 +464,6 @@ BOWS T3:
 
 ITEMS:
     Gain X Ranged Proficiency
-
 
     Longsword TBlueprint
     Sem Mods

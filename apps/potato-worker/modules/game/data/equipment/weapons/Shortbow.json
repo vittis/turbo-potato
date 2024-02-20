@@ -1,0 +1,47 @@
+{
+  "name": "Shortbow",
+  "tags": [
+    "RANGED",
+    "PHYSICAL"
+  ],
+  "slots": [
+    "MAIN_HAND"
+  ],
+  "mods": [
+    {
+      "type": "GRANT_ABILITY",
+      "payload": {
+        "name": "Disarming Shot"
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_COOLDOWN",
+        "value": 15
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "ATTACK_DAMAGE",
+        "value": 0
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "SPELL_DAMAGE",
+        "value": 15
+      }
+    },
+    {
+      "type": "GRANT_BASE_STAT",
+      "payload": {
+        "stat": "SPELL_COOLDOWN",
+        "value": 15
+      }
+    }
+  ],
+  "effects": []
+}

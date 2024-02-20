@@ -1,8 +1,0 @@
-{
-    "name": "Cloth Hat",
-    "implicits": {
-        "int": 2
-    },
-    "weight": 0.5,
-    "slot": "HEAD"
-}

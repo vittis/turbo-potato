@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    height: 100svh;
+    height: 100vh;
+    touch-action: none;
+  }
+
+  #game {
+    position: absolute;
+    z-index: -1;
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  .bg-pattern-gradient {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--b1),
+      var(--b1) 13px,
+      var(--b2) 13px,
+      var(--b2) 14px
+    );
+  }
+
+  .bg-pattern-gradient-error {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--b1),
+      var(--b1) 13px,
+      rgba(255 0 0 / 0.07) 13px,
+      rgba(255 0 0 / 0.07) 14px
+    );
+  }
+
+  .bg-pattern-gradient-success {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--b1),
+      var(--b1) 13px,
+      #142116b7 13px,
+      #142116b7 14px
+    );
+  }
+
+  :root {
+    --b1: #fff;
+    --b2: #f2f2f2;
+
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* --b1: #09090b;
+    --b2: #212115b2; */
+
+    --b1: #040404;
+    --b2: rgba(255 255 0 / 0.04);
+
+    --background: 240 10% 5%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 47.9 80.8% 80.1%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 54.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 43.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .chat-start,
+  .chat-end {
+    @apply last:mb-4;
+  }
+  .chat-bubble {
+    font-size: 14px;
+    min-height: 30px;
+    @apply bg-gray-800;
+  }
+
+  .main-panel {
+    box-shadow: 0px 0px 28px 1px rgba(255 172 56 / 0.12) !important;
+  }
+
+  .glow-sm-error {
+    box-shadow: 0px 0px 5px 0px rgba(255 0 0 / 0.17) !important;
+    /* transition: all 0.2s ease-in-out; */
+  }
+
+  .glow-sm-success {
+    box-shadow: 0px 0px 5px 0px rgba(255 255 255 / 0.11) !important;
+    /* transition: all 0.2s ease-in-out; */
+  }
+
+  .grid-kk {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    /* grid-template-columns: 1fr 1fr 1fr; */
+    grid-gap: 20px;
+  }
+
+  /* .glow-sm:hover {
+    box-shadow: 0px 0px 6px 3px rgba(255 178 25 / 0.12) !important;
+  } */
+
+  .CollapsibleContent {
+    overflow: hidden;
+  }
+  .CollapsibleContent[data-state="open"] {
+    animation: slideDown 200ms ease-out;
+  }
+  .CollapsibleContent[data-state="closed"] {
+    animation: slideUp 200ms ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      height: var(--radix-collapsible-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "Desperate Will",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "ATTACK_POWER",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    },
+    {
+      "name": "STURDY",
+      "values": [
+        90,
+        10,
+        15,
+        20,
+        30
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ALLY_FAINT",
+      "target": "ALL_ALLIES",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "ATTACK_POWER",
+          "quantity": "DYNAMIC"
+        },
+        {
+          "name": "STURDY",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

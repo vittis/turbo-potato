@@ -1,4 +1,6 @@
-import { Game } from "./game/Game";
+// not used anymore
+
+/* import { Game } from "./game/Game";
 
 const game = new Game();
 game.startGame();
@@ -10,3 +12,4 @@ export function getGameHistory() {
 export function getGameEventHistory() {
   return game.eventHistory;
 }
+ */

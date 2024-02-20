@@ -1,0 +1,52 @@
+{
+  "name": "Berserk",
+  "type": "TIER_SCALE",
+  "tiers": [
+    {
+      "name": "ATTACK_POWER",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    },
+    {
+      "name": "VULNERABLE",
+      "values": [
+        5,
+        10,
+        15,
+        20,
+        30
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "BATTLE_START",
+      "target": "SELF",
+      "conditions": [
+        {
+          "type": "POSITION",
+          "payload": {
+            "target": "SELF",
+            "position": "FRONT"
+          }
+        }
+      ],
+      "payload": [
+        {
+          "name": "ATTACK_POWER",
+          "quantity": "DYNAMIC"
+        },
+        {
+          "name": "VULNERABLE",
+          "quantity": "DYNAMIC"
+        }
+      ]
+    }
+  ]
+}

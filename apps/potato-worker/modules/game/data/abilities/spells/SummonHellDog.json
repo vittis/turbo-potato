@@ -1,0 +1,32 @@
+{
+  "name": "Summon Hell Dog",
+  "type": "SPELL",
+  "tags": [
+    "SUMMON"
+  ],
+  "target": "STANDARD",
+  "cooldown": 60,
+  "effects": [
+    {
+      "type": "DAMAGE",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "conditions": [],
+      "payload": {
+        "value": 15
+      }
+    },
+    {
+      "type": "STATUS_EFFECT",
+      "trigger": "ON_HIT",
+      "target": "STANDARD",
+      "conditions": [],
+      "payload": [
+        {
+          "name": "SLOW",
+          "quantity": 5
+        }
+      ]
+    }
+  ]
+}

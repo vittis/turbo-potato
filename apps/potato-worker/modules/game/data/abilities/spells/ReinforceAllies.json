@@ -1,0 +1,18 @@
+{
+  "name": "Reinforce Allies",
+  "type": "SPELL",
+  "tags": [],
+  "target": "ADJACENT_ALLIES",
+  "cooldown": 100,
+  "effects": [
+    {
+      "type": "SHIELD",
+      "trigger": "ON_USE",
+      "target": "ADJACENT_ALLIES",
+      "conditions": [],
+      "payload": {
+        "value": 20
+      }
+    }
+  ]
+}
